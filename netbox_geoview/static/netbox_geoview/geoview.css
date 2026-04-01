@@ -1,0 +1,111 @@
+.geoview-map {
+    position: relative;
+    min-height: 36rem;
+    overflow: hidden;
+    border-radius: 0.875rem;
+    background: #d9e4ec;
+}
+
+.geoview-map__tiles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    width: 100%;
+    height: 100%;
+}
+
+.geoview-map__tile {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    aspect-ratio: 1;
+    background: #eef4f8;
+}
+
+.geoview-map__overlay {
+    position: absolute;
+    left: 1rem;
+    bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.875rem 1rem;
+    border-radius: 0.875rem;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 1rem 2rem rgba(21, 35, 49, 0.12);
+    backdrop-filter: blur(10px);
+}
+
+.geoview-map__overlay-title {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.geoview-map__overlay-meta {
+    color: var(--bs-secondary-color);
+    font-size: 0.875rem;
+}
+
+.geoview-map__marker {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 0.2rem solid #fff;
+    border-radius: 999px;
+    background: #d63384;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 0.35rem rgba(214, 51, 132, 0.24);
+}
+
+.geoview-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.875rem;
+}
+
+.geoview-stat-grid--compact {
+    gap: 0.75rem;
+}
+
+.geoview-stat-grid > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.875rem 1rem;
+    border-radius: 0.875rem;
+    background: var(--bs-tertiary-bg);
+}
+
+.geoview-stat-grid__label {
+    color: var(--bs-secondary-color);
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.geoview-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.geoview-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+    background: var(--bs-tertiary-bg);
+    font-size: 0.875rem;
+}
+
+.geoview-device + .geoview-device {
+    padding-top: 0.875rem;
+    border-top: 1px solid var(--bs-border-color);
+}
+
+@media (max-width: 767.98px) {
+    .geoview-map {
+        min-height: 24rem;
+    }
+}

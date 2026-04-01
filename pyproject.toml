@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "netbox-geoview"
+description = "Clean NetBox GeoView plugin skeleton"
+dynamic = ["version"]
+requires-python = ">=3.12"
+dependencies = [
+    "netbox>=4.5.5,<4.6",
+]
+authors = [
+    { name = "Codex" },
+]
+license = { text = "MIT" }
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: Django",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Networking",
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = { attr = "netbox_geoview.version.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["netbox_geoview*"]
+
+[tool.setuptools.package-data]
+netbox_geoview = [
+    "templates/netbox_geoview/*.html",
+    "static/netbox_geoview/*.css",
+    "static/netbox_geoview/*.js",
+]

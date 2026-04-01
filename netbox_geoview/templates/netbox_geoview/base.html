@@ -1,0 +1,30 @@
+{% extends 'base/layout.html' %}
+{% load static %}
+
+{% block title %}GeoView{% endblock title %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'netbox_geoview/geoview.css' %}">
+{% endblock head %}
+
+{% block header %}
+<div class="d-flex flex-column gap-2">
+  <h1 class="mb-0">GeoView</h1>
+  <p class="text-secondary mb-0">NetBox 4.5.5 plugin skeleton with map and filter tabs</p>
+</div>
+{% endblock header %}
+
+{% block tabs %}
+<ul class="nav nav-tabs page-tabs">
+  <li class="nav-item">
+    <a class="nav-link{% if active_tab == 'map' %} active{% endif %}" href="{{ map_url }}">Map</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link{% if active_tab == 'filter' %} active{% endif %}" href="{{ filter_url }}">Filter</a>
+  </li>
+</ul>
+{% endblock tabs %}
+
+{% block javascript %}
+<script src="{% static 'netbox_geoview/geoview.js' %}"></script>
+{% endblock javascript %}
