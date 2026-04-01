@@ -7,9 +7,6 @@ name = "netbox-geoview"
 description = "Clean NetBox GeoView plugin skeleton"
 dynamic = ["version"]
 requires-python = ">=3.12"
-dependencies = [
-    "netbox>=4.5.5,<4.6",
-]
 authors = [
     { name = "Codex" },
 ]

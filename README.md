@@ -27,5 +27,5 @@ NetBox compatibility is managed separately through `min_version` and `max_versio
 
 - NetBox `4.5.5`
 - Python `>=3.12`
-- Package dependency: `netbox>=4.5.5,<4.6`
+- Installation inside the NetBox virtual environment
 - Access to OpenStreetMap tiles for the map preview
