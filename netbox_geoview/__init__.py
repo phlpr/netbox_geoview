@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy as _
 from netbox.plugins import PluginConfig
 
 from .version import NETBOX_MAX_VERSION, NETBOX_MIN_VERSION, __version__
@@ -5,8 +6,8 @@ from .version import NETBOX_MAX_VERSION, NETBOX_MIN_VERSION, __version__
 
 class NetBoxGeoViewConfig(PluginConfig):
     name = "netbox_geoview"
-    verbose_name = "NetBox GeoView"
-    description = "Geo view skeleton with map and filter tabs"
+    verbose_name = _("Geo-View")
+    description = _("Geospatial view with map and filter tabs")
     version = __version__
     author = "Codex"
     base_url = "geoview"

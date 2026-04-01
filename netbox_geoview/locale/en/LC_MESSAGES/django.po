@@ -1,0 +1,99 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: netbox-geoview\n"
+"POT-Creation-Date: 2026-04-02 00:00+0000\n"
+"PO-Revision-Date: 2026-04-02 00:00+0000\n"
+"Last-Translator: Codex\n"
+"Language-Team: Codex\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Geo-View"
+msgstr "Geo-View"
+
+msgid "Geospatial view with map and filter tabs"
+msgstr "Geospatial view with map and filter tabs"
+
+msgid "Search"
+msgstr "Search"
+
+msgid "Device name, serial, asset tag"
+msgstr "Device name, serial, asset tag"
+
+msgid "Sites"
+msgstr "Sites"
+
+msgid "Locations"
+msgstr "Locations"
+
+msgid "Device roles"
+msgstr "Device roles"
+
+msgid "Devices"
+msgstr "Devices"
+
+msgid "Latitude"
+msgstr "Latitude"
+
+msgid "Longitude"
+msgstr "Longitude"
+
+msgid "Zoom"
+msgstr "Zoom"
+
+msgid "Preview limit"
+msgstr "Preview limit"
+
+msgid "Navigation"
+msgstr "Navigation"
+
+msgid "Map"
+msgstr "Map"
+
+msgid "Filter"
+msgstr "Filter"
+
+msgid "Roles"
+msgstr "Roles"
+
+msgid "OpenStreetMap tile preview"
+msgstr "OpenStreetMap tile preview"
+
+msgid "Results"
+msgstr "Results"
+
+msgid "Preview"
+msgstr "Preview"
+
+msgid "Selection"
+msgstr "Selection"
+
+msgid "Open filters"
+msgstr "Open filters"
+
+msgid "No filters selected."
+msgstr "No filters selected."
+
+msgid "Device preview"
+msgstr "Device preview"
+
+msgid "No site"
+msgstr "No site"
+
+msgid "No devices match the current filter."
+msgstr "No devices match the current filter."
+
+msgid "Apply and open map"
+msgstr "Apply and open map"
+
+msgid "Reset"
+msgstr "Reset"
+
+msgid "Current result"
+msgstr "Current result"
+
+msgid "Current selection"
+msgstr "Current selection"

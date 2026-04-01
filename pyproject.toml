@@ -30,6 +30,8 @@ include = ["netbox_geoview*"]
 
 [tool.setuptools.package-data]
 netbox_geoview = [
+    "locale/*/LC_MESSAGES/*.mo",
+    "locale/*/LC_MESSAGES/*.po",
     "templates/netbox_geoview/*.html",
     "static/netbox_geoview/*.css",
     "static/netbox_geoview/*.js",

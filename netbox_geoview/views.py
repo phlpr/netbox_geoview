@@ -1,5 +1,6 @@
 from django.db.models import Q
 from django.urls import reverse
+from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
 
 from dcim.models import Device
@@ -76,14 +77,14 @@ class GeoViewBaseView(TemplateView):
         if cleaned_data.get("sites"):
             groups.append(
                 {
-                    "label": "Sites",
+                    "label": _("Sites"),
                     "entries": [site.name for site in cleaned_data["sites"]],
                 }
             )
         if cleaned_data.get("locations"):
             groups.append(
                 {
-                    "label": "Locations",
+                    "label": _("Locations"),
                     "entries": [
                         location.name for location in cleaned_data["locations"]
                     ],
@@ -92,15 +93,17 @@ class GeoViewBaseView(TemplateView):
         if cleaned_data.get("device_roles"):
             groups.append(
                 {
-                    "label": "Roles",
+                    "label": _("Roles"),
                     "entries": [role.name for role in cleaned_data["device_roles"]],
                 }
             )
         if cleaned_data.get("devices"):
             groups.append(
                 {
-                    "label": "Devices",
-                    "entries": [device.name or str(device) for device in cleaned_data["devices"]],
+                    "label": _("Devices"),
+                    "entries": [
+                        device.name or str(device) for device in cleaned_data["devices"]
+                    ],
                 }
             )
         return groups
@@ -149,6 +152,12 @@ class GeoViewBaseView(TemplateView):
                 },
                 "preview_devices": filtered_devices[:preview_limit],
                 "preview_limit": preview_limit,
+                "map_overlay": {
+                    "title": _("OpenStreetMap tile preview"),
+                    "latitude": _("Latitude"),
+                    "longitude": _("Longitude"),
+                    "zoom": _("Zoom"),
+                },
             }
         )
         return context

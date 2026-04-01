@@ -1,9 +1,24 @@
-from netbox.plugins import PluginMenuItem
+from django.utils.translation import gettext_lazy as _
+
+from netbox.plugins import PluginMenu, PluginMenuItem
 
 
-menu_items = (
-    PluginMenuItem(
-        link="plugins:netbox_geoview:map",
-        link_text="GeoView",
+menu = PluginMenu(
+    label=_("Geo-View"),
+    groups=(
+        (
+            _("Navigation"),
+            (
+                PluginMenuItem(
+                    link="plugins:netbox_geoview:map",
+                    link_text=_("Map"),
+                ),
+                PluginMenuItem(
+                    link="plugins:netbox_geoview:filter",
+                    link_text=_("Filter"),
+                ),
+            ),
+        ),
     ),
+    icon_class="mdi mdi-map-marker-radius-outline",
 )

@@ -35,6 +35,10 @@
         const zoom = Number.parseInt(element.dataset.zoom || "6", 10);
         const tileTemplate =
             element.dataset.tileUrl || "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+        const overlayTitle = element.dataset.overlayTitle || "";
+        const labelLatitude = element.dataset.labelLatitude || "Latitude";
+        const labelLongitude = element.dataset.labelLongitude || "Longitude";
+        const labelZoom = element.dataset.labelZoom || "Zoom";
         const center = getTileCoordinate(lat, lon, zoom);
         let tiles = "";
 
@@ -51,8 +55,8 @@
             <div class="geoview-map__tiles">${tiles}</div>
             <div class="geoview-map__marker"></div>
             <div class="geoview-map__overlay">
-                <span class="geoview-map__overlay-title">OpenStreetMap tile preview</span>
-                <span class="geoview-map__overlay-meta">Lat ${lat.toFixed(4)} · Lon ${lon.toFixed(4)} · Zoom ${zoom}</span>
+                <span class="geoview-map__overlay-title">${overlayTitle}</span>
+                <span class="geoview-map__overlay-meta">${labelLatitude} ${lat.toFixed(4)} | ${labelLongitude} ${lon.toFixed(4)} | ${labelZoom} ${zoom}</span>
             </div>
         `;
     }

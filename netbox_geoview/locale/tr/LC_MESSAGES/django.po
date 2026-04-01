@@ -1,0 +1,99 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: netbox-geoview\n"
+"POT-Creation-Date: 2026-04-02 00:00+0000\n"
+"PO-Revision-Date: 2026-04-02 00:00+0000\n"
+"Last-Translator: Codex\n"
+"Language-Team: Codex\n"
+"Language: tr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "Geo-View"
+msgstr "Geo-View"
+
+msgid "Geospatial view with map and filter tabs"
+msgstr "Harita ve filtre sekmelerine sahip cografi gorunum"
+
+msgid "Search"
+msgstr "Ara"
+
+msgid "Device name, serial, asset tag"
+msgstr "Cihaz adi, seri numarasi, varlik etiketi"
+
+msgid "Sites"
+msgstr "Siteler"
+
+msgid "Locations"
+msgstr "Konumlar"
+
+msgid "Device roles"
+msgstr "Cihaz rolleri"
+
+msgid "Devices"
+msgstr "Cihazlar"
+
+msgid "Latitude"
+msgstr "Enlem"
+
+msgid "Longitude"
+msgstr "Boylam"
+
+msgid "Zoom"
+msgstr "Yakinlastirma"
+
+msgid "Preview limit"
+msgstr "Onizleme siniri"
+
+msgid "Navigation"
+msgstr "Gezinme"
+
+msgid "Map"
+msgstr "Harita"
+
+msgid "Filter"
+msgstr "Filtre"
+
+msgid "Roles"
+msgstr "Roller"
+
+msgid "OpenStreetMap tile preview"
+msgstr "OpenStreetMap karo onizlemesi"
+
+msgid "Results"
+msgstr "Sonuclar"
+
+msgid "Preview"
+msgstr "Onizleme"
+
+msgid "Selection"
+msgstr "Secim"
+
+msgid "Open filters"
+msgstr "Filtreleri ac"
+
+msgid "No filters selected."
+msgstr "Hic filtre secilmedi."
+
+msgid "Device preview"
+msgstr "Cihaz onizlemesi"
+
+msgid "No site"
+msgstr "Site yok"
+
+msgid "No devices match the current filter."
+msgstr "Guncel filtreyle eslesen cihaz yok."
+
+msgid "Apply and open map"
+msgstr "Uygula ve haritayi ac"
+
+msgid "Reset"
+msgstr "Sifirla"
+
+msgid "Current result"
+msgstr "Guncel sonuc"
+
+msgid "Current selection"
+msgstr "Guncel secim"

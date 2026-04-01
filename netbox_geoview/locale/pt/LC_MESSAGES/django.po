@@ -1,0 +1,99 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: netbox-geoview\n"
+"POT-Creation-Date: 2026-04-02 00:00+0000\n"
+"PO-Revision-Date: 2026-04-02 00:00+0000\n"
+"Last-Translator: Codex\n"
+"Language-Team: Codex\n"
+"Language: pt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Geo-View"
+msgstr "Geo-View"
+
+msgid "Geospatial view with map and filter tabs"
+msgstr "Vista geoespacial com separadores de mapa e filtro"
+
+msgid "Search"
+msgstr "Pesquisar"
+
+msgid "Device name, serial, asset tag"
+msgstr "Nome do dispositivo, serie, etiqueta de ativo"
+
+msgid "Sites"
+msgstr "Sites"
+
+msgid "Locations"
+msgstr "Localizacoes"
+
+msgid "Device roles"
+msgstr "Funcoes dos dispositivos"
+
+msgid "Devices"
+msgstr "Dispositivos"
+
+msgid "Latitude"
+msgstr "Latitude"
+
+msgid "Longitude"
+msgstr "Longitude"
+
+msgid "Zoom"
+msgstr "Zoom"
+
+msgid "Preview limit"
+msgstr "Limite de pre-visualizacao"
+
+msgid "Navigation"
+msgstr "Navegacao"
+
+msgid "Map"
+msgstr "Mapa"
+
+msgid "Filter"
+msgstr "Filtro"
+
+msgid "Roles"
+msgstr "Funcoes"
+
+msgid "OpenStreetMap tile preview"
+msgstr "Pre-visualizacao de mosaicos OpenStreetMap"
+
+msgid "Results"
+msgstr "Resultados"
+
+msgid "Preview"
+msgstr "Pre-visualizacao"
+
+msgid "Selection"
+msgstr "Selecao"
+
+msgid "Open filters"
+msgstr "Abrir filtros"
+
+msgid "No filters selected."
+msgstr "Nenhum filtro selecionado."
+
+msgid "Device preview"
+msgstr "Pre-visualizacao de dispositivos"
+
+msgid "No site"
+msgstr "Sem site"
+
+msgid "No devices match the current filter."
+msgstr "Nenhum dispositivo corresponde ao filtro atual."
+
+msgid "Apply and open map"
+msgstr "Aplicar e abrir mapa"
+
+msgid "Reset"
+msgstr "Repor"
+
+msgid "Current result"
+msgstr "Resultado atual"
+
+msgid "Current selection"
+msgstr "Selecao atual"

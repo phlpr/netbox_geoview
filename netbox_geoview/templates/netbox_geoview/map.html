@@ -1,11 +1,12 @@
 {% extends 'netbox_geoview/base.html' %}
+{% load i18n %}
 
 {% block content %}
 <div class="row g-4">
   <div class="col-12 col-xxl-8">
     <div class="card">
       <div class="card-header">
-        <h2 class="card-title mb-0">Map</h2>
+        <h2 class="card-title mb-0">{% trans "Map" %}</h2>
       </div>
       <div class="card-body">
         <div
@@ -15,6 +16,10 @@
           data-lon="{{ map_state.lon }}"
           data-zoom="{{ map_state.zoom }}"
           data-tile-url="{{ tile_url }}"
+          data-overlay-title="{{ map_overlay.title }}"
+          data-label-latitude="{{ map_overlay.latitude }}"
+          data-label-longitude="{{ map_overlay.longitude }}"
+          data-label-zoom="{{ map_overlay.zoom }}"
         ></div>
       </div>
     </div>
@@ -23,24 +28,24 @@
     <div class="d-flex flex-column gap-4">
       <div class="card">
         <div class="card-header">
-          <h2 class="card-title mb-0">Results</h2>
+          <h2 class="card-title mb-0">{% trans "Results" %}</h2>
         </div>
         <div class="card-body">
           <div class="geoview-stat-grid">
             <div>
-              <span class="geoview-stat-grid__label">Devices</span>
+              <span class="geoview-stat-grid__label">{% trans "Devices" %}</span>
               <strong>{{ result_counts.devices }}</strong>
             </div>
             <div>
-              <span class="geoview-stat-grid__label">Sites</span>
+              <span class="geoview-stat-grid__label">{% trans "Sites" %}</span>
               <strong>{{ result_counts.sites }}</strong>
             </div>
             <div>
-              <span class="geoview-stat-grid__label">Locations</span>
+              <span class="geoview-stat-grid__label">{% trans "Locations" %}</span>
               <strong>{{ result_counts.locations }}</strong>
             </div>
             <div>
-              <span class="geoview-stat-grid__label">Preview</span>
+              <span class="geoview-stat-grid__label">{% trans "Preview" %}</span>
               <strong>{{ preview_limit }}</strong>
             </div>
           </div>
@@ -48,25 +53,25 @@
       </div>
       <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-          <h2 class="card-title mb-0">Selection</h2>
-          <a class="btn btn-primary btn-sm" href="{{ filter_url }}">Open filters</a>
+          <h2 class="card-title mb-0">{% trans "Selection" %}</h2>
+          <a class="btn btn-primary btn-sm" href="{{ filter_url }}">{% trans "Open filters" %}</a>
         </div>
         <div class="card-body">
           <div class="geoview-stat-grid geoview-stat-grid--compact">
             <div>
-              <span class="geoview-stat-grid__label">Sites</span>
+              <span class="geoview-stat-grid__label">{% trans "Sites" %}</span>
               <strong>{{ selection_counts.sites }}</strong>
             </div>
             <div>
-              <span class="geoview-stat-grid__label">Locations</span>
+              <span class="geoview-stat-grid__label">{% trans "Locations" %}</span>
               <strong>{{ selection_counts.locations }}</strong>
             </div>
             <div>
-              <span class="geoview-stat-grid__label">Roles</span>
+              <span class="geoview-stat-grid__label">{% trans "Roles" %}</span>
               <strong>{{ selection_counts.roles }}</strong>
             </div>
             <div>
-              <span class="geoview-stat-grid__label">Devices</span>
+              <span class="geoview-stat-grid__label">{% trans "Devices" %}</span>
               <strong>{{ selection_counts.devices }}</strong>
             </div>
           </div>
@@ -84,13 +89,13 @@
               {% endfor %}
             </div>
           {% else %}
-            <p class="text-secondary mb-0 mt-3">No filters selected.</p>
+            <p class="text-secondary mb-0 mt-3">{% trans "No filters selected." %}</p>
           {% endif %}
         </div>
       </div>
       <div class="card">
         <div class="card-header">
-          <h2 class="card-title mb-0">Device preview</h2>
+          <h2 class="card-title mb-0">{% trans "Device preview" %}</h2>
         </div>
         <div class="card-body">
           <div class="d-flex flex-column gap-3">
@@ -98,13 +103,13 @@
               <div class="geoview-device">
                 <div class="fw-semibold">{{ device.name|default:device }}</div>
                 <div class="text-secondary small">
-                  {% if device.site %}{{ device.site.name }}{% else %}No site{% endif %}
-                  {% if device.location %} · {{ device.location.name }}{% endif %}
-                  {% if device.role %} · {{ device.role.name }}{% endif %}
+                  {% if device.site %}{{ device.site.name }}{% else %}{% trans "No site" %}{% endif %}
+                  {% if device.location %} | {{ device.location.name }}{% endif %}
+                  {% if device.role %} | {{ device.role.name }}{% endif %}
                 </div>
               </div>
             {% empty %}
-              <p class="text-secondary mb-0">No devices match the current filter.</p>
+              <p class="text-secondary mb-0">{% trans "No devices match the current filter." %}</p>
             {% endfor %}
           </div>
         </div>

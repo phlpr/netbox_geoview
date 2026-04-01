@@ -1,11 +1,12 @@
 {% extends 'netbox_geoview/base.html' %}
+{% load i18n %}
 
 {% block content %}
 <div class="row g-4">
   <div class="col-12 col-xxl-8">
     <div class="card">
       <div class="card-header">
-        <h2 class="card-title mb-0">Filter</h2>
+        <h2 class="card-title mb-0">{% trans "Filter" %}</h2>
       </div>
       <div class="card-body">
         <form method="get" action="{{ map_base_url }}" class="row g-4">
@@ -55,8 +56,8 @@
             {{ filter_form.limit.errors }}
           </div>
           <div class="col-12 d-flex flex-wrap gap-2">
-            <button type="submit" class="btn btn-primary">Apply and open map</button>
-            <a href="{{ filter_base_url }}" class="btn btn-outline-secondary">Reset</a>
+            <button type="submit" class="btn btn-primary">{% trans "Apply and open map" %}</button>
+            <a href="{{ filter_base_url }}" class="btn btn-outline-secondary">{% trans "Reset" %}</a>
           </div>
         </form>
       </div>
@@ -66,24 +67,24 @@
     <div class="d-flex flex-column gap-4">
       <div class="card">
         <div class="card-header">
-          <h2 class="card-title mb-0">Current result</h2>
+          <h2 class="card-title mb-0">{% trans "Current result" %}</h2>
         </div>
         <div class="card-body">
           <div class="geoview-stat-grid geoview-stat-grid--compact">
             <div>
-              <span class="geoview-stat-grid__label">Devices</span>
+              <span class="geoview-stat-grid__label">{% trans "Devices" %}</span>
               <strong>{{ result_counts.devices }}</strong>
             </div>
             <div>
-              <span class="geoview-stat-grid__label">Sites</span>
+              <span class="geoview-stat-grid__label">{% trans "Sites" %}</span>
               <strong>{{ result_counts.sites }}</strong>
             </div>
             <div>
-              <span class="geoview-stat-grid__label">Locations</span>
+              <span class="geoview-stat-grid__label">{% trans "Locations" %}</span>
               <strong>{{ result_counts.locations }}</strong>
             </div>
             <div>
-              <span class="geoview-stat-grid__label">Preview</span>
+              <span class="geoview-stat-grid__label">{% trans "Preview" %}</span>
               <strong>{{ preview_limit }}</strong>
             </div>
           </div>
@@ -91,7 +92,7 @@
       </div>
       <div class="card">
         <div class="card-header">
-          <h2 class="card-title mb-0">Current selection</h2>
+          <h2 class="card-title mb-0">{% trans "Current selection" %}</h2>
         </div>
         <div class="card-body">
           {% if selection_groups %}
@@ -108,7 +109,7 @@
               {% endfor %}
             </div>
           {% else %}
-            <p class="text-secondary mb-0">No filters selected.</p>
+            <p class="text-secondary mb-0">{% trans "No filters selected." %}</p>
           {% endif %}
         </div>
       </div>

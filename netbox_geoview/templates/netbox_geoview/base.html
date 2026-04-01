@@ -1,7 +1,7 @@
 {% extends 'base/layout.html' %}
-{% load static %}
+{% load i18n static %}
 
-{% block title %}GeoView{% endblock title %}
+{% block title %}{% trans "Geo-View" %}{% endblock title %}
 
 {% block head %}
 <link rel="stylesheet" href="{% static 'netbox_geoview/geoview.css' %}">
@@ -9,18 +9,18 @@
 
 {% block header %}
 <div class="d-flex flex-column gap-2">
-  <h1 class="mb-0">GeoView</h1>
-  <p class="text-secondary mb-0">NetBox 4.5.5 plugin skeleton with map and filter tabs</p>
+  <h1 class="mb-0">{% trans "Geo-View" %}</h1>
+  <p class="text-secondary mb-0">{% trans "Geospatial view with map and filter tabs" %}</p>
 </div>
 {% endblock header %}
 
 {% block tabs %}
 <ul class="nav nav-tabs page-tabs">
   <li class="nav-item">
-    <a class="nav-link{% if active_tab == 'map' %} active{% endif %}" href="{{ map_url }}">Map</a>
+    <a class="nav-link{% if active_tab == 'map' %} active{% endif %}" href="{{ map_url }}">{% trans "Map" %}</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link{% if active_tab == 'filter' %} active{% endif %}" href="{{ filter_url }}">Filter</a>
+    <a class="nav-link{% if active_tab == 'filter' %} active{% endif %}" href="{{ filter_url }}">{% trans "Filter" %}</a>
   </li>
 </ul>
 {% endblock tabs %}

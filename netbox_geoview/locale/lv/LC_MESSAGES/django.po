@@ -1,0 +1,99 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: netbox-geoview\n"
+"POT-Creation-Date: 2026-04-02 00:00+0000\n"
+"PO-Revision-Date: 2026-04-02 00:00+0000\n"
+"Last-Translator: Codex\n"
+"Language-Team: Codex\n"
+"Language: lv\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);\n"
+
+msgid "Geo-View"
+msgstr "Geo-View"
+
+msgid "Geospatial view with map and filter tabs"
+msgstr "Geotelpisks skats ar kartes un filtra cilnem"
+
+msgid "Search"
+msgstr "Meklet"
+
+msgid "Device name, serial, asset tag"
+msgstr "Ierices nosaukums, serijas numurs, aktiva birka"
+
+msgid "Sites"
+msgstr "Vietnes"
+
+msgid "Locations"
+msgstr "Atrasanas vietas"
+
+msgid "Device roles"
+msgstr "Iericu lomas"
+
+msgid "Devices"
+msgstr "Ierices"
+
+msgid "Latitude"
+msgstr "Platums"
+
+msgid "Longitude"
+msgstr "Garums"
+
+msgid "Zoom"
+msgstr "Tuvinajums"
+
+msgid "Preview limit"
+msgstr "Prieksskatijuma limits"
+
+msgid "Navigation"
+msgstr "Navigacija"
+
+msgid "Map"
+msgstr "Karte"
+
+msgid "Filter"
+msgstr "Filtrs"
+
+msgid "Roles"
+msgstr "Lomas"
+
+msgid "OpenStreetMap tile preview"
+msgstr "OpenStreetMap flizu prieksskatijums"
+
+msgid "Results"
+msgstr "Rezultati"
+
+msgid "Preview"
+msgstr "Prieksskatijums"
+
+msgid "Selection"
+msgstr "Atlase"
+
+msgid "Open filters"
+msgstr "Atvert filtrus"
+
+msgid "No filters selected."
+msgstr "Nav atlasits neviens filtrs."
+
+msgid "Device preview"
+msgstr "Iericu prieksskatijums"
+
+msgid "No site"
+msgstr "Nav vietnes"
+
+msgid "No devices match the current filter."
+msgstr "Neviena ierice neatbilst pasreizejam filtram."
+
+msgid "Apply and open map"
+msgstr "Pielietot un atvert karti"
+
+msgid "Reset"
+msgstr "Atiestatit"
+
+msgid "Current result"
+msgstr "Pasreizejais rezultats"
+
+msgid "Current selection"
+msgstr "Pasreizeja atlase"

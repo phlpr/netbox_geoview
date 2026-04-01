@@ -1,0 +1,99 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: netbox-geoview\n"
+"POT-Creation-Date: 2026-04-02 00:00+0000\n"
+"PO-Revision-Date: 2026-04-02 00:00+0000\n"
+"Last-Translator: Codex\n"
+"Language-Team: Codex\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Geo-View"
+msgstr "Geo-View"
+
+msgid "Geospatial view with map and filter tabs"
+msgstr "Georuimtelijke weergave met kaart- en filtertabbladen"
+
+msgid "Search"
+msgstr "Zoeken"
+
+msgid "Device name, serial, asset tag"
+msgstr "Apparaatnaam, serienummer, assettag"
+
+msgid "Sites"
+msgstr "Sites"
+
+msgid "Locations"
+msgstr "Locaties"
+
+msgid "Device roles"
+msgstr "Apparaatrollen"
+
+msgid "Devices"
+msgstr "Apparaten"
+
+msgid "Latitude"
+msgstr "Breedtegraad"
+
+msgid "Longitude"
+msgstr "Lengtegraad"
+
+msgid "Zoom"
+msgstr "Zoom"
+
+msgid "Preview limit"
+msgstr "Voorbeeldlimiet"
+
+msgid "Navigation"
+msgstr "Navigatie"
+
+msgid "Map"
+msgstr "Kaart"
+
+msgid "Filter"
+msgstr "Filter"
+
+msgid "Roles"
+msgstr "Rollen"
+
+msgid "OpenStreetMap tile preview"
+msgstr "OpenStreetMap-tegelvoorbeeld"
+
+msgid "Results"
+msgstr "Resultaten"
+
+msgid "Preview"
+msgstr "Voorbeeld"
+
+msgid "Selection"
+msgstr "Selectie"
+
+msgid "Open filters"
+msgstr "Filters openen"
+
+msgid "No filters selected."
+msgstr "Geen filters geselecteerd."
+
+msgid "Device preview"
+msgstr "Apparaatvoorbeeld"
+
+msgid "No site"
+msgstr "Geen site"
+
+msgid "No devices match the current filter."
+msgstr "Geen apparaten komen overeen met het huidige filter."
+
+msgid "Apply and open map"
+msgstr "Toepassen en kaart openen"
+
+msgid "Reset"
+msgstr "Resetten"
+
+msgid "Current result"
+msgstr "Huidig resultaat"
+
+msgid "Current selection"
+msgstr "Huidige selectie"

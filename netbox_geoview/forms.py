@@ -1,66 +1,67 @@
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from dcim.models import Device, DeviceRole, Location, Site
 
 
 class GeoViewFilterForm(forms.Form):
     q = forms.CharField(
-        label="Search",
+        label=_("Search"),
         required=False,
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
-                "placeholder": "Device name, serial, asset tag",
+                "placeholder": _("Device name, serial, asset tag"),
             }
         ),
     )
     sites = forms.ModelMultipleChoiceField(
-        label="Sites",
+        label=_("Sites"),
         required=False,
         queryset=Site.objects.none(),
         widget=forms.SelectMultiple(attrs={"class": "form-select", "size": 8}),
     )
     locations = forms.ModelMultipleChoiceField(
-        label="Locations",
+        label=_("Locations"),
         required=False,
         queryset=Location.objects.none(),
         widget=forms.SelectMultiple(attrs={"class": "form-select", "size": 8}),
     )
     device_roles = forms.ModelMultipleChoiceField(
-        label="Device roles",
+        label=_("Device roles"),
         required=False,
         queryset=DeviceRole.objects.none(),
         widget=forms.SelectMultiple(attrs={"class": "form-select", "size": 8}),
     )
     devices = forms.ModelMultipleChoiceField(
-        label="Devices",
+        label=_("Devices"),
         required=False,
         queryset=Device.objects.none(),
         widget=forms.SelectMultiple(attrs={"class": "form-select", "size": 8}),
     )
     lat = forms.FloatField(
-        label="Latitude",
+        label=_("Latitude"),
         required=False,
         widget=forms.NumberInput(
             attrs={"class": "form-control", "step": "0.000001"}
         ),
     )
     lon = forms.FloatField(
-        label="Longitude",
+        label=_("Longitude"),
         required=False,
         widget=forms.NumberInput(
             attrs={"class": "form-control", "step": "0.000001"}
         ),
     )
     zoom = forms.IntegerField(
-        label="Zoom",
+        label=_("Zoom"),
         required=False,
         min_value=1,
         max_value=19,
         widget=forms.NumberInput(attrs={"class": "form-control"}),
     )
     limit = forms.IntegerField(
-        label="Preview limit",
+        label=_("Preview limit"),
         required=False,
         min_value=1,
         max_value=1000,
