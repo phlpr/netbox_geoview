@@ -1,3 +1,4 @@
+from django.conf import settings
 from hashlib import sha256
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
@@ -21,17 +22,51 @@ from .version import __version__
 class GeoViewBaseView(TemplateView):
     active_tab = "map"
 
+    def get_plugin_settings(self):
+        return getattr(settings, "PLUGINS_CONFIG", {}).get("netbox_geoview", {})
+
+    def get_setting(self, *keys):
+        plugin_settings = self.get_plugin_settings()
+        for key in keys:
+            if key in plugin_settings:
+                return plugin_settings[key]
+        for key in keys:
+            value = get_plugin_config("netbox_geoview", key)
+            if value is not None:
+                return value
+        return None
+
+    def get_zoom_bounds(self):
+        min_zoom = int(self.get_setting("min_zoom") or 2)
+        max_zoom = int(self.get_setting("max_zoom") or 19)
+        min_zoom = max(0, min(min_zoom, 22))
+        max_zoom = max(0, min(max_zoom, 22))
+        if min_zoom > max_zoom:
+            min_zoom, max_zoom = max_zoom, min_zoom
+        return min_zoom, max_zoom
+
+    def clamp_zoom(self, value):
+        min_zoom, max_zoom = self.get_zoom_bounds()
+        return max(min_zoom, min(max_zoom, int(value)))
+
     def get_initial_values(self):
+        min_zoom, _ = self.get_zoom_bounds()
         return {
-            "lat": get_plugin_config("netbox_geoview", "map_center_lat"),
-            "lon": get_plugin_config("netbox_geoview", "map_center_lon"),
-            "zoom": get_plugin_config("netbox_geoview", "map_zoom"),
+            "lat": self.get_setting("start_latitude", "map_center_lat"),
+            "lon": self.get_setting("start_longitude", "map_center_lon"),
+            "zoom": self.clamp_zoom(self.get_setting("start_zoom", "map_zoom") or min_zoom),
             "limit": 250,
         }
 
     def get_form(self):
         data = self.request.GET or None
-        form = GeoViewFilterForm(data=data, initial=self.get_initial_values())
+        min_zoom, max_zoom = self.get_zoom_bounds()
+        form = GeoViewFilterForm(
+            data=data,
+            initial=self.get_initial_values(),
+            min_zoom=min_zoom,
+            max_zoom=max_zoom,
+        )
         if form.is_bound:
             form.is_valid()
         else:
@@ -52,9 +87,11 @@ class GeoViewBaseView(TemplateView):
             "lon": cleaned_data.get("lon")
             if cleaned_data.get("lon") is not None
             else initial["lon"],
-            "zoom": cleaned_data.get("zoom")
-            if cleaned_data.get("zoom") is not None
-            else initial["zoom"],
+            "zoom": self.clamp_zoom(
+                cleaned_data.get("zoom")
+                if cleaned_data.get("zoom") is not None
+                else initial["zoom"]
+            ),
         }
 
     def get_preview_limit(self, cleaned_data):
@@ -202,8 +239,31 @@ class GeoViewFilterView(GeoViewBaseView):
 class GeoViewTileView(View):
     http_method_names = ["get"]
 
+    def get_plugin_settings(self):
+        return getattr(settings, "PLUGINS_CONFIG", {}).get("netbox_geoview", {})
+
+    def get_setting(self, *keys):
+        plugin_settings = self.get_plugin_settings()
+        for key in keys:
+            if key in plugin_settings:
+                return plugin_settings[key]
+        for key in keys:
+            value = get_plugin_config("netbox_geoview", key)
+            if value is not None:
+                return value
+        return None
+
+    def get_zoom_bounds(self):
+        min_zoom = int(self.get_setting("min_zoom") or 2)
+        max_zoom = int(self.get_setting("max_zoom") or 19)
+        min_zoom = max(0, min(min_zoom, 22))
+        max_zoom = max(0, min(max_zoom, 22))
+        if min_zoom > max_zoom:
+            min_zoom, max_zoom = max_zoom, min_zoom
+        return min_zoom, max_zoom
+
     def get_upstream_url(self, z, x, y):
-        template = get_plugin_config("netbox_geoview", "tile_url")
+        template = self.get_setting("tile_provider_url", "tile_url")
         upstream_url = (
             template.replace("{z}", str(z))
             .replace("{x}", str(x))
@@ -218,7 +278,8 @@ class GeoViewTileView(View):
         return f"netbox_geoview.tile.{sha256(upstream_url.encode('utf-8')).hexdigest()}"
 
     def get(self, request, z, x, y):
-        if z < 0 or z > 22:
+        min_zoom, max_zoom = self.get_zoom_bounds()
+        if z < min_zoom or z > max_zoom:
             raise Http404
         scale = 2**z
         if x < 0 or y < 0 or x >= scale or y >= scale:

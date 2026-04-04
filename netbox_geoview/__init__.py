@@ -14,6 +14,12 @@ class NetBoxGeoViewConfig(PluginConfig):
     min_version = NETBOX_MIN_VERSION
     max_version = NETBOX_MAX_VERSION
     default_settings = {
+        "start_latitude": 20.0,
+        "start_longitude": 0.0,
+        "start_zoom": 2,
+        "min_zoom": 2,
+        "max_zoom": 19,
+        "tile_provider_url": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
         "map_center_lat": 20.0,
         "map_center_lon": 0.0,
         "map_zoom": 2,

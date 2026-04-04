@@ -69,8 +69,14 @@ class GeoViewFilterForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
+        min_zoom = kwargs.pop("min_zoom", 1)
+        max_zoom = kwargs.pop("max_zoom", 19)
         super().__init__(*args, **kwargs)
         self.fields["sites"].queryset = Site.objects.order_by("name")
         self.fields["locations"].queryset = Location.objects.order_by("name")
         self.fields["device_roles"].queryset = DeviceRole.objects.order_by("name")
         self.fields["devices"].queryset = Device.objects.order_by("name")
+        self.fields["zoom"].min_value = min_zoom
+        self.fields["zoom"].max_value = max_zoom
+        self.fields["zoom"].widget.attrs["min"] = min_zoom
+        self.fields["zoom"].widget.attrs["max"] = max_zoom
