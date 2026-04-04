@@ -1,12 +1,21 @@
+from hashlib import sha256
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlparse
+from urllib.request import Request, urlopen
+
+from django.core.cache import cache
 from django.db.models import Q
+from django.http import Http404, HttpResponse
 from django.urls import reverse
 from django.utils.translation import gettext as _
+from django.views import View
 from django.views.generic import TemplateView
 
 from dcim.models import Device
 from netbox.plugins import get_plugin_config
 
 from .forms import GeoViewFilterForm
+from .version import __version__
 
 
 class GeoViewBaseView(TemplateView):
@@ -143,7 +152,10 @@ class GeoViewBaseView(TemplateView):
                 "active_tab": self.active_tab,
                 "filter_form": form,
                 "map_state": map_state,
-                "tile_url": get_plugin_config("netbox_geoview", "tile_url"),
+                "tile_url": (
+                    f"{reverse('plugins:netbox_geoview:map')}"
+                    "tiles/{z}/{x}/{y}.png"
+                ),
                 "map_url": self.build_tab_url("plugins:netbox_geoview:map"),
                 "filter_url": self.build_tab_url("plugins:netbox_geoview:filter"),
                 "map_base_url": reverse("plugins:netbox_geoview:map"),
@@ -170,10 +182,7 @@ class GeoViewBaseView(TemplateView):
                 "preview_devices": filtered_devices[:preview_limit],
                 "preview_limit": preview_limit,
                 "map_overlay": {
-                    "title": _("OpenStreetMap tile preview"),
-                    "latitude": _("Latitude"),
-                    "longitude": _("Longitude"),
-                    "zoom": _("Zoom"),
+                    "attribution": "© OpenStreetMap contributors",
                 },
             }
         )
@@ -188,3 +197,71 @@ class GeoViewMapView(GeoViewBaseView):
 class GeoViewFilterView(GeoViewBaseView):
     template_name = "netbox_geoview/map.html"
     active_tab = "filter"
+
+
+class GeoViewTileView(View):
+    http_method_names = ["get"]
+
+    def get_upstream_url(self, z, x, y):
+        template = get_plugin_config("netbox_geoview", "tile_url")
+        upstream_url = (
+            template.replace("{z}", str(z))
+            .replace("{x}", str(x))
+            .replace("{y}", str(y))
+        )
+        parsed = urlparse(upstream_url)
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            raise Http404
+        return upstream_url
+
+    def get_cache_key(self, upstream_url):
+        return f"netbox_geoview.tile.{sha256(upstream_url.encode('utf-8')).hexdigest()}"
+
+    def get(self, request, z, x, y):
+        if z < 0 or z > 22:
+            raise Http404
+        scale = 2**z
+        if x < 0 or y < 0 or x >= scale or y >= scale:
+            raise Http404
+
+        upstream_url = self.get_upstream_url(z, x, y)
+        cache_key = self.get_cache_key(upstream_url)
+        cached_tile = cache.get(cache_key)
+        if cached_tile is not None:
+            response = HttpResponse(
+                cached_tile["content"], content_type=cached_tile["content_type"]
+            )
+            response["Cache-Control"] = "public, max-age=86400"
+            return response
+
+        request_headers = {
+            "User-Agent": f"netbox-geoview/{__version__}",
+            "Referer": request.build_absolute_uri(
+                reverse("plugins:netbox_geoview:map")
+            ),
+        }
+
+        try:
+            with urlopen(
+                Request(upstream_url, headers=request_headers), timeout=10
+            ) as upstream_response:
+                content = upstream_response.read()
+                content_type = upstream_response.headers.get_content_type()
+        except HTTPError as exc:
+            if exc.code == 404:
+                raise Http404 from exc
+            return HttpResponse(status=502)
+        except URLError:
+            return HttpResponse(status=502)
+
+        if not content_type.startswith("image/"):
+            return HttpResponse(status=502)
+
+        cache.set(
+            cache_key,
+            {"content": content, "content_type": content_type},
+            timeout=86400,
+        )
+        response = HttpResponse(content, content_type=content_type)
+        response["Cache-Control"] = "public, max-age=86400"
+        return response

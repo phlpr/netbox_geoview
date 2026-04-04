@@ -14,9 +14,9 @@ class NetBoxGeoViewConfig(PluginConfig):
     min_version = NETBOX_MIN_VERSION
     max_version = NETBOX_MAX_VERSION
     default_settings = {
-        "map_center_lat": 48.2082,
-        "map_center_lon": 16.3738,
-        "map_zoom": 6,
+        "map_center_lat": 20.0,
+        "map_center_lon": 0.0,
+        "map_zoom": 2,
         "tile_url": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
     }
 

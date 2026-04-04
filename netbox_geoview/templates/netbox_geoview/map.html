@@ -11,10 +11,7 @@
       data-lon="{{ map_state.lon }}"
       data-zoom="{{ map_state.zoom }}"
       data-tile-url="{{ tile_url }}"
-      data-overlay-title="{{ map_overlay.title }}"
-      data-label-latitude="{{ map_overlay.latitude }}"
-      data-label-longitude="{{ map_overlay.longitude }}"
-      data-label-zoom="{{ map_overlay.zoom }}"
+      data-overlay-attribution="{{ map_overlay.attribution }}"
     ></div>
   </div>
   <div class="tab-pane{% if active_tab == 'filter' %} show active{% endif %}" id="filter-panel" role="tabpanel" aria-labelledby="filter-tab">

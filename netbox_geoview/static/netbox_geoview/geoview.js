@@ -30,17 +30,17 @@
     }
 
     function renderMap(element) {
-        const lat = Number.parseFloat(element.dataset.lat || "48.2082");
-        const lon = Number.parseFloat(element.dataset.lon || "16.3738");
-        const zoom = Number.parseInt(element.dataset.zoom || "6", 10);
-        const tileTemplate =
-            element.dataset.tileUrl || "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-        const overlayTitle = element.dataset.overlayTitle || "";
-        const labelLatitude = element.dataset.labelLatitude || "Latitude";
-        const labelLongitude = element.dataset.labelLongitude || "Longitude";
-        const labelZoom = element.dataset.labelZoom || "Zoom";
+        const lat = Number.parseFloat(element.dataset.lat || "20");
+        const lon = Number.parseFloat(element.dataset.lon || "0");
+        const zoom = Number.parseInt(element.dataset.zoom || "2", 10);
+        const tileTemplate = element.dataset.tileUrl || "";
+        const overlayAttribution = element.dataset.overlayAttribution || "";
         const center = getTileCoordinate(lat, lon, zoom);
         let tiles = "";
+
+        if (!tileTemplate) {
+            return;
+        }
 
         for (let row = -1; row <= 1; row += 1) {
             for (let column = -1; column <= 1; column += 1) {
@@ -53,10 +53,8 @@
 
         element.innerHTML = `
             <div class="geoview-map__tiles">${tiles}</div>
-            <div class="geoview-map__marker"></div>
             <div class="geoview-map__overlay">
-                <span class="geoview-map__overlay-title">${overlayTitle}</span>
-                <span class="geoview-map__overlay-meta">${labelLatitude} ${lat.toFixed(4)} | ${labelLongitude} ${lon.toFixed(4)} | ${labelZoom} ${zoom}</span>
+                <span class="geoview-map__overlay-meta">${overlayAttribution}</span>
             </div>
         `;
     }
