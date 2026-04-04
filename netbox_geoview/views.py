@@ -1,4 +1,5 @@
 from hashlib import sha256
+from urllib.parse import urlencode
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
@@ -83,6 +84,10 @@ class GeoViewConfigMixin:
             url = str(layer.get("url") or "").strip()
             if not url:
                 continue
+            query = layer.get("query") if isinstance(layer.get("query"), dict) else {}
+            headers = (
+                layer.get("headers") if isinstance(layer.get("headers"), dict) else {}
+            )
             layer_id = slugify(str(layer.get("id") or name)) or f"layer-{index}"
             suffix = 2
             while layer_id in used_ids:
@@ -111,6 +116,14 @@ class GeoViewConfigMixin:
                     "attribution": str(layer.get("attribution") or ""),
                     "min_zoom": layer_min_zoom,
                     "max_zoom": layer_max_zoom,
+                    "query": {
+                        str(key): str(value)
+                        for key, value in query.items()
+                    },
+                    "headers": {
+                        str(key): str(value)
+                        for key, value in headers.items()
+                    },
                 }
             )
 
@@ -121,6 +134,8 @@ class GeoViewConfigMixin:
         fallback["id"] = "openstreetmap"
         fallback["min_zoom"] = min_zoom
         fallback["max_zoom"] = max_zoom
+        fallback["query"] = {}
+        fallback["headers"] = {}
         return [fallback]
 
     def get_default_tile_layer_id(self, layers):
@@ -272,6 +287,16 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
 
     def get_map_config(self, map_state):
         tile_layers = self.get_tile_layer_configs()
+        public_tile_layers = [
+            {
+                "id": layer["id"],
+                "name": layer["name"],
+                "attribution": layer["attribution"],
+                "min_zoom": layer["min_zoom"],
+                "max_zoom": layer["max_zoom"],
+            }
+            for layer in tile_layers
+        ]
         return {
             "lat": map_state["lat"],
             "lon": map_state["lon"],
@@ -284,7 +309,7 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
                 "plugins:netbox_geoview:tile",
                 kwargs={"layer_id": "__layer__", "z": 0, "x": 0, "y": 0},
             ).replace("/0/0/0.png", "/{z}/{x}/{y}.png"),
-            "tile_layers": tile_layers,
+            "tile_layers": public_tile_layers,
         }
 
     def get_context_data(self, **kwargs):
@@ -353,10 +378,13 @@ class GeoViewTileView(GeoViewConfigMixin, View):
                     "{y}", str(y)
                 )
             )
+            if layer["query"]:
+                separator = "&" if "?" in upstream_url else "?"
+                upstream_url = f"{upstream_url}{separator}{urlencode(layer['query'])}"
             parsed = urlparse(upstream_url)
             if parsed.scheme not in {"http", "https"} or not parsed.netloc:
                 raise Http404
-            return upstream_url
+            return upstream_url, layer["headers"]
         raise Http404
 
     def get_cache_key(self, upstream_url):
@@ -370,7 +398,7 @@ class GeoViewTileView(GeoViewConfigMixin, View):
         if x < 0 or y < 0 or x >= scale or y >= scale:
             raise Http404
 
-        upstream_url = self.get_upstream_url(layer_id, z, x, y)
+        upstream_url, layer_headers = self.get_upstream_url(layer_id, z, x, y)
         cache_key = self.get_cache_key(upstream_url)
         cached_tile = cache.get(cache_key)
         if cached_tile is not None:
@@ -386,6 +414,7 @@ class GeoViewTileView(GeoViewConfigMixin, View):
                 reverse("plugins:netbox_geoview:map")
             ),
         }
+        request_headers.update(layer_headers)
 
         try:
             with urlopen(
