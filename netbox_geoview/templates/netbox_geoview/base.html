@@ -1,30 +1,38 @@
-{% extends 'base/layout.html' %}
-{% load i18n static %}
+{% extends 'generic/_base.html' %}
+{% load helpers %}
+{% load i18n %}
+{% load static %}
 
 {% block title %}{% trans "Geo-View" %}{% endblock title %}
 
-{% block head %}
-<link rel="stylesheet" href="{% static 'netbox_geoview/geoview.css' %}">
-{% endblock head %}
-
-{% block header %}
-<div class="d-flex flex-column gap-2">
-  <h1 class="mb-0">{% trans "Geo-View" %}</h1>
-  <p class="text-secondary mb-0">{% trans "Geospatial view with map and filter tabs" %}</p>
-</div>
-{% endblock header %}
+{% block subtitle %}
+  <div class="text-secondary">{% trans "Geospatial view with map and filter tabs" %}</div>
+{% endblock subtitle %}
 
 {% block tabs %}
-<ul class="nav nav-tabs page-tabs">
-  <li class="nav-item">
-    <a class="nav-link{% if active_tab == 'map' %} active{% endif %}" href="{{ map_url }}">{% trans "Map" %}</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link{% if active_tab == 'filter' %} active{% endif %}" href="{{ filter_url }}">{% trans "Filter" %}</a>
-  </li>
-</ul>
+  <ul class="nav nav-tabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link{% if active_tab == 'map' %} active{% endif %}" id="map-tab" data-bs-toggle="tab" data-bs-target="#map-panel" type="button" role="tab" aria-controls="map-panel" aria-selected="{% if active_tab == 'map' %}true{% else %}false{% endif %}">
+        {% trans "Map" %}
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link{% if active_tab == 'filter' %} active{% endif %}" id="filter-tab" data-bs-toggle="tab" data-bs-target="#filter-panel" type="button" role="tab" aria-controls="filter-panel" aria-selected="{% if active_tab == 'filter' %}true{% else %}false{% endif %}">
+        {% trans "Filter" %}
+        {% if active_filter_count %}
+          {% badge active_filter_count bg_color="primary" %}
+        {% endif %}
+      </button>
+    </li>
+  </ul>
 {% endblock tabs %}
 
+{% block head %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'netbox_geoview/geoview.css' %}">
+{% endblock head %}
+
 {% block javascript %}
-<script src="{% static 'netbox_geoview/geoview.js' %}"></script>
+  {{ block.super }}
+  <script src="{% static 'netbox_geoview/geoview.js' %}"></script>
 {% endblock javascript %}

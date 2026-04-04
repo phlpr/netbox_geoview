@@ -22,7 +22,12 @@ class GeoViewBaseView(TemplateView):
 
     def get_form(self):
         data = self.request.GET or None
-        return GeoViewFilterForm(data=data, initial=self.get_initial_values())
+        form = GeoViewFilterForm(data=data, initial=self.get_initial_values())
+        if form.is_bound:
+            form.is_valid()
+        else:
+            form.cleaned_data = {}
+        return form
 
     def get_cleaned_data(self, form):
         if form.is_valid():
@@ -108,6 +113,16 @@ class GeoViewBaseView(TemplateView):
             )
         return groups
 
+    def get_active_filter_count(self, cleaned_data):
+        count = 0
+        if cleaned_data.get("q"):
+            count += 1
+        for key in ("sites", "locations", "device_roles", "devices"):
+            values = cleaned_data.get(key)
+            if values:
+                count += 1
+        return count
+
     def build_tab_url(self, view_name):
         base_url = reverse(view_name)
         query_string = self.request.GET.urlencode()
@@ -124,6 +139,7 @@ class GeoViewBaseView(TemplateView):
         preview_limit = self.get_preview_limit(cleaned_data)
         context.update(
             {
+                "model": Device,
                 "active_tab": self.active_tab,
                 "filter_form": form,
                 "map_state": map_state,
@@ -139,6 +155,7 @@ class GeoViewBaseView(TemplateView):
                     "roles": len(cleaned_data.get("device_roles") or []),
                     "devices": len(cleaned_data.get("devices") or []),
                 },
+                "active_filter_count": self.get_active_filter_count(cleaned_data),
                 "result_counts": {
                     "devices": filtered_devices.count(),
                     "sites": filtered_devices.exclude(site__isnull=True)
@@ -169,5 +186,5 @@ class GeoViewMapView(GeoViewBaseView):
 
 
 class GeoViewFilterView(GeoViewBaseView):
-    template_name = "netbox_geoview/filter.html"
+    template_name = "netbox_geoview/map.html"
     active_tab = "filter"

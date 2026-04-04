@@ -1,120 +1,23 @@
 {% extends 'netbox_geoview/base.html' %}
+{% load helpers %}
 {% load i18n %}
 
 {% block content %}
-<div class="row g-4">
-  <div class="col-12 col-xxl-8">
-    <div class="card">
-      <div class="card-header">
-        <h2 class="card-title mb-0">{% trans "Map" %}</h2>
-      </div>
-      <div class="card-body">
-        <div
-          class="geoview-map"
-          data-geoview-map
-          data-lat="{{ map_state.lat }}"
-          data-lon="{{ map_state.lon }}"
-          data-zoom="{{ map_state.zoom }}"
-          data-tile-url="{{ tile_url }}"
-          data-overlay-title="{{ map_overlay.title }}"
-          data-label-latitude="{{ map_overlay.latitude }}"
-          data-label-longitude="{{ map_overlay.longitude }}"
-          data-label-zoom="{{ map_overlay.zoom }}"
-        ></div>
-      </div>
-    </div>
+  <div class="tab-pane geoview-viewport{% if active_tab == 'map' %} show active{% endif %}" id="map-panel" role="tabpanel" aria-labelledby="map-tab">
+    <div
+      class="geoview-map geoview-map--fullscreen"
+      data-geoview-map
+      data-lat="{{ map_state.lat }}"
+      data-lon="{{ map_state.lon }}"
+      data-zoom="{{ map_state.zoom }}"
+      data-tile-url="{{ tile_url }}"
+      data-overlay-title="{{ map_overlay.title }}"
+      data-label-latitude="{{ map_overlay.latitude }}"
+      data-label-longitude="{{ map_overlay.longitude }}"
+      data-label-zoom="{{ map_overlay.zoom }}"
+    ></div>
   </div>
-  <div class="col-12 col-xxl-4">
-    <div class="d-flex flex-column gap-4">
-      <div class="card">
-        <div class="card-header">
-          <h2 class="card-title mb-0">{% trans "Results" %}</h2>
-        </div>
-        <div class="card-body">
-          <div class="geoview-stat-grid">
-            <div>
-              <span class="geoview-stat-grid__label">{% trans "Devices" %}</span>
-              <strong>{{ result_counts.devices }}</strong>
-            </div>
-            <div>
-              <span class="geoview-stat-grid__label">{% trans "Sites" %}</span>
-              <strong>{{ result_counts.sites }}</strong>
-            </div>
-            <div>
-              <span class="geoview-stat-grid__label">{% trans "Locations" %}</span>
-              <strong>{{ result_counts.locations }}</strong>
-            </div>
-            <div>
-              <span class="geoview-stat-grid__label">{% trans "Preview" %}</span>
-              <strong>{{ preview_limit }}</strong>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h2 class="card-title mb-0">{% trans "Selection" %}</h2>
-          <a class="btn btn-primary btn-sm" href="{{ filter_url }}">{% trans "Open filters" %}</a>
-        </div>
-        <div class="card-body">
-          <div class="geoview-stat-grid geoview-stat-grid--compact">
-            <div>
-              <span class="geoview-stat-grid__label">{% trans "Sites" %}</span>
-              <strong>{{ selection_counts.sites }}</strong>
-            </div>
-            <div>
-              <span class="geoview-stat-grid__label">{% trans "Locations" %}</span>
-              <strong>{{ selection_counts.locations }}</strong>
-            </div>
-            <div>
-              <span class="geoview-stat-grid__label">{% trans "Roles" %}</span>
-              <strong>{{ selection_counts.roles }}</strong>
-            </div>
-            <div>
-              <span class="geoview-stat-grid__label">{% trans "Devices" %}</span>
-              <strong>{{ selection_counts.devices }}</strong>
-            </div>
-          </div>
-          {% if selection_groups %}
-            <div class="d-flex flex-column gap-3 mt-4">
-              {% for group in selection_groups %}
-                <div>
-                  <div class="fw-semibold mb-2">{{ group.label }}</div>
-                  <div class="geoview-chip-list">
-                    {% for entry in group.entries %}
-                      <span class="geoview-chip">{{ entry }}</span>
-                    {% endfor %}
-                  </div>
-                </div>
-              {% endfor %}
-            </div>
-          {% else %}
-            <p class="text-secondary mb-0 mt-3">{% trans "No filters selected." %}</p>
-          {% endif %}
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-header">
-          <h2 class="card-title mb-0">{% trans "Device preview" %}</h2>
-        </div>
-        <div class="card-body">
-          <div class="d-flex flex-column gap-3">
-            {% for device in preview_devices %}
-              <div class="geoview-device">
-                <div class="fw-semibold">{{ device.name|default:device }}</div>
-                <div class="text-secondary small">
-                  {% if device.site %}{{ device.site.name }}{% else %}{% trans "No site" %}{% endif %}
-                  {% if device.location %} | {{ device.location.name }}{% endif %}
-                  {% if device.role %} | {{ device.role.name }}{% endif %}
-                </div>
-              </div>
-            {% empty %}
-              <p class="text-secondary mb-0">{% trans "No devices match the current filter." %}</p>
-            {% endfor %}
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="tab-pane{% if active_tab == 'filter' %} show active{% endif %}" id="filter-panel" role="tabpanel" aria-labelledby="filter-tab">
+    {% include 'inc/filter_list.html' %}
   </div>
-</div>
 {% endblock content %}

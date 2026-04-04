@@ -6,6 +6,16 @@
     background: #d9e4ec;
 }
 
+.geoview-viewport {
+    height: calc(100dvh - 19rem);
+}
+
+.geoview-map--fullscreen {
+    height: 100%;
+    min-height: 18rem;
+    max-height: none;
+}
+
 .geoview-map__tiles {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -107,5 +117,15 @@
 @media (max-width: 767.98px) {
     .geoview-map {
         min-height: 24rem;
+    }
+
+    .geoview-viewport {
+        height: calc(100dvh - 15rem);
+    }
+
+    .geoview-map--fullscreen {
+        height: 100%;
+        min-height: 16rem;
+        max-height: none;
     }
 }

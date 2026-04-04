@@ -13,10 +13,6 @@ menu = PluginMenu(
                     link="plugins:netbox_geoview:map",
                     link_text=_("Map"),
                 ),
-                PluginMenuItem(
-                    link="plugins:netbox_geoview:filter",
-                    link_text=_("Filter"),
-                ),
             ),
         ),
     ),
