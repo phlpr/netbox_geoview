@@ -90,3 +90,22 @@ msgstr "Guncel secim"
 
 msgid "Filters"
 msgstr "Filtreler"
+
+msgid "Region"
+msgstr "Region"
+
+msgid "Site group"
+msgstr "Site group"
+
+msgid "Site"
+msgstr "Site"
+
+msgid "Operator"
+msgstr "Operator"
+
+msgid "is"
+msgstr "is"
+
+msgid "The selected site does not have coordinates and cannot be shown on the map."
+msgstr "The selected site does not have coordinates and cannot be shown on the map."
+

@@ -1,4 +1,13 @@
 (function () {
+    function escapeHtml(value) {
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#39;");
+    }
+
     function getMapConfig(element) {
         const configId = element.dataset.configId;
 
@@ -25,6 +34,62 @@
             minZoom: layer.min_zoom,
             maxZoom: layer.max_zoom,
         });
+    }
+
+    function createSiteMarkerIcon(markerStyle) {
+        if (markerStyle.icon_url) {
+            return window.L.icon({
+                iconUrl: markerStyle.icon_url,
+                iconSize: markerStyle.icon_size,
+                iconAnchor: markerStyle.icon_anchor,
+                popupAnchor: markerStyle.popup_anchor,
+            });
+        }
+
+        const symbol = markerStyle.symbol ? `<span class="geoview-site-marker__symbol">${escapeHtml(markerStyle.symbol)}</span>` : "";
+
+        return window.L.divIcon({
+            className: "geoview-site-marker-icon",
+            html: `
+                <span class="geoview-site-marker" style="--geoview-marker-color: ${escapeHtml(markerStyle.color || "#f1c40f")};">
+                    <span class="geoview-site-marker__body"></span>
+                    ${symbol}
+                </span>
+            `,
+            iconSize: markerStyle.icon_size,
+            iconAnchor: markerStyle.icon_anchor,
+            popupAnchor: markerStyle.popup_anchor,
+        });
+    }
+
+    function buildSitePopup(marker) {
+        const lines = [`<strong>${escapeHtml(marker.name)}</strong>`];
+        if (marker.group_name) {
+            lines.push(escapeHtml(marker.group_name));
+        }
+        return lines.join("<br>");
+    }
+
+    function addSiteMarkers(map, config) {
+        const markers = Array.isArray(config.site_markers) ? config.site_markers : [];
+        const bounds = [];
+
+        markers.forEach(function (marker) {
+            const latLng = [marker.latitude, marker.longitude];
+            const leafletMarker = window.L.marker(latLng, {
+                icon: createSiteMarkerIcon(marker.marker_style || {}),
+            });
+            leafletMarker.bindPopup(buildSitePopup(marker));
+            leafletMarker.addTo(map);
+            bounds.push(latLng);
+        });
+
+        if (bounds.length > 0) {
+            map.fitBounds(bounds, {
+                padding: [24, 24],
+                maxZoom: Math.max(config.zoom, 10),
+            });
+        }
     }
 
     function renderMap(element) {
@@ -70,6 +135,8 @@
             collapsed: true,
             position: "topright",
         }).addTo(map);
+
+        addSiteMarkers(map, config);
     }
 
     document.addEventListener("DOMContentLoaded", function () {

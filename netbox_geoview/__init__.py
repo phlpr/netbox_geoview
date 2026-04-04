@@ -21,6 +21,15 @@ class NetBoxGeoViewConfig(PluginConfig):
         "max_zoom": 19,
         "default_tile_layer": "OpenStreetMap",
         "scroll_wheel_zoom": True,
+        "site_marker": {
+            "color": "#f1c40f",
+            "symbol": "",
+            "icon_url": "",
+            "icon_size": [28, 40],
+            "icon_anchor": [14, 40],
+            "popup_anchor": [0, -34],
+        },
+        "site_group_markers": {},
         "tile_layers": [
             {
                 "name": "OpenStreetMap",

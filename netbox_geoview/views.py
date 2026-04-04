@@ -1,20 +1,21 @@
 from hashlib import sha256
-from urllib.parse import urlencode
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlparse
+from urllib.parse import urlencode, urlparse
 from urllib.request import Request, urlopen
 
 from django.conf import settings
 from django.core.cache import cache
+from django.contrib import messages
 from django.db.models import Q
 from django.http import Http404, HttpResponse
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
 from django.views import View
 from django.views.generic import TemplateView
 
-from dcim.models import Device
+from dcim.models import Site
 from netbox.plugins import get_plugin_config
 
 from .forms import GeoViewFilterForm
@@ -38,6 +39,15 @@ DEFAULT_TILE_LAYERS = [
         "attribution": "&copy; OpenStreetMap contributors, Humanitarian OpenStreetMap Team",
     },
 ]
+
+DEFAULT_SITE_MARKER = {
+    "color": "#f1c40f",
+    "symbol": "",
+    "icon_url": "",
+    "icon_size": [28, 40],
+    "icon_anchor": [14, 40],
+    "popup_anchor": [0, -34],
+}
 
 
 class GeoViewConfigMixin:
@@ -94,19 +104,9 @@ class GeoViewConfigMixin:
                 layer_id = f"{layer_id}-{suffix}"
                 suffix += 1
             used_ids.add(layer_id)
-            layer_min_zoom = max(
-                min_zoom,
-                min(
-                    max_zoom,
-                    int(layer.get("min_zoom", min_zoom)),
-                ),
-            )
+            layer_min_zoom = max(min_zoom, min(max_zoom, int(layer.get("min_zoom", min_zoom))))
             layer_max_zoom = max(
-                layer_min_zoom,
-                min(
-                    max_zoom,
-                    int(layer.get("max_zoom", max_zoom)),
-                ),
+                layer_min_zoom, min(max_zoom, int(layer.get("max_zoom", max_zoom)))
             )
             normalized_layers.append(
                 {
@@ -116,14 +116,8 @@ class GeoViewConfigMixin:
                     "attribution": str(layer.get("attribution") or ""),
                     "min_zoom": layer_min_zoom,
                     "max_zoom": layer_max_zoom,
-                    "query": {
-                        str(key): str(value)
-                        for key, value in query.items()
-                    },
-                    "headers": {
-                        str(key): str(value)
-                        for key, value in headers.items()
-                    },
+                    "query": {str(key): str(value) for key, value in query.items()},
+                    "headers": {str(key): str(value) for key, value in headers.items()},
                 }
             )
 
@@ -152,6 +146,34 @@ class GeoViewConfigMixin:
             return True
         return bool(value)
 
+    def normalize_marker_style(self, marker_style, fallback=None):
+        base = dict(fallback or DEFAULT_SITE_MARKER)
+        if isinstance(marker_style, dict):
+            for key in ("color", "symbol", "icon_url"):
+                if key in marker_style:
+                    base[key] = str(marker_style[key] or "")
+            for key in ("icon_size", "icon_anchor", "popup_anchor"):
+                value = marker_style.get(key)
+                if isinstance(value, (list, tuple)) and len(value) == 2:
+                    base[key] = [int(value[0]), int(value[1])]
+        return base
+
+    def get_site_marker_style(self, site_group):
+        default_style = self.normalize_marker_style(self.get_setting("site_marker"))
+        configured_group_styles = self.get_setting("site_group_markers")
+        if not isinstance(configured_group_styles, dict) or site_group is None:
+            return default_style
+
+        candidates = [str(site_group.name).strip().lower()]
+        if getattr(site_group, "slug", None):
+            candidates.append(str(site_group.slug).strip().lower())
+
+        for key, style in configured_group_styles.items():
+            if str(key).strip().lower() in candidates:
+                return self.normalize_marker_style(style, default_style)
+
+        return default_style
+
 
 class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
     active_tab = "map"
@@ -164,18 +186,11 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
             "zoom": self.clamp_zoom(
                 self.get_setting("start_zoom", "map_zoom") or min_zoom
             ),
-            "limit": 250,
         }
 
     def get_form(self):
         data = self.request.GET or None
-        min_zoom, max_zoom = self.get_zoom_bounds()
-        form = GeoViewFilterForm(
-            data=data,
-            initial=self.get_initial_values(),
-            min_zoom=min_zoom,
-            max_zoom=max_zoom,
-        )
+        form = GeoViewFilterForm(data=data)
         if form.is_bound:
             form.is_valid()
         else:
@@ -187,94 +202,59 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
             return form.cleaned_data
         return {}
 
-    def get_map_state(self, cleaned_data):
-        initial = self.get_initial_values()
-        return {
-            "lat": cleaned_data.get("lat")
-            if cleaned_data.get("lat") is not None
-            else initial["lat"],
-            "lon": cleaned_data.get("lon")
-            if cleaned_data.get("lon") is not None
-            else initial["lon"],
-            "zoom": self.clamp_zoom(
-                cleaned_data.get("zoom")
-                if cleaned_data.get("zoom") is not None
-                else initial["zoom"]
-            ),
-        }
+    def get_map_state(self):
+        return self.get_initial_values()
 
-    def get_preview_limit(self, cleaned_data):
-        initial = self.get_initial_values()
-        return cleaned_data.get("limit") or initial["limit"]
-
-    def get_filtered_devices(self, cleaned_data):
-        queryset = Device.objects.select_related("site", "location", "role").order_by(
-            "name"
-        )
-        query = cleaned_data.get("q")
-        if query:
-            queryset = queryset.filter(
-                Q(name__icontains=query)
-                | Q(serial__icontains=query)
-                | Q(asset_tag__icontains=query)
-            )
-        sites = cleaned_data.get("sites")
+    def get_filtered_sites(self, cleaned_data):
+        queryset = Site.objects.select_related("group", "region").order_by("name")
+        regions = cleaned_data.get("region")
+        if regions:
+            queryset = queryset.filter(region__in=regions)
+        site_groups = cleaned_data.get("site_group")
+        if site_groups:
+            queryset = queryset.filter(group__in=site_groups)
+        sites = cleaned_data.get("site")
         if sites:
-            queryset = queryset.filter(site__in=sites)
-        locations = cleaned_data.get("locations")
-        if locations:
-            queryset = queryset.filter(location__in=locations)
-        device_roles = cleaned_data.get("device_roles")
-        if device_roles:
-            queryset = queryset.filter(role__in=device_roles)
-        devices = cleaned_data.get("devices")
-        if devices:
-            queryset = queryset.filter(pk__in=devices.values_list("pk", flat=True))
+            queryset = queryset.filter(pk__in=sites.values_list("pk", flat=True))
         return queryset.distinct()
+
+    def get_mappable_sites(self, sites):
+        return sites.exclude(latitude__isnull=True).exclude(longitude__isnull=True)
 
     def build_selection_groups(self, cleaned_data):
         groups = []
-        if cleaned_data.get("sites"):
+        regions = cleaned_data.get("region")
+        if regions:
             groups.append(
                 {
-                    "label": _("Sites"),
-                    "entries": [site.name for site in cleaned_data["sites"]],
+                    "label": _("Region"),
+                    "entries": [region.name for region in regions],
                 }
             )
-        if cleaned_data.get("locations"):
+        site_groups = cleaned_data.get("site_group")
+        if site_groups:
             groups.append(
                 {
-                    "label": _("Locations"),
-                    "entries": [
-                        location.name for location in cleaned_data["locations"]
-                    ],
+                    "label": _("Site group"),
+                    "entries": [site_group.name for site_group in site_groups],
                 }
             )
-        if cleaned_data.get("device_roles"):
+        sites = cleaned_data.get("site")
+        if sites:
             groups.append(
                 {
-                    "label": _("Roles"),
-                    "entries": [role.name for role in cleaned_data["device_roles"]],
+                    "label": _("Site"),
+                    "entries": [site.name for site in sites],
                 }
             )
-        if cleaned_data.get("devices"):
-            groups.append(
-                {
-                    "label": _("Devices"),
-                    "entries": [
-                        device.name or str(device) for device in cleaned_data["devices"]
-                    ],
-                }
-            )
-        return groups
+        if groups:
+            return groups
+        return []
 
     def get_active_filter_count(self, cleaned_data):
         count = 0
-        if cleaned_data.get("q"):
-            count += 1
-        for key in ("sites", "locations", "device_roles", "devices"):
-            values = cleaned_data.get(key)
-            if values:
+        for key in ("region", "site_group", "site"):
+            if cleaned_data.get(key):
                 count += 1
         return count
 
@@ -285,7 +265,23 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
             return f"{base_url}?{query_string}"
         return base_url
 
-    def get_map_config(self, map_state):
+    def build_site_markers(self, sites):
+        markers = []
+        for site in sites:
+            if site.latitude is None or site.longitude is None:
+                continue
+            markers.append(
+                {
+                    "name": site.name,
+                    "group_name": site.group.name if site.group else "",
+                    "latitude": float(site.latitude),
+                    "longitude": float(site.longitude),
+                    "marker_style": self.get_site_marker_style(site.group),
+                }
+            )
+        return markers
+
+    def get_map_config(self, map_state, sites, has_active_filters):
         tile_layers = self.get_tile_layer_configs()
         public_tile_layers = [
             {
@@ -310,47 +306,36 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
                 kwargs={"layer_id": "__layer__", "z": 0, "x": 0, "y": 0},
             ).replace("/0/0/0.png", "/{z}/{x}/{y}.png"),
             "tile_layers": public_tile_layers,
+            "site_markers": self.build_site_markers(sites) if has_active_filters else [],
         }
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         form = self.get_form()
         cleaned_data = self.get_cleaned_data(form)
-        map_state = self.get_map_state(cleaned_data)
-        filtered_devices = self.get_filtered_devices(cleaned_data)
-        preview_limit = self.get_preview_limit(cleaned_data)
+        map_state = self.get_map_state()
+        filtered_sites = self.get_filtered_sites(cleaned_data)
+        mappable_sites = self.get_mappable_sites(filtered_sites)
+        has_active_filters = self.get_active_filter_count(cleaned_data) > 0
         context.update(
             {
-                "model": Device,
+                "model": Site,
                 "active_tab": self.active_tab,
                 "filter_form": form,
                 "map_state": map_state,
-                "map_config": self.get_map_config(map_state),
+                "map_config": self.get_map_config(
+                    map_state, mappable_sites, has_active_filters
+                ),
                 "map_url": self.build_tab_url("plugins:netbox_geoview:map"),
                 "filter_url": self.build_tab_url("plugins:netbox_geoview:filter"),
+                "apply_url": reverse("plugins:netbox_geoview:apply"),
                 "map_base_url": reverse("plugins:netbox_geoview:map"),
                 "filter_base_url": reverse("plugins:netbox_geoview:filter"),
                 "selection_groups": self.build_selection_groups(cleaned_data),
                 "selection_counts": {
-                    "sites": len(cleaned_data.get("sites") or []),
-                    "locations": len(cleaned_data.get("locations") or []),
-                    "roles": len(cleaned_data.get("device_roles") or []),
-                    "devices": len(cleaned_data.get("devices") or []),
+                    "sites": mappable_sites.count(),
                 },
                 "active_filter_count": self.get_active_filter_count(cleaned_data),
-                "result_counts": {
-                    "devices": filtered_devices.count(),
-                    "sites": filtered_devices.exclude(site__isnull=True)
-                    .values("site_id")
-                    .distinct()
-                    .count(),
-                    "locations": filtered_devices.exclude(location__isnull=True)
-                    .values("location_id")
-                    .distinct()
-                    .count(),
-                },
-                "preview_devices": filtered_devices[:preview_limit],
-                "preview_limit": preview_limit,
             }
         )
         return context
@@ -364,6 +349,30 @@ class GeoViewMapView(GeoViewBaseView):
 class GeoViewFilterView(GeoViewBaseView):
     template_name = "netbox_geoview/map.html"
     active_tab = "filter"
+
+
+class GeoViewApplyFiltersView(GeoViewConfigMixin, View):
+    http_method_names = ["get"]
+
+    def get(self, request):
+        form = GeoViewFilterForm(data=request.GET or None)
+        form.is_valid()
+        cleaned_data = form.cleaned_data if form.is_valid() else {}
+        selected_sites = cleaned_data.get("site")
+        if selected_sites and selected_sites.filter(
+            Q(latitude__isnull=True) | Q(longitude__isnull=True)
+        ).exists():
+            messages.warning(
+                request,
+                _(
+                    "The selected site does not have coordinates and cannot be shown on the map."
+                ),
+            )
+        query_string = request.GET.urlencode()
+        target_url = reverse("plugins:netbox_geoview:map")
+        if query_string:
+            target_url = f"{target_url}?{query_string}"
+        return redirect(target_url)
 
 
 class GeoViewTileView(GeoViewConfigMixin, View):

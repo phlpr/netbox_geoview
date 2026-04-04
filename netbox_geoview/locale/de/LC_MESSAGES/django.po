@@ -90,3 +90,22 @@ msgstr "Aktuelle Auswahl"
 
 msgid "Filters"
 msgstr "Filter"
+
+msgid "Region"
+msgstr "Standortregion"
+
+msgid "Site group"
+msgstr "Standortgruppe"
+
+msgid "Site"
+msgstr "Standort"
+
+msgid "Operator"
+msgstr "Operator"
+
+msgid "is"
+msgstr "ist"
+
+msgid "The selected site does not have coordinates and cannot be shown on the map."
+msgstr "Der ausgewaehlte Standort hat keine Koordinaten und kann auf der Karte nicht angezeigt werden."
+

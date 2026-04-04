@@ -39,6 +39,28 @@ PLUGINS_CONFIG = {
         "max_zoom": 19,
         "default_tile_layer": "OpenStreetMap",
         "scroll_wheel_zoom": True,
+        "site_marker": {
+            "color": "#f1c40f",
+            "symbol": "",
+            "icon_url": "",
+            "icon_size": [28, 40],
+            "icon_anchor": [14, 40],
+            "popup_anchor": [0, -34],
+        },
+        "site_group_markers": {
+            "LOWG": {
+                "color": "#2ecc71",
+            },
+            "LOWK": {
+                "color": "#3498db",
+            },
+            "LOWL": {
+                "color": "#e74c3c",
+            },
+            "LOWS": {
+                "color": "#ff69b4",
+            },
+        },
         "tile_layers": [
             {
                 "name": "OpenStreetMap",
@@ -96,6 +118,8 @@ Available settings:
 - `max_zoom`: maximum allowed zoom level
 - `default_tile_layer`: default base layer name or ID
 - `scroll_wheel_zoom`: enables zooming with the mouse wheel
+- `site_marker`: default marker appearance for selected sites
+- `site_group_markers`: marker overrides by site group name or slug
 - `tile_layers`: list of available base layers
 - `query`: optional query string parameters per layer, useful for API keys
 - `headers`: optional HTTP headers per layer

@@ -1,1 +1,61 @@
-{% extends 'netbox_geoview/map.html' %}
+{% load i18n %}
+
+<form action="{{ apply_url }}" method="get">
+  <div class="geoview-filter-form">
+    <div class="geoview-filter-form__header row g-2">
+      <div class="col-lg-2"></div>
+      <div class="col-lg-10">
+        <h3 class="geoview-filter-form__title">Lokation</h3>
+      </div>
+    </div>
+    <div class="geoview-filter-form__rows">
+      <div class="row align-items-center g-2 geoview-filter-form__row">
+        <div class="col-lg-2">
+          <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.region.id_for_label }}">{{ filter_form.region.label }}</label>
+        </div>
+        <div class="col-lg-2">
+          <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
+            <option selected>{% trans 'is' %}</option>
+          </select>
+        </div>
+        <div class="col-lg-8">
+          {{ filter_form.region }}
+        </div>
+      </div>
+      <div class="row align-items-center g-2 geoview-filter-form__row">
+        <div class="col-lg-2">
+          <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.site_group.id_for_label }}">{{ filter_form.site_group.label }}</label>
+        </div>
+        <div class="col-lg-2">
+          <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
+            <option selected>{% trans 'is' %}</option>
+          </select>
+        </div>
+        <div class="col-lg-8">
+          {{ filter_form.site_group }}
+        </div>
+      </div>
+      <div class="row align-items-center g-2 geoview-filter-form__row">
+        <div class="col-lg-2">
+          <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.site.id_for_label }}">{{ filter_form.site.label }}</label>
+        </div>
+        <div class="col-lg-2">
+          <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
+            <option selected>{% trans 'is' %}</option>
+          </select>
+        </div>
+        <div class="col-lg-8">
+          {{ filter_form.site }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="btn-float-group-right me-1">
+    <a href="{{ filter_base_url }}" class="btn btn-outline-danger btn-float">
+      <i class="mdi mdi-backspace"></i> {% trans "Reset" %}
+    </a>
+    <button type="submit" class="btn btn-primary">
+      <i class="mdi mdi-magnify"></i> {% trans "Search" %}
+    </button>
+  </div>
+</form>

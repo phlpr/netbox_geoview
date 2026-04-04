@@ -1,82 +1,24 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from dcim.models import Device, DeviceRole, Location, Site
+from dcim.models import Region, Site, SiteGroup
+from utilities.forms.fields import DynamicModelMultipleChoiceField
 
 
 class GeoViewFilterForm(forms.Form):
-    q = forms.CharField(
-        label=_("Search"),
+    region = DynamicModelMultipleChoiceField(
+        label=_("Region"),
         required=False,
-        widget=forms.TextInput(
-            attrs={
-                "class": "form-control",
-                "placeholder": _("Device name, serial, asset tag"),
-            }
-        ),
+        queryset=Region.objects.order_by("name"),
     )
-    sites = forms.ModelMultipleChoiceField(
-        label=_("Sites"),
+    site_group = DynamicModelMultipleChoiceField(
+        label=_("Site group"),
         required=False,
-        queryset=Site.objects.none(),
-        widget=forms.SelectMultiple(attrs={"class": "form-select", "size": 8}),
+        queryset=SiteGroup.objects.order_by("name"),
     )
-    locations = forms.ModelMultipleChoiceField(
-        label=_("Locations"),
+    site = DynamicModelMultipleChoiceField(
+        label=_("Site"),
         required=False,
-        queryset=Location.objects.none(),
-        widget=forms.SelectMultiple(attrs={"class": "form-select", "size": 8}),
+        queryset=Site.objects.order_by("name"),
+        query_params={"region_id": "$region", "group_id": "$site_group"},
     )
-    device_roles = forms.ModelMultipleChoiceField(
-        label=_("Device roles"),
-        required=False,
-        queryset=DeviceRole.objects.none(),
-        widget=forms.SelectMultiple(attrs={"class": "form-select", "size": 8}),
-    )
-    devices = forms.ModelMultipleChoiceField(
-        label=_("Devices"),
-        required=False,
-        queryset=Device.objects.none(),
-        widget=forms.SelectMultiple(attrs={"class": "form-select", "size": 8}),
-    )
-    lat = forms.FloatField(
-        label=_("Latitude"),
-        required=False,
-        widget=forms.NumberInput(
-            attrs={"class": "form-control", "step": "0.000001"}
-        ),
-    )
-    lon = forms.FloatField(
-        label=_("Longitude"),
-        required=False,
-        widget=forms.NumberInput(
-            attrs={"class": "form-control", "step": "0.000001"}
-        ),
-    )
-    zoom = forms.IntegerField(
-        label=_("Zoom"),
-        required=False,
-        min_value=1,
-        max_value=19,
-        widget=forms.NumberInput(attrs={"class": "form-control"}),
-    )
-    limit = forms.IntegerField(
-        label=_("Preview limit"),
-        required=False,
-        min_value=1,
-        max_value=1000,
-        widget=forms.NumberInput(attrs={"class": "form-control"}),
-    )
-
-    def __init__(self, *args, **kwargs):
-        min_zoom = kwargs.pop("min_zoom", 1)
-        max_zoom = kwargs.pop("max_zoom", 19)
-        super().__init__(*args, **kwargs)
-        self.fields["sites"].queryset = Site.objects.order_by("name")
-        self.fields["locations"].queryset = Location.objects.order_by("name")
-        self.fields["device_roles"].queryset = DeviceRole.objects.order_by("name")
-        self.fields["devices"].queryset = Device.objects.order_by("name")
-        self.fields["zoom"].min_value = min_zoom
-        self.fields["zoom"].max_value = max_zoom
-        self.fields["zoom"].widget.attrs["min"] = min_zoom
-        self.fields["zoom"].widget.attrs["max"] = max_zoom

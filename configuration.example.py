@@ -9,6 +9,28 @@ PLUGINS_CONFIG = {
         "max_zoom": 19,
         "default_tile_layer": "OpenStreetMap",
         "scroll_wheel_zoom": True,
+        "site_marker": {
+            "color": "#f1c40f",
+            "symbol": "",
+            "icon_url": "",
+            "icon_size": [28, 40],
+            "icon_anchor": [14, 40],
+            "popup_anchor": [0, -34],
+        },
+        "site_group_markers": {
+            "LOWG": {
+                "color": "#2ecc71",
+            },
+            "LOWK": {
+                "color": "#3498db",
+            },
+            "LOWL": {
+                "color": "#e74c3c",
+            },
+            "LOWS": {
+                "color": "#ff69b4",
+            },
+        },
         "tile_layers": [
             {
                 "name": "OpenStreetMap",
