@@ -1,13 +1,14 @@
-from django.conf import settings
 from hashlib import sha256
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
+from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Q
 from django.http import Http404, HttpResponse
 from django.urls import reverse
+from django.utils.text import slugify
 from django.utils.translation import gettext as _
 from django.views import View
 from django.views.generic import TemplateView
@@ -19,11 +20,30 @@ from .forms import GeoViewFilterForm
 from .version import __version__
 
 
-class GeoViewBaseView(TemplateView):
-    active_tab = "map"
+DEFAULT_TILE_LAYERS = [
+    {
+        "name": "OpenStreetMap",
+        "url": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+        "attribution": "&copy; OpenStreetMap contributors",
+    },
+    {
+        "name": "OpenStreetMap DE",
+        "url": "https://tile.openstreetmap.de/{z}/{x}/{y}.png",
+        "attribution": "&copy; OpenStreetMap contributors",
+    },
+    {
+        "name": "OpenStreetMap HOT",
+        "url": "https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+        "attribution": "&copy; OpenStreetMap contributors, Humanitarian OpenStreetMap Team",
+    },
+]
+
+
+class GeoViewConfigMixin:
+    plugin_name = "netbox_geoview"
 
     def get_plugin_settings(self):
-        return getattr(settings, "PLUGINS_CONFIG", {}).get("netbox_geoview", {})
+        return getattr(settings, "PLUGINS_CONFIG", {}).get(self.plugin_name, {})
 
     def get_setting(self, *keys):
         plugin_settings = self.get_plugin_settings()
@@ -31,7 +51,7 @@ class GeoViewBaseView(TemplateView):
             if key in plugin_settings:
                 return plugin_settings[key]
         for key in keys:
-            value = get_plugin_config("netbox_geoview", key)
+            value = get_plugin_config(self.plugin_name, key)
             if value is not None:
                 return value
         return None
@@ -49,12 +69,86 @@ class GeoViewBaseView(TemplateView):
         min_zoom, max_zoom = self.get_zoom_bounds()
         return max(min_zoom, min(max_zoom, int(value)))
 
+    def get_tile_layer_configs(self):
+        configured_layers = self.get_setting("tile_layers")
+        layers = configured_layers if configured_layers else DEFAULT_TILE_LAYERS
+        min_zoom, max_zoom = self.get_zoom_bounds()
+        normalized_layers = []
+        used_ids = set()
+
+        for index, layer in enumerate(layers, start=1):
+            if not isinstance(layer, dict):
+                continue
+            name = str(layer.get("name") or f"Layer {index}").strip()
+            url = str(layer.get("url") or "").strip()
+            if not url:
+                continue
+            layer_id = slugify(str(layer.get("id") or name)) or f"layer-{index}"
+            suffix = 2
+            while layer_id in used_ids:
+                layer_id = f"{layer_id}-{suffix}"
+                suffix += 1
+            used_ids.add(layer_id)
+            layer_min_zoom = max(
+                min_zoom,
+                min(
+                    max_zoom,
+                    int(layer.get("min_zoom", min_zoom)),
+                ),
+            )
+            layer_max_zoom = max(
+                layer_min_zoom,
+                min(
+                    max_zoom,
+                    int(layer.get("max_zoom", max_zoom)),
+                ),
+            )
+            normalized_layers.append(
+                {
+                    "id": layer_id,
+                    "name": name,
+                    "url": url,
+                    "attribution": str(layer.get("attribution") or ""),
+                    "min_zoom": layer_min_zoom,
+                    "max_zoom": layer_max_zoom,
+                }
+            )
+
+        if normalized_layers:
+            return normalized_layers
+
+        fallback = DEFAULT_TILE_LAYERS[0].copy()
+        fallback["id"] = "openstreetmap"
+        fallback["min_zoom"] = min_zoom
+        fallback["max_zoom"] = max_zoom
+        return [fallback]
+
+    def get_default_tile_layer_id(self, layers):
+        desired = str(self.get_setting("default_tile_layer") or "").strip().lower()
+        if desired:
+            for layer in layers:
+                if desired in {layer["id"].lower(), layer["name"].lower()}:
+                    return layer["id"]
+        return layers[0]["id"]
+
+    def get_scroll_wheel_zoom(self):
+        value = self.get_setting("scroll_wheel_zoom")
+        if value is None:
+            return True
+        return bool(value)
+
+
+class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
+    active_tab = "map"
+
     def get_initial_values(self):
         min_zoom, _ = self.get_zoom_bounds()
         return {
             "lat": self.get_setting("start_latitude", "map_center_lat"),
             "lon": self.get_setting("start_longitude", "map_center_lon"),
-            "zoom": self.clamp_zoom(self.get_setting("start_zoom", "map_zoom") or min_zoom),
+            "zoom": self.clamp_zoom(
+                self.get_setting("start_zoom", "map_zoom") or min_zoom
+            ),
             "limit": 250,
         }
 
@@ -176,6 +270,23 @@ class GeoViewBaseView(TemplateView):
             return f"{base_url}?{query_string}"
         return base_url
 
+    def get_map_config(self, map_state):
+        tile_layers = self.get_tile_layer_configs()
+        return {
+            "lat": map_state["lat"],
+            "lon": map_state["lon"],
+            "zoom": map_state["zoom"],
+            "min_zoom": self.get_zoom_bounds()[0],
+            "max_zoom": self.get_zoom_bounds()[1],
+            "scroll_wheel_zoom": self.get_scroll_wheel_zoom(),
+            "default_tile_layer_id": self.get_default_tile_layer_id(tile_layers),
+            "tile_proxy_url_template": reverse(
+                "plugins:netbox_geoview:tile",
+                kwargs={"layer_id": "__layer__", "z": 0, "x": 0, "y": 0},
+            ).replace("/0/0/0.png", "/{z}/{x}/{y}.png"),
+            "tile_layers": tile_layers,
+        }
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         form = self.get_form()
@@ -189,10 +300,7 @@ class GeoViewBaseView(TemplateView):
                 "active_tab": self.active_tab,
                 "filter_form": form,
                 "map_state": map_state,
-                "tile_url": (
-                    f"{reverse('plugins:netbox_geoview:map')}"
-                    "tiles/{z}/{x}/{y}.png"
-                ),
+                "map_config": self.get_map_config(map_state),
                 "map_url": self.build_tab_url("plugins:netbox_geoview:map"),
                 "filter_url": self.build_tab_url("plugins:netbox_geoview:filter"),
                 "map_base_url": reverse("plugins:netbox_geoview:map"),
@@ -218,9 +326,6 @@ class GeoViewBaseView(TemplateView):
                 },
                 "preview_devices": filtered_devices[:preview_limit],
                 "preview_limit": preview_limit,
-                "map_overlay": {
-                    "attribution": "© OpenStreetMap contributors",
-                },
             }
         )
         return context
@@ -236,48 +341,28 @@ class GeoViewFilterView(GeoViewBaseView):
     active_tab = "filter"
 
 
-class GeoViewTileView(View):
+class GeoViewTileView(GeoViewConfigMixin, View):
     http_method_names = ["get"]
 
-    def get_plugin_settings(self):
-        return getattr(settings, "PLUGINS_CONFIG", {}).get("netbox_geoview", {})
-
-    def get_setting(self, *keys):
-        plugin_settings = self.get_plugin_settings()
-        for key in keys:
-            if key in plugin_settings:
-                return plugin_settings[key]
-        for key in keys:
-            value = get_plugin_config("netbox_geoview", key)
-            if value is not None:
-                return value
-        return None
-
-    def get_zoom_bounds(self):
-        min_zoom = int(self.get_setting("min_zoom") or 2)
-        max_zoom = int(self.get_setting("max_zoom") or 19)
-        min_zoom = max(0, min(min_zoom, 22))
-        max_zoom = max(0, min(max_zoom, 22))
-        if min_zoom > max_zoom:
-            min_zoom, max_zoom = max_zoom, min_zoom
-        return min_zoom, max_zoom
-
-    def get_upstream_url(self, z, x, y):
-        template = self.get_setting("tile_provider_url", "tile_url")
-        upstream_url = (
-            template.replace("{z}", str(z))
-            .replace("{x}", str(x))
-            .replace("{y}", str(y))
-        )
-        parsed = urlparse(upstream_url)
-        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
-            raise Http404
-        return upstream_url
+    def get_upstream_url(self, layer_id, z, x, y):
+        for layer in self.get_tile_layer_configs():
+            if layer["id"] != layer_id:
+                continue
+            upstream_url = (
+                layer["url"].replace("{z}", str(z)).replace("{x}", str(x)).replace(
+                    "{y}", str(y)
+                )
+            )
+            parsed = urlparse(upstream_url)
+            if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+                raise Http404
+            return upstream_url
+        raise Http404
 
     def get_cache_key(self, upstream_url):
         return f"netbox_geoview.tile.{sha256(upstream_url.encode('utf-8')).hexdigest()}"
 
-    def get(self, request, z, x, y):
+    def get(self, request, layer_id, z, x, y):
         min_zoom, max_zoom = self.get_zoom_bounds()
         if z < min_zoom or z > max_zoom:
             raise Http404
@@ -285,7 +370,7 @@ class GeoViewTileView(View):
         if x < 0 or y < 0 or x >= scale or y >= scale:
             raise Http404
 
-        upstream_url = self.get_upstream_url(z, x, y)
+        upstream_url = self.get_upstream_url(layer_id, z, x, y)
         cache_key = self.get_cache_key(upstream_url)
         cached_tile = cache.get(cache_key)
         if cached_tile is not None:

@@ -3,15 +3,12 @@
 {% load i18n %}
 
 {% block content %}
+  {{ map_config|json_script:"geoview-map-config" }}
   <div class="tab-pane geoview-viewport{% if active_tab == 'map' %} show active{% endif %}" id="map-panel" role="tabpanel" aria-labelledby="map-tab">
     <div
       class="geoview-map geoview-map--fullscreen"
       data-geoview-map
-      data-lat="{{ map_state.lat }}"
-      data-lon="{{ map_state.lon }}"
-      data-zoom="{{ map_state.zoom }}"
-      data-tile-url="{{ tile_url }}"
-      data-overlay-attribution="{{ map_overlay.attribution }}"
+      data-config-id="geoview-map-config"
     ></div>
   </div>
   <div class="tab-pane{% if active_tab == 'filter' %} show active{% endif %}" id="filter-panel" role="tabpanel" aria-labelledby="filter-tab">

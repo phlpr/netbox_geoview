@@ -37,6 +37,25 @@ PLUGINS_CONFIG = {
         "start_zoom": 7,
         "min_zoom": 2,
         "max_zoom": 19,
+        "default_tile_layer": "OpenStreetMap",
+        "scroll_wheel_zoom": True,
+        "tile_layers": [
+            {
+                "name": "OpenStreetMap",
+                "url": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                "attribution": "&copy; OpenStreetMap contributors",
+            },
+            {
+                "name": "OpenStreetMap DE",
+                "url": "https://tile.openstreetmap.de/{z}/{x}/{y}.png",
+                "attribution": "&copy; OpenStreetMap contributors",
+            },
+            {
+                "name": "OpenStreetMap HOT",
+                "url": "https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+                "attribution": "&copy; OpenStreetMap contributors, Humanitarian OpenStreetMap Team",
+            },
+        ],
         "tile_provider_url": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
     }
 }
@@ -51,6 +70,9 @@ Available settings:
 - `start_zoom`: initial map zoom level
 - `min_zoom`: minimum allowed zoom level
 - `max_zoom`: maximum allowed zoom level
+- `default_tile_layer`: default base layer name or ID
+- `scroll_wheel_zoom`: enables zooming with the mouse wheel
+- `tile_layers`: list of available base layers
 - `tile_provider_url`: upstream tile URL template with `{z}`, `{x}`, and `{y}`
 
 ## Requirements

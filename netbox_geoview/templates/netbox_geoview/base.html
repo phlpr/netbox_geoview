@@ -29,10 +29,12 @@
 
 {% block head %}
   {{ block.super }}
+  <link rel="stylesheet" href="{% static 'netbox_geoview/vendor/leaflet/leaflet.css' %}">
   <link rel="stylesheet" href="{% static 'netbox_geoview/geoview.css' %}">
 {% endblock head %}
 
 {% block javascript %}
   {{ block.super }}
+  <script src="{% static 'netbox_geoview/vendor/leaflet/leaflet.js' %}"></script>
   <script src="{% static 'netbox_geoview/geoview.js' %}"></script>
 {% endblock javascript %}

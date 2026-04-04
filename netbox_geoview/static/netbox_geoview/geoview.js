@@ -1,62 +1,75 @@
 (function () {
-    function clamp(value, min, max) {
-        return Math.min(Math.max(value, min), max);
+    function getMapConfig(element) {
+        const configId = element.dataset.configId;
+
+        if (!configId) {
+            return null;
+        }
+
+        const configNode = document.getElementById(configId);
+
+        if (!configNode) {
+            return null;
+        }
+
+        return JSON.parse(configNode.textContent);
     }
 
-    function wrap(value, size) {
-        return ((value % size) + size) % size;
+    function buildTileUrl(template, layerId) {
+        return template.replace("__layer__", encodeURIComponent(layerId));
     }
 
-    function getTileCoordinate(lat, lon, zoom) {
-        const latitude = clamp(lat, -85.05112878, 85.05112878);
-        const scale = 2 ** zoom;
-        const x = ((lon + 180) / 360) * scale;
-        const radians = (latitude * Math.PI) / 180;
-        const y =
-            ((1 - Math.log(Math.tan(radians) + 1 / Math.cos(radians)) / Math.PI) / 2) *
-            scale;
-        return {
-            x: Math.floor(x),
-            y: Math.floor(y),
-            scale,
-        };
-    }
-
-    function buildTileUrl(template, zoom, x, y) {
-        return template
-            .replace("{z}", String(zoom))
-            .replace("{x}", String(x))
-            .replace("{y}", String(y));
+    function createBaseLayer(config, layer) {
+        return window.L.tileLayer(buildTileUrl(config.tile_proxy_url_template, layer.id), {
+            attribution: layer.attribution || "",
+            minZoom: layer.min_zoom,
+            maxZoom: layer.max_zoom,
+        });
     }
 
     function renderMap(element) {
-        const lat = Number.parseFloat(element.dataset.lat || "20");
-        const lon = Number.parseFloat(element.dataset.lon || "0");
-        const zoom = Number.parseInt(element.dataset.zoom || "2", 10);
-        const tileTemplate = element.dataset.tileUrl || "";
-        const overlayAttribution = element.dataset.overlayAttribution || "";
-        const center = getTileCoordinate(lat, lon, zoom);
-        let tiles = "";
-
-        if (!tileTemplate) {
+        if (!window.L) {
             return;
         }
 
-        for (let row = -1; row <= 1; row += 1) {
-            for (let column = -1; column <= 1; column += 1) {
-                const x = wrap(center.x + column, center.scale);
-                const y = clamp(center.y + row, 0, center.scale - 1);
-                const src = buildTileUrl(tileTemplate, zoom, x, y);
-                tiles += `<img class="geoview-map__tile" src="${src}" alt="" loading="lazy">`;
-            }
+        const config = getMapConfig(element);
+
+        if (!config || !Array.isArray(config.tile_layers) || config.tile_layers.length === 0) {
+            return;
         }
 
-        element.innerHTML = `
-            <div class="geoview-map__tiles">${tiles}</div>
-            <div class="geoview-map__overlay">
-                <span class="geoview-map__overlay-meta">${overlayAttribution}</span>
-            </div>
-        `;
+        const map = window.L.map(element, {
+            center: [config.lat, config.lon],
+            zoom: config.zoom,
+            minZoom: config.min_zoom,
+            maxZoom: config.max_zoom,
+            scrollWheelZoom: Boolean(config.scroll_wheel_zoom),
+            zoomControl: true,
+        });
+
+        const baseLayers = {};
+        let activeLayer = null;
+
+        config.tile_layers.forEach(function (layer) {
+            const tileLayer = createBaseLayer(config, layer);
+            baseLayers[layer.name] = tileLayer;
+            if (layer.id === config.default_tile_layer_id) {
+                activeLayer = tileLayer;
+            }
+        });
+
+        if (!activeLayer) {
+            activeLayer = Object.values(baseLayers)[0];
+        }
+
+        if (activeLayer) {
+            activeLayer.addTo(map);
+        }
+
+        window.L.control.layers(baseLayers, {}, {
+            collapsed: true,
+            position: "topright",
+        }).addTo(map);
     }
 
     document.addEventListener("DOMContentLoaded", function () {
