@@ -7,7 +7,7 @@
 }
 
 .geoview-viewport {
-    height: calc(100dvh - 19rem);
+    height: calc(100dvh - 16.5rem);
 }
 
 .geoview-map--fullscreen {
@@ -120,7 +120,7 @@
     }
 
     .geoview-viewport {
-        height: calc(100dvh - 15rem);
+        height: calc(100dvh - 13.5rem);
     }
 
     .geoview-map--fullscreen {
