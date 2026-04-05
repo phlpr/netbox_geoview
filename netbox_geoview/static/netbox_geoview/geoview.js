@@ -88,8 +88,15 @@
 
     function buildSitePopup(marker) {
         const sections = Array.isArray(marker.popup_sections) ? marker.popup_sections : [];
+        const hasCoordinates = Number.isFinite(Number(marker.latitude)) && Number.isFinite(Number(marker.longitude));
+        const googleMapsUrl = hasCoordinates
+            ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${marker.latitude},${marker.longitude}`)}`
+            : "";
         const linkBlock = marker.netbox_url
             ? `<div class="geoview-popup-link">NetBox: <a href="${escapeHtml(marker.netbox_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(marker.netbox_url)}</a></div>`
+            : "";
+        const mapsBlock = googleMapsUrl
+            ? `<div class="geoview-popup-link"><a href="${escapeHtml(googleMapsUrl)}" target="_blank" rel="noopener noreferrer">Open in Google Maps</a></div>`
             : "";
         const sectionBlocks = sections.map(function (section) {
             const title = escapeHtml(section.title || "");
@@ -110,6 +117,7 @@
                 <div class="geoview-popup-body">
                     <div class="geoview-popup-title">${escapeHtml(marker.name || "")}</div>
                     ${linkBlock}
+                    ${mapsBlock}
                     ${sectionBlocks}
                 </div>
             </div>
