@@ -18,18 +18,15 @@ PLUGINS_CONFIG = {
             "popup_anchor": [0, -34],
         },
         "site_group_markers": {
-            "LOWG": {
-                "color": "#2ecc71",
-            },
-            "LOWK": {
-                "color": "#3498db",
-            },
-            "LOWL": {
-                "color": "#e74c3c",
-            },
-            "LOWS": {
-                "color": "#ff69b4",
-            },
+            "burgenland": {"color": "#f1c40f"},
+            "karnten": {"color": "#e74c3c"},
+            "niederosterreich": {"color": "#3498db"},
+            "oberosterreich": {"color": "#2ecc71"},
+            "salzburg": {"color": "#ff69b4"},
+            "steiermark": {"color": "#16a085"},
+            "tirol": {"color": "#9b59b6"},
+            "vorarlberg": {"color": "#34495e"},
+            "wien": {"color": "#f39c12"},
         },
         "tile_layers": [
             {
@@ -61,14 +58,6 @@ PLUGINS_CONFIG = {
                 "attribution": "&copy; MapTiler",
                 "query": {
                     "key": "YOUR_MAPTILER_API_KEY",
-                },
-            },
-            {
-                "name": "Mapbox Satellite",
-                "url": "https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.jpg90",
-                "attribution": "&copy; Mapbox",
-                "query": {
-                    "access_token": "YOUR_MAPBOX_ACCESS_TOKEN",
                 },
             },
         ],
