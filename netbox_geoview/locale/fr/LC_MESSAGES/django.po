@@ -109,3 +109,47 @@ msgstr "is"
 msgid "The selected site does not have coordinates and cannot be shown on the map."
 msgstr "The selected site does not have coordinates and cannot be shown on the map."
 
+
+msgid "Location"
+msgstr "Location"
+
+
+msgid "Hardware"
+msgstr "Hardware"
+
+
+msgid "Responsibility"
+msgstr "Responsibility"
+
+
+msgid "Manufacturer"
+msgstr "Manufacturer"
+
+
+msgid "Model"
+msgstr "Model"
+
+
+msgid "Operating system"
+msgstr "Operating system"
+
+
+msgid "Tenant group"
+msgstr "Tenant group"
+
+
+msgid "Tenant"
+msgstr "Tenant"
+
+
+msgid "Owner group"
+msgstr "Owner group"
+
+
+msgid "Owner"
+msgstr "Owner"
+
+
+msgid "One or more selected devices do not have coordinates and cannot be shown on the map."
+msgstr "One or more selected devices do not have coordinates and cannot be shown on the map."
+

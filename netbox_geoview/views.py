@@ -1,3 +1,4 @@
+import json
 from hashlib import sha256
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, urlparse
@@ -6,6 +7,7 @@ from urllib.request import Request, urlopen
 from django.conf import settings
 from django.core.cache import cache
 from django.contrib import messages
+from core.models import ObjectType
 from django.db.models import Q
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
@@ -15,10 +17,11 @@ from django.utils.translation import gettext as _
 from django.views import View
 from django.views.generic import TemplateView
 
-from dcim.models import Site
+from dcim.models import Device
+from extras.models import SavedFilter
 from netbox.plugins import get_plugin_config
 
-from .forms import GeoViewFilterForm
+from .forms import GeoViewFilterForm, get_saved_filter_models
 from .version import __version__
 
 
@@ -48,6 +51,24 @@ DEFAULT_SITE_MARKER = {
     "icon_anchor": [14, 40],
     "popup_anchor": [0, -34],
 }
+
+
+def apply_saved_filter_parameters(data):
+    if not data or ("filter" not in data and "filter_id" not in data):
+        return data
+    data = data.copy()
+    saved_filters = SavedFilter.objects.filter(
+        Q(slug__in=data.getlist("filter")) | Q(pk__in=data.getlist("filter_id"))
+    )
+    for saved_filter in saved_filters:
+        for key, value in saved_filter.parameters.items():
+            values = value if isinstance(value, (list, tuple)) else [value]
+            if key in data:
+                for entry in values:
+                    data.appendlist(key, entry)
+            else:
+                data.setlist(key, values)
+    return data
 
 
 class GeoViewConfigMixin:
@@ -189,7 +210,7 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
         }
 
     def get_form(self):
-        data = self.request.GET or None
+        data = apply_saved_filter_parameters(self.request.GET or None)
         form = GeoViewFilterForm(data=data)
         if form.is_bound:
             form.is_valid()
@@ -205,46 +226,117 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
     def get_map_state(self):
         return self.get_initial_values()
 
-    def get_filtered_sites(self, cleaned_data):
-        queryset = Site.objects.select_related("group", "region").order_by("name")
+    def get_filtered_devices(self, cleaned_data):
+        queryset = Device.objects.select_related(
+            "site__group",
+            "site__region",
+            "device_type__manufacturer",
+            "platform",
+            "tenant__group",
+            "owner__group",
+        ).order_by("name")
+        search_query = cleaned_data.get("q")
+        if search_query:
+            queryset = queryset.filter(
+                Q(name__icontains=search_query)
+                | Q(serial__icontains=search_query)
+                | Q(asset_tag__icontains=search_query)
+                | Q(site__name__icontains=search_query)
+                | Q(device_type__model__icontains=search_query)
+                | Q(device_type__manufacturer__name__icontains=search_query)
+            )
+        selected_tags = cleaned_data.get("tag") or []
+        include_untagged = settings.FILTERS_NULL_CHOICE_VALUE in selected_tags
+        required_tags = [
+            tag for tag in selected_tags if tag != settings.FILTERS_NULL_CHOICE_VALUE
+        ]
+        if include_untagged and required_tags:
+            tagged_queryset = queryset
+            for tag_slug in required_tags:
+                tagged_queryset = tagged_queryset.filter(tags__slug=tag_slug)
+            queryset = queryset.filter(
+                Q(tags__isnull=True) | Q(pk__in=tagged_queryset.values("pk"))
+            )
+        elif include_untagged:
+            queryset = queryset.filter(tags__isnull=True)
+        elif required_tags:
+            for tag_slug in required_tags:
+                queryset = queryset.filter(tags__slug=tag_slug)
         regions = cleaned_data.get("region")
         if regions:
-            queryset = queryset.filter(region__in=regions)
+            queryset = queryset.filter(site__region__in=regions)
         site_groups = cleaned_data.get("site_group")
         if site_groups:
-            queryset = queryset.filter(group__in=site_groups)
+            queryset = queryset.filter(site__group__in=site_groups)
         sites = cleaned_data.get("site")
         if sites:
-            queryset = queryset.filter(pk__in=sites.values_list("pk", flat=True))
+            queryset = queryset.filter(site__in=sites)
+        manufacturers = cleaned_data.get("manufacturer")
+        if manufacturers:
+            queryset = queryset.filter(device_type__manufacturer__in=manufacturers)
+        device_types = cleaned_data.get("device_type")
+        if device_types:
+            queryset = queryset.filter(device_type__in=device_types)
+        platforms = cleaned_data.get("platform")
+        if platforms:
+            queryset = queryset.filter(platform__in=platforms)
+        tenant_groups = cleaned_data.get("tenant_group")
+        if tenant_groups:
+            queryset = queryset.filter(tenant__group__in=tenant_groups)
+        tenants = cleaned_data.get("tenant")
+        if tenants:
+            queryset = queryset.filter(tenant__in=tenants)
+        owner_groups = cleaned_data.get("owner_group")
+        if owner_groups:
+            queryset = queryset.filter(owner__group__in=owner_groups)
+        owners = cleaned_data.get("owner")
+        if owners:
+            queryset = queryset.filter(owner__in=owners)
+        devices = cleaned_data.get("device")
+        if devices:
+            queryset = queryset.filter(pk__in=devices.values_list("pk", flat=True))
         return queryset.distinct()
 
-    def get_mappable_sites(self, sites):
-        return sites.exclude(latitude__isnull=True).exclude(longitude__isnull=True)
+    def get_device_coordinates(self, device):
+        if device.latitude is not None and device.longitude is not None:
+            return float(device.latitude), float(device.longitude)
+        if (
+            device.site is not None
+            and device.site.latitude is not None
+            and device.site.longitude is not None
+        ):
+            return float(device.site.latitude), float(device.site.longitude)
+        return None
 
     def build_selection_groups(self, cleaned_data):
         groups = []
-        regions = cleaned_data.get("region")
-        if regions:
+        search_query = cleaned_data.get("q")
+        if search_query:
+            groups.append({"label": _("Search"), "entries": [search_query]})
+        tags = cleaned_data.get("tag")
+        if tags:
+            groups.append({"label": _("Tags"), "entries": [str(tag) for tag in tags]})
+        field_specs = (
+            ("region", _("Region")),
+            ("site_group", _("Site group")),
+            ("site", _("Site")),
+            ("manufacturer", _("Manufacturer")),
+            ("device_type", _("Model")),
+            ("platform", _("Operating system")),
+            ("tenant_group", _("Tenant group")),
+            ("tenant", _("Tenant")),
+            ("owner_group", _("Owner group")),
+            ("owner", _("Owner")),
+            ("device", _("Device")),
+        )
+        for field_name, label in field_specs:
+            values = cleaned_data.get(field_name)
+            if not values:
+                continue
             groups.append(
                 {
-                    "label": _("Region"),
-                    "entries": [region.name for region in regions],
-                }
-            )
-        site_groups = cleaned_data.get("site_group")
-        if site_groups:
-            groups.append(
-                {
-                    "label": _("Site group"),
-                    "entries": [site_group.name for site_group in site_groups],
-                }
-            )
-        sites = cleaned_data.get("site")
-        if sites:
-            groups.append(
-                {
-                    "label": _("Site"),
-                    "entries": [site.name for site in sites],
+                    "label": label,
+                    "entries": [getattr(obj, "name", None) or str(obj) for obj in values],
                 }
             )
         if groups:
@@ -253,7 +345,23 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
 
     def get_active_filter_count(self, cleaned_data):
         count = 0
-        for key in ("region", "site_group", "site"):
+        if cleaned_data.get("q"):
+            count += 1
+        if cleaned_data.get("tag"):
+            count += 1
+        for key in (
+            "region",
+            "site_group",
+            "site",
+            "manufacturer",
+            "device_type",
+            "platform",
+            "tenant_group",
+            "tenant",
+            "owner_group",
+            "owner",
+            "device",
+        ):
             if cleaned_data.get(key):
                 count += 1
         return count
@@ -265,23 +373,28 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
             return f"{base_url}?{query_string}"
         return base_url
 
-    def build_site_markers(self, sites):
+    def build_site_markers(self, devices):
         markers = []
-        for site in sites:
-            if site.latitude is None or site.longitude is None:
+        for device in devices:
+            coordinates = self.get_device_coordinates(device)
+            if coordinates is None:
                 continue
+            latitude, longitude = coordinates
+            site = device.site
             markers.append(
                 {
-                    "name": site.name,
-                    "group_name": site.group.name if site.group else "",
-                    "latitude": float(site.latitude),
-                    "longitude": float(site.longitude),
-                    "marker_style": self.get_site_marker_style(site.group),
+                    "name": device.name or str(device),
+                    "group_name": site.name if site else "",
+                    "latitude": latitude,
+                    "longitude": longitude,
+                    "marker_style": self.get_site_marker_style(
+                        site.group if site and site.group else None
+                    ),
                 }
             )
         return markers
 
-    def get_map_config(self, map_state, sites, has_active_filters):
+    def get_map_config(self, map_state, devices, has_active_filters):
         tile_layers = self.get_tile_layer_configs()
         public_tile_layers = [
             {
@@ -306,7 +419,7 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
                 kwargs={"layer_id": "__layer__", "z": 0, "x": 0, "y": 0},
             ).replace("/0/0/0.png", "/{z}/{x}/{y}.png"),
             "tile_layers": public_tile_layers,
-            "site_markers": self.build_site_markers(sites) if has_active_filters else [],
+            "site_markers": self.build_site_markers(devices) if has_active_filters else [],
         }
 
     def get_context_data(self, **kwargs):
@@ -314,17 +427,43 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
         form = self.get_form()
         cleaned_data = self.get_cleaned_data(form)
         map_state = self.get_map_state()
-        filtered_sites = self.get_filtered_sites(cleaned_data)
-        mappable_sites = self.get_mappable_sites(filtered_sites)
+        filtered_devices = self.get_filtered_devices(cleaned_data)
         has_active_filters = self.get_active_filter_count(cleaned_data) > 0
+        active_filter_badges = []
+        for group in self.build_selection_groups(cleaned_data):
+            entries = ", ".join(group["entries"])
+            if entries:
+                active_filter_badges.append(f'{group["label"]}: {entries}')
+
+        save_filter_url = None
+        if (
+            has_active_filters
+            and self.request.user.has_perm("extras.add_savedfilter")
+            and "filter_id" not in self.request.GET
+        ):
+            object_type_ids = [
+                ObjectType.objects.get_for_model(model).pk
+                for model in get_saved_filter_models(cleaned_data)
+            ]
+            parameters = json.dumps(dict(self.request.GET.lists()))
+            save_filter_query = urlencode(
+                {
+                    "object_types": object_type_ids,
+                    "parameters": parameters,
+                },
+                doseq=True,
+            )
+            save_filter_url = (
+                f'{reverse("extras:savedfilter_add")}?{save_filter_query}'
+            )
         context.update(
             {
-                "model": Site,
+                "model": Device,
                 "active_tab": self.active_tab,
                 "filter_form": form,
                 "map_state": map_state,
                 "map_config": self.get_map_config(
-                    map_state, mappable_sites, has_active_filters
+                    map_state, filtered_devices, has_active_filters
                 ),
                 "map_url": self.build_tab_url("plugins:netbox_geoview:map"),
                 "filter_url": self.build_tab_url("plugins:netbox_geoview:filter"),
@@ -333,9 +472,11 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
                 "filter_base_url": reverse("plugins:netbox_geoview:filter"),
                 "selection_groups": self.build_selection_groups(cleaned_data),
                 "selection_counts": {
-                    "sites": mappable_sites.count(),
+                    "devices": filtered_devices.count(),
                 },
                 "active_filter_count": self.get_active_filter_count(cleaned_data),
+                "active_filter_badges": active_filter_badges,
+                "save_filter_url": save_filter_url,
             }
         )
         return context
@@ -355,13 +496,26 @@ class GeoViewApplyFiltersView(GeoViewConfigMixin, View):
     http_method_names = ["get"]
 
     def get(self, request):
-        form = GeoViewFilterForm(data=request.GET or None)
+        form = GeoViewFilterForm(data=apply_saved_filter_parameters(request.GET or None))
         form.is_valid()
         cleaned_data = form.cleaned_data if form.is_valid() else {}
-        selected_sites = cleaned_data.get("site")
-        if selected_sites and selected_sites.filter(
-            Q(latitude__isnull=True) | Q(longitude__isnull=True)
-        ).exists():
+        selected_devices = cleaned_data.get("device")
+        if selected_devices:
+            has_unmappable_device = any(
+                (
+                    device.latitude is None
+                    or device.longitude is None
+                )
+                and (
+                    device.site is None
+                    or device.site.latitude is None
+                    or device.site.longitude is None
+                )
+                for device in selected_devices.select_related("site")
+            )
+        else:
+            has_unmappable_device = False
+        if has_unmappable_device:
             messages.warning(
                 request,
                 _(

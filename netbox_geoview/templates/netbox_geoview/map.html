@@ -4,6 +4,20 @@
 
 {% block content %}
   {{ map_config|json_script:"geoview-map-config" }}
+  {% if active_tab == 'map' and active_filter_badges %}
+    <div class="mb-3">
+      {% for badge in active_filter_badges %}
+        <span class="badge rounded-pill text-bg-primary text-decoration-none me-1">
+          <i class="mdi mdi-close"></i> {{ badge }}
+        </span>
+      {% endfor %}
+      {% if save_filter_url %}
+        <a href="{{ save_filter_url }}" class="badge rounded-pill text-bg-success text-decoration-none me-1">
+          <i class="mdi mdi-content-save"></i> {% trans "Save" %}
+        </a>
+      {% endif %}
+    </div>
+  {% endif %}
   <div class="tab-pane geoview-viewport{% if active_tab == 'map' %} show active{% endif %}" id="map-panel" role="tabpanel" aria-labelledby="map-tab">
     <div
       class="geoview-map geoview-map--fullscreen"

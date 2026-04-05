@@ -54,15 +54,19 @@
     padding-top: 0.5rem;
 }
 
+.geoview-filter-form__section + .geoview-filter-form__section {
+    margin-top: 1.85rem;
+}
+
 .geoview-filter-form__header {
     margin-bottom: 0.25rem;
 }
 
 .geoview-filter-form__title {
     margin: 0;
-    font-size: 1.55rem;
-    font-weight: 700;
-    line-height: 1.25;
+    font-size: 1rem;
+    font-weight: var(--tblr-font-weight-bold);
+    line-height: 1.2;
 }
 
 .geoview-filter-form__rows {
@@ -77,6 +81,11 @@
 }
 
 .geoview-filter-form .form-select {
+    min-height: 2.8rem;
+    border-radius: 0.45rem;
+}
+
+.geoview-filter-form .form-control {
     min-height: 2.8rem;
     border-radius: 0.45rem;
 }

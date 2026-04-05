@@ -1,51 +1,227 @@
 {% load i18n %}
 
 <form action="{{ apply_url }}" method="get">
+  {% for field in filter_form.hidden_fields %}
+    {{ field }}
+  {% endfor %}
   <div class="geoview-filter-form">
-    <div class="geoview-filter-form__header row g-2">
-      <div class="col-lg-2"></div>
-      <div class="col-lg-10">
-        <h3 class="geoview-filter-form__title">Lokation</h3>
+    <div class="geoview-filter-form__section">
+      <div class="geoview-filter-form__rows">
+        <div class="row align-items-center g-2 geoview-filter-form__row">
+          <div class="col-lg-2">
+            <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.q.id_for_label }}">{{ filter_form.q.label }}</label>
+          </div>
+          <div class="col-lg-10">
+            {{ filter_form.q }}
+          </div>
+        </div>
+        <div class="row align-items-center g-2 geoview-filter-form__row">
+          <div class="col-lg-2">
+            <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.filter_id.id_for_label }}">{{ filter_form.filter_id.label }}</label>
+          </div>
+          <div class="col-lg-10">
+            {{ filter_form.filter_id }}
+          </div>
+        </div>
+        <div class="row align-items-center g-2 geoview-filter-form__row">
+          <div class="col-lg-2">
+            <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.tag.id_for_label }}">{{ filter_form.tag.label }}</label>
+          </div>
+          <div class="col-lg-2">
+            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
+              <option selected>{% trans 'has these tags' %}</option>
+            </select>
+          </div>
+          <div class="col-lg-8">
+            {{ filter_form.tag }}
+          </div>
+        </div>
       </div>
     </div>
-    <div class="geoview-filter-form__rows">
-      <div class="row align-items-center g-2 geoview-filter-form__row">
-        <div class="col-lg-2">
-          <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.region.id_for_label }}">{{ filter_form.region.label }}</label>
-        </div>
-        <div class="col-lg-2">
-          <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
-            <option selected>{% trans 'is' %}</option>
-          </select>
-        </div>
-        <div class="col-lg-8">
-          {{ filter_form.region }}
+
+    <div class="geoview-filter-form__section">
+      <div class="geoview-filter-form__header row g-2">
+        <div class="col-lg-2"></div>
+        <div class="col-lg-10">
+          <h3 class="geoview-filter-form__title">{% trans "Location" %}</h3>
         </div>
       </div>
-      <div class="row align-items-center g-2 geoview-filter-form__row">
-        <div class="col-lg-2">
-          <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.site_group.id_for_label }}">{{ filter_form.site_group.label }}</label>
+      <div class="geoview-filter-form__rows">
+        <div class="row align-items-center g-2 geoview-filter-form__row">
+          <div class="col-lg-2">
+            <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.region.id_for_label }}">{{ filter_form.region.label }}</label>
+          </div>
+          <div class="col-lg-2">
+            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
+              <option selected>{% trans 'is' %}</option>
+            </select>
+          </div>
+          <div class="col-lg-8">
+            {{ filter_form.region }}
+          </div>
         </div>
-        <div class="col-lg-2">
-          <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
-            <option selected>{% trans 'is' %}</option>
-          </select>
+        <div class="row align-items-center g-2 geoview-filter-form__row">
+          <div class="col-lg-2">
+            <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.site_group.id_for_label }}">{{ filter_form.site_group.label }}</label>
+          </div>
+          <div class="col-lg-2">
+            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
+              <option selected>{% trans 'is' %}</option>
+            </select>
+          </div>
+          <div class="col-lg-8">
+            {{ filter_form.site_group }}
+          </div>
         </div>
-        <div class="col-lg-8">
-          {{ filter_form.site_group }}
+        <div class="row align-items-center g-2 geoview-filter-form__row">
+          <div class="col-lg-2">
+            <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.site.id_for_label }}">{{ filter_form.site.label }}</label>
+          </div>
+          <div class="col-lg-2">
+            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
+              <option selected>{% trans 'is' %}</option>
+            </select>
+          </div>
+          <div class="col-lg-8">
+            {{ filter_form.site }}
+          </div>
         </div>
       </div>
-      <div class="row align-items-center g-2 geoview-filter-form__row">
-        <div class="col-lg-2">
-          <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.site.id_for_label }}">{{ filter_form.site.label }}</label>
+    </div>
+
+    <div class="geoview-filter-form__section">
+      <div class="geoview-filter-form__header row g-2">
+        <div class="col-lg-2"></div>
+        <div class="col-lg-10">
+          <h3 class="geoview-filter-form__title">{% trans "Hardware" %}</h3>
         </div>
-        <div class="col-lg-2">
-          <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
-            <option selected>{% trans 'is' %}</option>
-          </select>
+      </div>
+      <div class="geoview-filter-form__rows">
+        <div class="row align-items-center g-2 geoview-filter-form__row">
+          <div class="col-lg-2">
+            <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.manufacturer.id_for_label }}">{{ filter_form.manufacturer.label }}</label>
+          </div>
+          <div class="col-lg-2">
+            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
+              <option selected>{% trans 'is' %}</option>
+            </select>
+          </div>
+          <div class="col-lg-8">
+            {{ filter_form.manufacturer }}
+          </div>
         </div>
-        <div class="col-lg-8">
-          {{ filter_form.site }}
+        <div class="row align-items-center g-2 geoview-filter-form__row">
+          <div class="col-lg-2">
+            <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.device_type.id_for_label }}">{{ filter_form.device_type.label }}</label>
+          </div>
+          <div class="col-lg-2">
+            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
+              <option selected>{% trans 'is' %}</option>
+            </select>
+          </div>
+          <div class="col-lg-8">
+            {{ filter_form.device_type }}
+          </div>
+        </div>
+        <div class="row align-items-center g-2 geoview-filter-form__row">
+          <div class="col-lg-2">
+            <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.platform.id_for_label }}">{{ filter_form.platform.label }}</label>
+          </div>
+          <div class="col-lg-2">
+            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
+              <option selected>{% trans 'is' %}</option>
+            </select>
+          </div>
+          <div class="col-lg-8">
+            {{ filter_form.platform }}
+          </div>
+        </div>
+        <div class="row align-items-center g-2 geoview-filter-form__row">
+          <div class="col-lg-2">
+            <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.device.id_for_label }}">{{ filter_form.device.label }}</label>
+          </div>
+          <div class="col-lg-2">
+            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
+              <option selected>{% trans 'is' %}</option>
+            </select>
+          </div>
+          <div class="col-lg-8">
+            {{ filter_form.device }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="geoview-filter-form__section">
+      <div class="geoview-filter-form__header row g-2">
+        <div class="col-lg-2"></div>
+        <div class="col-lg-10">
+          <h3 class="geoview-filter-form__title">{% trans "Tenant" %}</h3>
+        </div>
+      </div>
+      <div class="geoview-filter-form__rows">
+        <div class="row align-items-center g-2 geoview-filter-form__row">
+          <div class="col-lg-2">
+            <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.tenant_group.id_for_label }}">{{ filter_form.tenant_group.label }}</label>
+          </div>
+          <div class="col-lg-2">
+            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
+              <option selected>{% trans 'is' %}</option>
+            </select>
+          </div>
+          <div class="col-lg-8">
+            {{ filter_form.tenant_group }}
+          </div>
+        </div>
+        <div class="row align-items-center g-2 geoview-filter-form__row">
+          <div class="col-lg-2">
+            <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.tenant.id_for_label }}">{{ filter_form.tenant.label }}</label>
+          </div>
+          <div class="col-lg-2">
+            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
+              <option selected>{% trans 'is' %}</option>
+            </select>
+          </div>
+          <div class="col-lg-8">
+            {{ filter_form.tenant }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="geoview-filter-form__section">
+      <div class="geoview-filter-form__header row g-2">
+        <div class="col-lg-2"></div>
+        <div class="col-lg-10">
+          <h3 class="geoview-filter-form__title">{% trans "Ownership" %}</h3>
+        </div>
+      </div>
+      <div class="geoview-filter-form__rows">
+        <div class="row align-items-center g-2 geoview-filter-form__row">
+          <div class="col-lg-2">
+            <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.owner_group.id_for_label }}">{{ filter_form.owner_group.label }}</label>
+          </div>
+          <div class="col-lg-2">
+            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
+              <option selected>{% trans 'is' %}</option>
+            </select>
+          </div>
+          <div class="col-lg-8">
+            {{ filter_form.owner_group }}
+          </div>
+        </div>
+        <div class="row align-items-center g-2 geoview-filter-form__row">
+          <div class="col-lg-2">
+            <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.owner.id_for_label }}">{{ filter_form.owner.label }}</label>
+          </div>
+          <div class="col-lg-2">
+            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
+              <option selected>{% trans 'is' %}</option>
+            </select>
+          </div>
+          <div class="col-lg-8">
+            {{ filter_form.owner }}
+          </div>
         </div>
       </div>
     </div>
