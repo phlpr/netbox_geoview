@@ -44,6 +44,20 @@
     color: var(--bs-emphasis-color);
 }
 
+.geoview-map .geoview-recenter-control a {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    color: var(--bs-emphasis-color);
+    background: #fff;
+}
+
+.geoview-map .geoview-recenter-control i {
+    font-size: 1rem;
+    line-height: 30px;
+}
+
 .geoview-map .leaflet-control-attribution {
     padding: 0.25rem 0.5rem;
     border-top-left-radius: 0.5rem;

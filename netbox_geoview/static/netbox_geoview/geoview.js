@@ -116,6 +116,43 @@
         `;
     }
 
+    function fitMapToBounds(map, bounds, config) {
+        if (bounds.length > 0) {
+            map.fitBounds(bounds, {
+                padding: [24, 24],
+                maxZoom: Math.max(config.zoom, 10),
+            });
+            return;
+        }
+        map.setView([config.lat, config.lon], config.zoom);
+    }
+
+    function addRecenterControl(map, config, bounds) {
+        const RecenterControl = window.L.Control.extend({
+            options: {
+                position: "topleft",
+            },
+            onAdd: function () {
+                const container = window.L.DomUtil.create("div", "leaflet-bar geoview-recenter-control");
+                const button = window.L.DomUtil.create("a", "", container);
+                button.href = "#";
+                button.title = "Center all markers";
+                button.setAttribute("aria-label", "Center all markers");
+                button.innerHTML = '<i class="mdi mdi-crosshairs-gps" aria-hidden="true"></i>';
+
+                window.L.DomEvent.disableClickPropagation(container);
+                window.L.DomEvent.on(button, "click", function (event) {
+                    window.L.DomEvent.preventDefault(event);
+                    fitMapToBounds(map, bounds, config);
+                });
+
+                return container;
+            },
+        });
+
+        map.addControl(new RecenterControl());
+    }
+
     function addSiteMarkers(map, config) {
         const markers = Array.isArray(config.site_markers) ? config.site_markers : [];
         const bounds = [];
@@ -136,12 +173,8 @@
             bounds.push(latLng);
         });
 
-        if (bounds.length > 0) {
-            map.fitBounds(bounds, {
-                padding: [24, 24],
-                maxZoom: Math.max(config.zoom, 10),
-            });
-        }
+        fitMapToBounds(map, bounds, config);
+        return bounds;
     }
 
     function renderMap(element) {
@@ -188,7 +221,8 @@
             position: "topright",
         }).addTo(map);
 
-        addSiteMarkers(map, config);
+        const markerBounds = addSiteMarkers(map, config);
+        addRecenterControl(map, config, markerBounds);
     }
 
     document.addEventListener("DOMContentLoaded", function () {
