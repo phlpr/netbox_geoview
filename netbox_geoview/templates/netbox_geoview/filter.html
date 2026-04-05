@@ -28,8 +28,9 @@
             <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.tag.id_for_label }}">{{ filter_form.tag.label }}</label>
           </div>
           <div class="col-lg-2">
-            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
-              <option selected>{% trans 'has these tags' %}</option>
+            <select class="form-select geoview-filter-form__operator" name="tag_op" aria-label="{% trans 'Operator' %}">
+              <option value="exact"{% if filter_ops.tag != 'n' %} selected{% endif %}>{% trans 'has these tags' %}</option>
+              <option value="n"{% if filter_ops.tag == 'n' %} selected{% endif %}>{% trans 'does not have these tags' %}</option>
             </select>
           </div>
           <div class="col-lg-8">
@@ -52,8 +53,9 @@
             <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.region.id_for_label }}">{{ filter_form.region.label }}</label>
           </div>
           <div class="col-lg-2">
-            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
-              <option selected>{% trans 'is' %}</option>
+            <select class="form-select geoview-filter-form__operator" name="region_op" aria-label="{% trans 'Operator' %}">
+              <option value="exact"{% if filter_ops.region != 'n' %} selected{% endif %}>{% trans 'is' %}</option>
+              <option value="n"{% if filter_ops.region == 'n' %} selected{% endif %}>{% trans 'is not' %}</option>
             </select>
           </div>
           <div class="col-lg-8">
@@ -65,8 +67,9 @@
             <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.site_group.id_for_label }}">{{ filter_form.site_group.label }}</label>
           </div>
           <div class="col-lg-2">
-            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
-              <option selected>{% trans 'is' %}</option>
+            <select class="form-select geoview-filter-form__operator" name="site_group_op" aria-label="{% trans 'Operator' %}">
+              <option value="exact"{% if filter_ops.site_group != 'n' %} selected{% endif %}>{% trans 'is' %}</option>
+              <option value="n"{% if filter_ops.site_group == 'n' %} selected{% endif %}>{% trans 'is not' %}</option>
             </select>
           </div>
           <div class="col-lg-8">
@@ -78,8 +81,9 @@
             <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.site.id_for_label }}">{{ filter_form.site.label }}</label>
           </div>
           <div class="col-lg-2">
-            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
-              <option selected>{% trans 'is' %}</option>
+            <select class="form-select geoview-filter-form__operator" name="site_op" aria-label="{% trans 'Operator' %}">
+              <option value="exact"{% if filter_ops.site != 'n' %} selected{% endif %}>{% trans 'is' %}</option>
+              <option value="n"{% if filter_ops.site == 'n' %} selected{% endif %}>{% trans 'is not' %}</option>
             </select>
           </div>
           <div class="col-lg-8">
@@ -102,8 +106,9 @@
             <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.manufacturer.id_for_label }}">{{ filter_form.manufacturer.label }}</label>
           </div>
           <div class="col-lg-2">
-            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
-              <option selected>{% trans 'is' %}</option>
+            <select class="form-select geoview-filter-form__operator" name="manufacturer_op" aria-label="{% trans 'Operator' %}">
+              <option value="exact"{% if filter_ops.manufacturer != 'n' %} selected{% endif %}>{% trans 'is' %}</option>
+              <option value="n"{% if filter_ops.manufacturer == 'n' %} selected{% endif %}>{% trans 'is not' %}</option>
             </select>
           </div>
           <div class="col-lg-8">
@@ -115,8 +120,9 @@
             <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.device_type.id_for_label }}">{{ filter_form.device_type.label }}</label>
           </div>
           <div class="col-lg-2">
-            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
-              <option selected>{% trans 'is' %}</option>
+            <select class="form-select geoview-filter-form__operator" name="device_type_op" aria-label="{% trans 'Operator' %}">
+              <option value="exact"{% if filter_ops.device_type != 'n' %} selected{% endif %}>{% trans 'is' %}</option>
+              <option value="n"{% if filter_ops.device_type == 'n' %} selected{% endif %}>{% trans 'is not' %}</option>
             </select>
           </div>
           <div class="col-lg-8">
@@ -128,8 +134,9 @@
             <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.platform.id_for_label }}">{{ filter_form.platform.label }}</label>
           </div>
           <div class="col-lg-2">
-            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
-              <option selected>{% trans 'is' %}</option>
+            <select class="form-select geoview-filter-form__operator" name="platform_op" aria-label="{% trans 'Operator' %}">
+              <option value="exact"{% if filter_ops.platform != 'n' %} selected{% endif %}>{% trans 'is' %}</option>
+              <option value="n"{% if filter_ops.platform == 'n' %} selected{% endif %}>{% trans 'is not' %}</option>
             </select>
           </div>
           <div class="col-lg-8">
@@ -141,8 +148,9 @@
             <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.device.id_for_label }}">{{ filter_form.device.label }}</label>
           </div>
           <div class="col-lg-2">
-            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
-              <option selected>{% trans 'is' %}</option>
+            <select class="form-select geoview-filter-form__operator" name="device_op" aria-label="{% trans 'Operator' %}">
+              <option value="exact"{% if filter_ops.device != 'n' %} selected{% endif %}>{% trans 'is' %}</option>
+              <option value="n"{% if filter_ops.device == 'n' %} selected{% endif %}>{% trans 'is not' %}</option>
             </select>
           </div>
           <div class="col-lg-8">
@@ -165,8 +173,9 @@
             <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.tenant_group.id_for_label }}">{{ filter_form.tenant_group.label }}</label>
           </div>
           <div class="col-lg-2">
-            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
-              <option selected>{% trans 'is' %}</option>
+            <select class="form-select geoview-filter-form__operator" name="tenant_group_op" aria-label="{% trans 'Operator' %}">
+              <option value="exact"{% if filter_ops.tenant_group != 'n' %} selected{% endif %}>{% trans 'is' %}</option>
+              <option value="n"{% if filter_ops.tenant_group == 'n' %} selected{% endif %}>{% trans 'is not' %}</option>
             </select>
           </div>
           <div class="col-lg-8">
@@ -178,8 +187,9 @@
             <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.tenant.id_for_label }}">{{ filter_form.tenant.label }}</label>
           </div>
           <div class="col-lg-2">
-            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
-              <option selected>{% trans 'is' %}</option>
+            <select class="form-select geoview-filter-form__operator" name="tenant_op" aria-label="{% trans 'Operator' %}">
+              <option value="exact"{% if filter_ops.tenant != 'n' %} selected{% endif %}>{% trans 'is' %}</option>
+              <option value="n"{% if filter_ops.tenant == 'n' %} selected{% endif %}>{% trans 'is not' %}</option>
             </select>
           </div>
           <div class="col-lg-8">
@@ -202,8 +212,9 @@
             <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.owner_group.id_for_label }}">{{ filter_form.owner_group.label }}</label>
           </div>
           <div class="col-lg-2">
-            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
-              <option selected>{% trans 'is' %}</option>
+            <select class="form-select geoview-filter-form__operator" name="owner_group_op" aria-label="{% trans 'Operator' %}">
+              <option value="exact"{% if filter_ops.owner_group != 'n' %} selected{% endif %}>{% trans 'is' %}</option>
+              <option value="n"{% if filter_ops.owner_group == 'n' %} selected{% endif %}>{% trans 'is not' %}</option>
             </select>
           </div>
           <div class="col-lg-8">
@@ -215,8 +226,9 @@
             <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.owner.id_for_label }}">{{ filter_form.owner.label }}</label>
           </div>
           <div class="col-lg-2">
-            <select class="form-select geoview-filter-form__operator" aria-label="{% trans 'Operator' %}">
-              <option selected>{% trans 'is' %}</option>
+            <select class="form-select geoview-filter-form__operator" name="owner_op" aria-label="{% trans 'Operator' %}">
+              <option value="exact"{% if filter_ops.owner != 'n' %} selected{% endif %}>{% trans 'is' %}</option>
+              <option value="n"{% if filter_ops.owner == 'n' %} selected{% endif %}>{% trans 'is not' %}</option>
             </select>
           </div>
           <div class="col-lg-8">

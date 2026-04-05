@@ -129,9 +129,6 @@ class GeoViewFilterForm(forms.Form):
         required=False,
         queryset=Device.objects.order_by("name"),
         query_params={
-            "region_id": "$region",
-            "site_group_id": "$site_group",
-            "site_id": "$site",
             "manufacturer_id": "$manufacturer",
             "device_type_id": "$device_type",
             "platform_id": "$platform",

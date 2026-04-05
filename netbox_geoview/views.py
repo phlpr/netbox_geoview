@@ -17,11 +17,16 @@ from django.utils.translation import gettext as _
 from django.views import View
 from django.views.generic import TemplateView
 
-from dcim.models import Device
+from dcim.models import Device, Site
 from extras.models import SavedFilter
 from netbox.plugins import get_plugin_config
 
-from .forms import GeoViewFilterForm, get_saved_filter_models
+from .forms import (
+    DEVICE_FILTER_FIELDS,
+    SITE_FILTER_FIELDS,
+    GeoViewFilterForm,
+    get_saved_filter_models,
+)
 from .version import __version__
 
 
@@ -51,6 +56,22 @@ DEFAULT_SITE_MARKER = {
     "icon_anchor": [14, 40],
     "popup_anchor": [0, -34],
 }
+
+SUPPORTED_LOOKUP_OPERATORS = {"exact", "n"}
+FIELD_OPERATOR_NAMES = (
+    "tag",
+    "region",
+    "site_group",
+    "site",
+    "manufacturer",
+    "device_type",
+    "platform",
+    "tenant_group",
+    "tenant",
+    "owner_group",
+    "owner",
+    "device",
+)
 
 
 def apply_saved_filter_parameters(data):
@@ -226,7 +247,44 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
     def get_map_state(self):
         return self.get_initial_values()
 
-    def get_filtered_devices(self, cleaned_data):
+    def get_filter_operators(self):
+        operators = {}
+        for field_name in FIELD_OPERATOR_NAMES:
+            value = self.request.GET.get(f"{field_name}_op", "exact")
+            operators[field_name] = value if value in SUPPORTED_LOOKUP_OPERATORS else "exact"
+        return operators
+
+    def has_site_filters(self, cleaned_data):
+        return any(cleaned_data.get(field_name) for field_name in SITE_FILTER_FIELDS)
+
+    def has_device_filters(self, cleaned_data):
+        return any(cleaned_data.get(field_name) for field_name in DEVICE_FILTER_FIELDS)
+
+    def apply_inclusion_filter(self, queryset, field_name, values, operator):
+        if not values:
+            return queryset
+        if operator == "n":
+            return queryset.exclude(**{f"{field_name}__in": values})
+        return queryset.filter(**{f"{field_name}__in": values})
+
+    def get_filtered_sites(self, cleaned_data, operators):
+        if not self.has_site_filters(cleaned_data):
+            return Site.objects.none()
+        queryset = Site.objects.select_related("group", "region").order_by("name")
+        queryset = self.apply_inclusion_filter(
+            queryset, "region", cleaned_data.get("region"), operators["region"]
+        )
+        queryset = self.apply_inclusion_filter(
+            queryset, "group", cleaned_data.get("site_group"), operators["site_group"]
+        )
+        queryset = self.apply_inclusion_filter(
+            queryset, "pk", cleaned_data.get("site"), operators["site"]
+        )
+        return queryset.distinct()
+
+    def get_filtered_devices(self, cleaned_data, operators):
+        if not self.has_device_filters(cleaned_data):
+            return Device.objects.none()
         queryset = Device.objects.select_related(
             "site__group",
             "site__region",
@@ -246,55 +304,56 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
                 | Q(device_type__manufacturer__name__icontains=search_query)
             )
         selected_tags = cleaned_data.get("tag") or []
-        include_untagged = settings.FILTERS_NULL_CHOICE_VALUE in selected_tags
-        required_tags = [
-            tag for tag in selected_tags if tag != settings.FILTERS_NULL_CHOICE_VALUE
-        ]
-        if include_untagged and required_tags:
-            tagged_queryset = queryset
-            for tag_slug in required_tags:
-                tagged_queryset = tagged_queryset.filter(tags__slug=tag_slug)
-            queryset = queryset.filter(
-                Q(tags__isnull=True) | Q(pk__in=tagged_queryset.values("pk"))
-            )
-        elif include_untagged:
-            queryset = queryset.filter(tags__isnull=True)
-        elif required_tags:
-            for tag_slug in required_tags:
-                queryset = queryset.filter(tags__slug=tag_slug)
-        regions = cleaned_data.get("region")
-        if regions:
-            queryset = queryset.filter(site__region__in=regions)
-        site_groups = cleaned_data.get("site_group")
-        if site_groups:
-            queryset = queryset.filter(site__group__in=site_groups)
-        sites = cleaned_data.get("site")
-        if sites:
-            queryset = queryset.filter(site__in=sites)
-        manufacturers = cleaned_data.get("manufacturer")
-        if manufacturers:
-            queryset = queryset.filter(device_type__manufacturer__in=manufacturers)
-        device_types = cleaned_data.get("device_type")
-        if device_types:
-            queryset = queryset.filter(device_type__in=device_types)
-        platforms = cleaned_data.get("platform")
-        if platforms:
-            queryset = queryset.filter(platform__in=platforms)
-        tenant_groups = cleaned_data.get("tenant_group")
-        if tenant_groups:
-            queryset = queryset.filter(tenant__group__in=tenant_groups)
-        tenants = cleaned_data.get("tenant")
-        if tenants:
-            queryset = queryset.filter(tenant__in=tenants)
-        owner_groups = cleaned_data.get("owner_group")
-        if owner_groups:
-            queryset = queryset.filter(owner__group__in=owner_groups)
-        owners = cleaned_data.get("owner")
-        if owners:
-            queryset = queryset.filter(owner__in=owners)
-        devices = cleaned_data.get("device")
-        if devices:
-            queryset = queryset.filter(pk__in=devices.values_list("pk", flat=True))
+        if selected_tags:
+            include_untagged = settings.FILTERS_NULL_CHOICE_VALUE in selected_tags
+            required_tags = [
+                tag for tag in selected_tags if tag != settings.FILTERS_NULL_CHOICE_VALUE
+            ]
+            if operators["tag"] == "n":
+                if include_untagged:
+                    queryset = queryset.exclude(tags__isnull=True)
+                for tag_slug in required_tags:
+                    queryset = queryset.exclude(tags__slug=tag_slug)
+            elif include_untagged and required_tags:
+                tagged_queryset = queryset
+                for tag_slug in required_tags:
+                    tagged_queryset = tagged_queryset.filter(tags__slug=tag_slug)
+                queryset = queryset.filter(
+                    Q(tags__isnull=True) | Q(pk__in=tagged_queryset.values("pk"))
+                )
+            elif include_untagged:
+                queryset = queryset.filter(tags__isnull=True)
+            elif required_tags:
+                for tag_slug in required_tags:
+                    queryset = queryset.filter(tags__slug=tag_slug)
+
+        queryset = self.apply_inclusion_filter(
+            queryset,
+            "device_type__manufacturer",
+            cleaned_data.get("manufacturer"),
+            operators["manufacturer"],
+        )
+        queryset = self.apply_inclusion_filter(
+            queryset, "device_type", cleaned_data.get("device_type"), operators["device_type"]
+        )
+        queryset = self.apply_inclusion_filter(
+            queryset, "platform", cleaned_data.get("platform"), operators["platform"]
+        )
+        queryset = self.apply_inclusion_filter(
+            queryset, "tenant__group", cleaned_data.get("tenant_group"), operators["tenant_group"]
+        )
+        queryset = self.apply_inclusion_filter(
+            queryset, "tenant", cleaned_data.get("tenant"), operators["tenant"]
+        )
+        queryset = self.apply_inclusion_filter(
+            queryset, "owner__group", cleaned_data.get("owner_group"), operators["owner_group"]
+        )
+        queryset = self.apply_inclusion_filter(
+            queryset, "owner", cleaned_data.get("owner"), operators["owner"]
+        )
+        queryset = self.apply_inclusion_filter(
+            queryset, "pk", cleaned_data.get("device"), operators["device"]
+        )
         return queryset.distinct()
 
     def get_device_coordinates(self, device):
@@ -308,14 +367,20 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
             return float(device.site.latitude), float(device.site.longitude)
         return None
 
-    def build_selection_groups(self, cleaned_data):
+    def build_selection_groups(self, cleaned_data, operators):
         groups = []
         search_query = cleaned_data.get("q")
         if search_query:
             groups.append({"label": _("Search"), "entries": [search_query]})
         tags = cleaned_data.get("tag")
         if tags:
-            groups.append({"label": _("Tags"), "entries": [str(tag) for tag in tags]})
+            groups.append(
+                {
+                    "label": _("Tags"),
+                    "entries": [str(tag) for tag in tags],
+                    "operator": operators["tag"],
+                }
+            )
         field_specs = (
             ("region", _("Region")),
             ("site_group", _("Site group")),
@@ -337,6 +402,7 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
                 {
                     "label": label,
                     "entries": [getattr(obj, "name", None) or str(obj) for obj in values],
+                    "operator": operators.get(field_name, "exact"),
                 }
             )
         if groups:
@@ -373,8 +439,20 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
             return f"{base_url}?{query_string}"
         return base_url
 
-    def build_site_markers(self, devices):
+    def build_site_markers(self, sites, devices):
         markers = []
+        for site in sites:
+            if site.latitude is None or site.longitude is None:
+                continue
+            markers.append(
+                {
+                    "name": site.name,
+                    "group_name": site.group.name if site.group else "",
+                    "latitude": float(site.latitude),
+                    "longitude": float(site.longitude),
+                    "marker_style": self.get_site_marker_style(site.group),
+                }
+            )
         for device in devices:
             coordinates = self.get_device_coordinates(device)
             if coordinates is None:
@@ -394,7 +472,7 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
             )
         return markers
 
-    def get_map_config(self, map_state, devices, has_active_filters):
+    def get_map_config(self, map_state, sites, devices, has_active_filters):
         tile_layers = self.get_tile_layer_configs()
         public_tile_layers = [
             {
@@ -419,21 +497,28 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
                 kwargs={"layer_id": "__layer__", "z": 0, "x": 0, "y": 0},
             ).replace("/0/0/0.png", "/{z}/{x}/{y}.png"),
             "tile_layers": public_tile_layers,
-            "site_markers": self.build_site_markers(devices) if has_active_filters else [],
+            "site_markers": self.build_site_markers(sites, devices) if has_active_filters else [],
         }
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         form = self.get_form()
         cleaned_data = self.get_cleaned_data(form)
+        operators = self.get_filter_operators()
         map_state = self.get_map_state()
-        filtered_devices = self.get_filtered_devices(cleaned_data)
+        filtered_sites = self.get_filtered_sites(cleaned_data, operators)
+        filtered_devices = self.get_filtered_devices(cleaned_data, operators)
         has_active_filters = self.get_active_filter_count(cleaned_data) > 0
         active_filter_badges = []
-        for group in self.build_selection_groups(cleaned_data):
+        for group in self.build_selection_groups(cleaned_data, operators):
             entries = ", ".join(group["entries"])
             if entries:
-                active_filter_badges.append(f'{group["label"]}: {entries}')
+                operator = group.get("operator", "exact")
+                if group["label"] == _("Tags"):
+                    relation = _("does not have these tags") if operator == "n" else _("has these tags")
+                else:
+                    relation = _("is not") if operator == "n" else _("is")
+                active_filter_badges.append(f'{group["label"]} {relation}: {entries}')
 
         save_filter_url = None
         if (
@@ -463,20 +548,22 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
                 "filter_form": form,
                 "map_state": map_state,
                 "map_config": self.get_map_config(
-                    map_state, filtered_devices, has_active_filters
+                    map_state, filtered_sites, filtered_devices, has_active_filters
                 ),
                 "map_url": self.build_tab_url("plugins:netbox_geoview:map"),
                 "filter_url": self.build_tab_url("plugins:netbox_geoview:filter"),
                 "apply_url": reverse("plugins:netbox_geoview:apply"),
                 "map_base_url": reverse("plugins:netbox_geoview:map"),
                 "filter_base_url": reverse("plugins:netbox_geoview:filter"),
-                "selection_groups": self.build_selection_groups(cleaned_data),
+                "selection_groups": self.build_selection_groups(cleaned_data, operators),
                 "selection_counts": {
+                    "sites": filtered_sites.count(),
                     "devices": filtered_devices.count(),
                 },
                 "active_filter_count": self.get_active_filter_count(cleaned_data),
                 "active_filter_badges": active_filter_badges,
                 "save_filter_url": save_filter_url,
+                "filter_ops": operators,
             }
         )
         return context
