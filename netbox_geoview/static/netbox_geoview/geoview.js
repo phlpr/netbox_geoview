@@ -80,6 +80,12 @@
                 icon: createSiteMarkerIcon(marker.marker_style || {}),
             });
             leafletMarker.bindPopup(buildSitePopup(marker));
+            leafletMarker.bindTooltip(escapeHtml(marker.name), {
+                permanent: true,
+                direction: "top",
+                offset: [0, -32],
+                className: "geoview-marker-label",
+            });
             leafletMarker.addTo(map);
             bounds.push(latLng);
         });

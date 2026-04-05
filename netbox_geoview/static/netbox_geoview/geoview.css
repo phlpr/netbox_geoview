@@ -50,6 +50,22 @@
     background: rgba(255, 255, 255, 0.92);
 }
 
+.geoview-map .leaflet-tooltip.geoview-marker-label {
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.94);
+    color: var(--bs-emphasis-color);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+    padding: 0.2rem 0.4rem;
+    box-shadow: 0 0.15rem 0.45rem rgba(21, 35, 49, 0.2);
+}
+
+.geoview-map .leaflet-tooltip-top.geoview-marker-label::before {
+    border-top-color: var(--bs-border-color);
+}
+
 .geoview-filter-form {
     padding-top: 0.5rem;
 }
