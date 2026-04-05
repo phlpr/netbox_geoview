@@ -62,12 +62,58 @@
         });
     }
 
-    function buildSitePopup(marker) {
-        const lines = [`<strong>${escapeHtml(marker.name)}</strong>`];
-        if (marker.group_name) {
-            lines.push(escapeHtml(marker.group_name));
+    function renderPopupTableRows(rows) {
+        const safeRows = Array.isArray(rows) ? rows : [];
+        if (safeRows.length === 0) {
+            return '<div class="geoview-popup-none"><em>none</em></div>';
         }
-        return lines.join("<br>");
+        const tableRows = safeRows.map(function (row) {
+            const label = Array.isArray(row) ? row[0] : "";
+            const value = Array.isArray(row) ? row[1] : "";
+            return `<tr><th>${escapeHtml(label)}</th><td>${escapeHtml(value)}</td></tr>`;
+        }).join("");
+        return `<table class="geoview-popup-table"><tbody>${tableRows}</tbody></table>`;
+    }
+
+    function renderPopupList(items) {
+        const safeItems = Array.isArray(items) ? items.filter(Boolean) : [];
+        if (safeItems.length === 0) {
+            return '<div class="geoview-popup-none"><em>none</em></div>';
+        }
+        const listItems = safeItems.map(function (item) {
+            return `<li>${escapeHtml(item)}</li>`;
+        }).join("");
+        return `<ul class="geoview-popup-list">${listItems}</ul>`;
+    }
+
+    function buildSitePopup(marker) {
+        const sections = Array.isArray(marker.popup_sections) ? marker.popup_sections : [];
+        const linkBlock = marker.netbox_url
+            ? `<div class="geoview-popup-link">NetBox: <a href="${escapeHtml(marker.netbox_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(marker.netbox_url)}</a></div>`
+            : "";
+        const sectionBlocks = sections.map(function (section) {
+            const title = escapeHtml(section.title || "");
+            const mode = section.mode || "table";
+            const body = mode === "list"
+                ? renderPopupList(section.items)
+                : renderPopupTableRows(section.rows);
+            return `
+                <div class="geoview-popup-section">
+                    <div class="geoview-popup-section-title">${title}</div>
+                    ${body}
+                </div>
+            `;
+        }).join("");
+
+        return `
+            <div class="geoview-popup">
+                <div class="geoview-popup-body">
+                    <div class="geoview-popup-title">${escapeHtml(marker.name || "")}</div>
+                    ${linkBlock}
+                    ${sectionBlocks}
+                </div>
+            </div>
+        `;
     }
 
     function addSiteMarkers(map, config) {

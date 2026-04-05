@@ -1,4 +1,5 @@
 import json
+from datetime import date, datetime
 from hashlib import sha256
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, urlparse
@@ -72,6 +73,73 @@ FIELD_OPERATOR_NAMES = (
     "owner",
     "device",
 )
+
+DEFAULT_POPUP_SECTIONS = {
+    "site": [
+        {
+            "title": "Core",
+            "mode": "table",
+            "fields": [
+                "id",
+                "name",
+                "slug",
+                "status",
+                "region",
+                "group",
+                "tenant",
+                "facility",
+                "time_zone",
+                "description",
+                "physical_address",
+                "shipping_address",
+                "latitude",
+                "longitude",
+                "comments",
+                "created",
+                "last_updated",
+            ],
+        },
+        {
+            "title": "Counts",
+            "mode": "table",
+            "fields": [
+                "circuit_count",
+                "device_count",
+                "prefix_count",
+                "rack_count",
+                "virtualmachine_count",
+                "vlan_count",
+            ],
+        },
+        {"title": "ASNs", "mode": "list", "field": "asns"},
+        {"title": "Tags", "mode": "list", "field": "tags"},
+        {"title": "Custom Fields", "mode": "table", "field": "custom_fields"},
+    ],
+    "device": [
+        {
+            "title": "Core",
+            "mode": "table",
+            "fields": [
+                "id",
+                "name",
+                "status",
+                "site",
+                "role",
+                "device_type",
+                "platform",
+                "tenant",
+                "serial",
+                "asset_tag",
+                "latitude",
+                "longitude",
+                "created",
+                "last_updated",
+            ],
+        },
+        {"title": "Tags", "mode": "list", "field": "tags"},
+        {"title": "Custom Fields", "mode": "table", "field": "custom_fields"},
+    ],
+}
 
 
 def apply_saved_filter_parameters(data):
@@ -216,6 +284,181 @@ class GeoViewConfigMixin:
 
         return default_style
 
+    def stringify_popup_value(self, value):
+        if value is None:
+            return ""
+        if isinstance(value, datetime):
+            return value.isoformat(sep=" ", timespec="seconds")
+        if isinstance(value, date):
+            return value.isoformat()
+        if isinstance(value, bool):
+            return "true" if value else "false"
+        return str(value)
+
+    def get_related_count(self, obj, relation_names):
+        for relation_name in relation_names:
+            manager = getattr(obj, relation_name, None)
+            if manager is None or not hasattr(manager, "count"):
+                continue
+            try:
+                return manager.count()
+            except Exception:
+                continue
+        return 0
+
+    def get_related_values(self, obj, relation_names):
+        for relation_name in relation_names:
+            manager = getattr(obj, relation_name, None)
+            if manager is None or not hasattr(manager, "all"):
+                continue
+            try:
+                values = []
+                for item in manager.all():
+                    values.append(getattr(item, "name", None) or str(item))
+                return values
+            except Exception:
+                continue
+        return []
+
+    def normalize_custom_fields(self, obj):
+        data = getattr(obj, "custom_field_data", None)
+        if not isinstance(data, dict):
+            return {}
+        normalized = {}
+        for key, value in data.items():
+            if isinstance(value, (list, tuple)):
+                normalized[str(key)] = ", ".join(
+                    self.stringify_popup_value(entry) for entry in value
+                )
+            else:
+                normalized[str(key)] = self.stringify_popup_value(value)
+        return normalized
+
+    def get_site_popup_values(self, site):
+        return {
+            "id": site.pk,
+            "name": site.name,
+            "slug": site.slug,
+            "status": site.get_status_display(),
+            "region": site.region.name if site.region else "",
+            "group": site.group.name if site.group else "",
+            "tenant": site.tenant.name if site.tenant else "",
+            "facility": site.facility or "",
+            "time_zone": site.time_zone or "",
+            "description": site.description or "",
+            "physical_address": site.physical_address or "",
+            "shipping_address": site.shipping_address or "",
+            "latitude": site.latitude,
+            "longitude": site.longitude,
+            "comments": site.comments or "",
+            "created": site.created,
+            "last_updated": site.last_updated,
+            "circuit_count": self.get_related_count(site, ("circuits",)),
+            "device_count": self.get_related_count(site, ("devices",)),
+            "prefix_count": self.get_related_count(site, ("prefixes",)),
+            "rack_count": self.get_related_count(site, ("racks",)),
+            "virtualmachine_count": self.get_related_count(
+                site, ("virtual_machines", "virtualmachines")
+            ),
+            "vlan_count": self.get_related_count(site, ("vlans",)),
+            "asns": self.get_related_values(site, ("asns",)),
+            "tags": [tag.name for tag in site.tags.all()],
+            "custom_fields": self.normalize_custom_fields(site),
+        }
+
+    def get_device_popup_values(self, device):
+        return {
+            "id": device.pk,
+            "name": device.name,
+            "status": device.get_status_display(),
+            "site": device.site.name if device.site else "",
+            "role": device.role.name if device.role else "",
+            "device_type": device.device_type.model if device.device_type else "",
+            "platform": device.platform.name if device.platform else "",
+            "tenant": device.tenant.name if device.tenant else "",
+            "serial": device.serial or "",
+            "asset_tag": device.asset_tag or "",
+            "latitude": device.latitude
+            if device.latitude is not None
+            else (device.site.latitude if device.site else None),
+            "longitude": device.longitude
+            if device.longitude is not None
+            else (device.site.longitude if device.site else None),
+            "created": device.created,
+            "last_updated": device.last_updated,
+            "tags": [tag.name for tag in device.tags.all()],
+            "custom_fields": self.normalize_custom_fields(device),
+        }
+
+    def normalize_popup_sections(self, object_type):
+        configured = self.get_setting("popup_sections")
+        if (
+            isinstance(configured, dict)
+            and isinstance(configured.get(object_type), list)
+            and configured.get(object_type)
+        ):
+            return configured.get(object_type)
+        return DEFAULT_POPUP_SECTIONS.get(object_type, [])
+
+    def render_popup_sections(self, object_type, values):
+        sections = []
+        for section in self.normalize_popup_sections(object_type):
+            if not isinstance(section, dict):
+                continue
+            title = self.stringify_popup_value(section.get("title") or "").strip()
+            if not title:
+                continue
+            mode = self.stringify_popup_value(section.get("mode") or "table").lower()
+            if mode == "table":
+                rows = []
+                fields = section.get("fields") or []
+                if isinstance(fields, list):
+                    for item in fields:
+                        if isinstance(item, dict):
+                            key = self.stringify_popup_value(item.get("key") or "")
+                            label = self.stringify_popup_value(
+                                item.get("label") or key
+                            )
+                        else:
+                            key = self.stringify_popup_value(item)
+                            label = key
+                        if not key:
+                            continue
+                        value = values.get(key)
+                        if isinstance(value, dict):
+                            rows.extend(
+                                [
+                                    [self.stringify_popup_value(k), self.stringify_popup_value(v)]
+                                    for k, v in value.items()
+                                ]
+                            )
+                        else:
+                            rows.append([label, self.stringify_popup_value(value)])
+                single_field = self.stringify_popup_value(section.get("field") or "")
+                if single_field:
+                    value = values.get(single_field)
+                    if isinstance(value, dict):
+                        rows = [
+                            [self.stringify_popup_value(k), self.stringify_popup_value(v)]
+                            for k, v in value.items()
+                        ]
+                    elif value is not None:
+                        rows = [[single_field, self.stringify_popup_value(value)]]
+                sections.append({"title": title, "mode": "table", "rows": rows})
+            elif mode == "list":
+                field_name = self.stringify_popup_value(section.get("field") or "")
+                values_list = values.get(field_name, [])
+                if not isinstance(values_list, list):
+                    values_list = [values_list] if values_list else []
+                sections.append(
+                    {
+                        "title": title,
+                        "mode": "list",
+                        "items": [self.stringify_popup_value(item) for item in values_list],
+                    }
+                )
+        return sections
+
 
 class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
     active_tab = "map"
@@ -270,7 +513,9 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
     def get_filtered_sites(self, cleaned_data, operators):
         if not self.has_site_filters(cleaned_data):
             return Site.objects.none()
-        queryset = Site.objects.select_related("group", "region").order_by("name")
+        queryset = Site.objects.select_related("group", "region", "tenant").prefetch_related(
+            "tags"
+        ).order_by("name")
         queryset = self.apply_inclusion_filter(
             queryset, "region", cleaned_data.get("region"), operators["region"]
         )
@@ -288,11 +533,13 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
         queryset = Device.objects.select_related(
             "site__group",
             "site__region",
+            "site__tenant",
             "device_type__manufacturer",
             "platform",
+            "role",
             "tenant__group",
             "owner__group",
-        ).order_by("name")
+        ).prefetch_related("tags").order_by("name")
         search_query = cleaned_data.get("q")
         if search_query:
             queryset = queryset.filter(
@@ -444,13 +691,17 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
         for site in sites:
             if site.latitude is None or site.longitude is None:
                 continue
+            popup_values = self.get_site_popup_values(site)
             markers.append(
                 {
                     "name": site.name,
                     "group_name": site.group.name if site.group else "",
+                    "object_type": "site",
+                    "netbox_url": self.request.build_absolute_uri(site.get_absolute_url()),
                     "latitude": float(site.latitude),
                     "longitude": float(site.longitude),
                     "marker_style": self.get_site_marker_style(site.group),
+                    "popup_sections": self.render_popup_sections("site", popup_values),
                 }
             )
         for device in devices:
@@ -459,15 +710,19 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
                 continue
             latitude, longitude = coordinates
             site = device.site
+            popup_values = self.get_device_popup_values(device)
             markers.append(
                 {
                     "name": device.name or str(device),
                     "group_name": site.name if site else "",
+                    "object_type": "device",
+                    "netbox_url": self.request.build_absolute_uri(device.get_absolute_url()),
                     "latitude": latitude,
                     "longitude": longitude,
                     "marker_style": self.get_site_marker_style(
                         site.group if site and site.group else None
                     ),
+                    "popup_sections": self.render_popup_sections("device", popup_values),
                 }
             )
         return markers

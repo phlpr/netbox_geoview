@@ -50,6 +50,11 @@
     background: rgba(255, 255, 255, 0.92);
 }
 
+.geoview-map .leaflet-popup-content {
+    margin: 0.6rem 0.7rem;
+    width: auto !important;
+}
+
 .geoview-map .leaflet-tooltip.geoview-marker-label {
     border: 1px solid var(--bs-border-color);
     border-radius: 0.5rem;
@@ -64,6 +69,76 @@
 
 .geoview-map .leaflet-tooltip-top.geoview-marker-label::before {
     border-top-color: var(--bs-border-color);
+}
+
+.geoview-popup {
+    width: min(31rem, 72vw);
+    max-width: 31rem;
+    font-size: 0.82rem;
+}
+
+.geoview-popup-body {
+    max-height: min(56vh, 30rem);
+    overflow-y: auto;
+    padding-right: 0.15rem;
+}
+
+.geoview-popup-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+}
+
+.geoview-popup-link {
+    margin-bottom: 0.6rem;
+}
+
+.geoview-popup-section + .geoview-popup-section {
+    margin-top: 0.75rem;
+}
+
+.geoview-popup-section-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.geoview-popup-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #495057;
+    background: var(--bs-body-bg);
+    table-layout: fixed;
+}
+
+.geoview-popup-table th,
+.geoview-popup-table td {
+    border: 1px solid #495057;
+    padding: 0.2rem 0.35rem;
+    vertical-align: top;
+    line-height: 1.25;
+}
+
+.geoview-popup-table th {
+    width: 30%;
+    font-weight: 700;
+    background: rgba(0, 0, 0, 0.03);
+    white-space: nowrap;
+}
+
+.geoview-popup-table td {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.geoview-popup-list {
+    margin: 0;
+    padding-left: 1.2rem;
+}
+
+.geoview-popup-none {
+    color: var(--bs-secondary-color);
 }
 
 .geoview-filter-form {
