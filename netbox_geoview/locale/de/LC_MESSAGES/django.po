@@ -153,3 +153,102 @@ msgstr "Owner"
 msgid "One or more selected devices do not have coordinates and cannot be shown on the map."
 msgstr "Ein oder mehrere ausgewaehlte Geraete haben keine Koordinaten und koennen auf der Karte nicht angezeigt werden."
 
+msgid "Not set"
+msgstr "Nicht gesetzt"
+
+msgid "Start"
+msgstr "Start"
+
+msgid "Destination"
+msgstr "Ziel"
+
+msgid "Calculate route"
+msgstr "Route berechnen"
+
+msgid "Clear"
+msgstr "Leeren"
+
+msgid "Calculating route..."
+msgstr "Route wird berechnet..."
+
+msgid "Route could not be calculated."
+msgstr "Die Route konnte nicht berechnet werden."
+
+msgid "No route calculated yet."
+msgstr "Noch keine Route berechnet."
+
+msgid "Distance"
+msgstr "Distanz"
+
+msgid "Duration"
+msgstr "Dauer"
+
+msgid "Mode"
+msgstr "Modus"
+
+msgid "Alternative"
+msgstr "Alternative"
+
+msgid "Collapse route panel"
+msgstr "Routenpanel einklappen"
+
+msgid "Expand route panel"
+msgstr "Routenpanel ausklappen"
+
+msgid "Route planner"
+msgstr "Routenplaner"
+
+msgid "Profile"
+msgstr "Profil"
+
+msgid "Set start and destination using marker popup actions."
+msgstr "Start und Ziel ueber die Marker-Aktionen im Popup setzen."
+
+msgid "Set as start"
+msgstr "Als Start setzen"
+
+msgid "Set as end"
+msgstr "Als Ziel setzen"
+
+msgid "Open in Google Maps"
+msgstr "In Google Maps oeffnen"
+
+msgid "Car"
+msgstr "Auto"
+
+msgid "Bicycle"
+msgstr "Fahrrad"
+
+msgid "Walking"
+msgstr "Zu Fuss"
+
+msgid "Motorcycle"
+msgstr "Motorrad"
+
+msgid "Bus"
+msgstr "Bus"
+
+msgid "Truck"
+msgstr "LKW"
+
+msgid "Taxi"
+msgstr "Taxi"
+
+msgid "Routing service returned an error."
+msgstr "Der Routing-Dienst hat einen Fehler geliefert."
+
+msgid "Routing is not configured."
+msgstr "Routing ist nicht konfiguriert."
+
+msgid "Invalid coordinates."
+msgstr "Ungueltige Koordinaten."
+
+msgid "Routing service is unavailable."
+msgstr "Der Routing-Dienst ist nicht verfuegbar."
+
+msgid "Routing service returned an invalid response."
+msgstr "Der Routing-Dienst hat eine ungueltige Antwort geliefert."
+
+msgid "No route found."
+msgstr "Keine Route gefunden."
+

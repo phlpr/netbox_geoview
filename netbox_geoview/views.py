@@ -951,7 +951,7 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
                 "active_filter_badges": active_filter_badges,
                 "save_filter_url": save_filter_url,
                 "filter_ops": operators,
-                "asset_version": f"{__version__}-routing-2",
+                "asset_version": f"{__version__}-routing-3",
                 "routing_profiles": [
                     {
                         "value": option,

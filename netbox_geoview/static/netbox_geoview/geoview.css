@@ -17,9 +17,13 @@
     grid-template-columns: minmax(0, 1fr);
 }
 
+.geoview-map-layout--panel-collapsed {
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+}
+
 .geoview-route-panel {
     border: 1px solid var(--bs-border-color);
-    border-radius: 0.875rem;
+    border-radius: var(--bs-border-radius-lg);
     background: var(--bs-body-bg);
     padding: 0.75rem;
     overflow-y: auto;
@@ -29,10 +33,49 @@
     display: none;
 }
 
+.geoview-route-panel.is-collapsed {
+    padding: 0.4rem 0.25rem;
+    overflow: hidden;
+}
+
+.geoview-route-panel__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
 .geoview-route-panel__title {
-    margin: 0 0 0.6rem 0;
-    font-size: 1rem;
-    font-weight: 700;
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.geoview-route-panel__toggle {
+    width: 1.9rem;
+    height: 1.9rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.geoview-route-panel__toggle .mdi {
+    font-size: 1.1rem;
+}
+
+.geoview-route-panel__content {
+    margin-top: 0.6rem;
+}
+
+.geoview-route-panel.is-collapsed .geoview-route-panel__title,
+.geoview-route-panel.is-collapsed .geoview-route-panel__content {
+    display: none;
+}
+
+.geoview-route-panel.is-collapsed .geoview-route-panel__head {
+    justify-content: center;
 }
 
 .geoview-route-panel__row + .geoview-route-panel__row {
@@ -61,6 +104,9 @@
 
 .geoview-route-panel__select {
     margin-top: 0.2rem;
+    min-height: calc(1.5em + 0.5rem + 2px);
+    border-radius: var(--bs-border-radius);
+    background-color: var(--bs-body-bg);
 }
 
 .geoview-route-panel__error {
@@ -397,8 +443,17 @@
         grid-template-rows: auto minmax(0, 1fr);
     }
 
+    .geoview-map-layout--panel-collapsed {
+        grid-template-columns: 1fr;
+    }
+
     .geoview-route-panel {
         max-height: 11rem;
+    }
+
+    .geoview-route-panel.is-collapsed {
+        max-height: none;
+        padding: 0.4rem;
     }
 
     .geoview-map {

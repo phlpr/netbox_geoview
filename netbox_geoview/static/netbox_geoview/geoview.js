@@ -344,10 +344,12 @@
             line: null,
             alternativeLines: [],
             isCalculating: false,
+            panelCollapsed: false,
         };
         const routeUi = {
             container: routeContainer,
             panel: routeContainer ? routeContainer.querySelector("[data-route-panel]") : null,
+            toggle: routeContainer ? routeContainer.querySelector("[data-route-toggle]") : null,
             start: routeContainer ? routeContainer.querySelector("[data-route-start]") : null,
             end: routeContainer ? routeContainer.querySelector("[data-route-end]") : null,
             open: routeContainer ? routeContainer.querySelector("[data-route-open]") : null,
@@ -366,6 +368,8 @@
             durationLabel: routeContainer ? (routeContainer.dataset.labelDuration || "Duration") : "Duration",
             modeLabel: routeContainer ? (routeContainer.dataset.labelMode || "Mode") : "Mode",
             alternativeLabel: routeContainer ? (routeContainer.dataset.labelAlternative || "Alternative") : "Alternative",
+            collapsePanelLabel: routeContainer ? (routeContainer.dataset.labelCollapseRoutePanel || "Collapse route panel") : "Collapse route panel",
+            expandPanelLabel: routeContainer ? (routeContainer.dataset.labelExpandRoutePanel || "Expand route panel") : "Expand route panel",
         };
 
         function clearRouteLines() {
@@ -487,14 +491,39 @@
             }
         }
 
+        function updatePanelToggleButton() {
+            if (!routeUi.toggle) {
+                return;
+            }
+            const icon = routeUi.toggle.querySelector("i");
+            const isCollapsed = routeState.panelCollapsed;
+            if (icon) {
+                icon.classList.remove("mdi-chevron-left", "mdi-chevron-right");
+                icon.classList.add(isCollapsed ? "mdi-chevron-right" : "mdi-chevron-left");
+            }
+            const label = isCollapsed ? routeUi.expandPanelLabel : routeUi.collapsePanelLabel;
+            routeUi.toggle.setAttribute("aria-label", label);
+            routeUi.toggle.setAttribute("title", label);
+            routeUi.toggle.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
+        }
+
         function setPanelVisibility() {
             const isVisible = Boolean(routeState.start || routeState.end);
             if (routeUi.panel) {
                 routeUi.panel.classList.toggle("is-hidden", !isVisible);
+                routeUi.panel.classList.toggle("is-collapsed", isVisible && routeState.panelCollapsed);
             }
             if (routeUi.container) {
                 routeUi.container.classList.toggle("geoview-map-layout--panel-hidden", !isVisible);
+                routeUi.container.classList.toggle(
+                    "geoview-map-layout--panel-collapsed",
+                    isVisible && routeState.panelCollapsed
+                );
             }
+            if (!isVisible) {
+                routeState.panelCollapsed = false;
+            }
+            updatePanelToggleButton();
             window.requestAnimationFrame(function () {
                 map.invalidateSize();
             });
@@ -633,6 +662,15 @@
         if (routeUi.clear) {
             routeUi.clear.addEventListener("click", clearRoute);
         }
+        if (routeUi.toggle) {
+            routeUi.toggle.addEventListener("click", function () {
+                if (!(routeState.start || routeState.end)) {
+                    return;
+                }
+                routeState.panelCollapsed = !routeState.panelCollapsed;
+                setPanelVisibility();
+            });
+        }
 
         window.L.control.layers(baseLayers, {}, {
             collapsed: true,
@@ -643,6 +681,7 @@
         addRecenterControl(map, config, markerBounds);
         setCostingOptions();
         setRouteSummary(null, defaultCosting);
+        updatePanelToggleButton();
         updateRoutePanel();
     }
 
