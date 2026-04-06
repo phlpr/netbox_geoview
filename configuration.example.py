@@ -7,6 +7,18 @@ PLUGINS_CONFIG = {
         "start_zoom": 7,
         "min_zoom": 2,
         "max_zoom": 19,
+        "valhalla_url": "https://valhalla1.openstreetmap.de/route",
+        "valhalla_timeout": 10,
+        "valhalla_costing_options": ["auto", "bicycle", "pedestrian"],
+        "valhalla_default_costing": "auto",
+        "valhalla_request_defaults": {
+            "alternates": 1,
+            "directions_options": {
+                "units": "kilometers",
+            },
+        },
+        "valhalla_headers": {},
+        "valhalla_query": {},
         "default_tile_layer": "OpenStreetMap",
         "scroll_wheel_zoom": True,
         "site_marker": {

@@ -10,7 +10,7 @@ from django.core.cache import cache
 from django.contrib import messages
 from core.models import ObjectType
 from django.db.models import Q
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.text import slugify
@@ -57,6 +57,8 @@ DEFAULT_SITE_MARKER = {
     "icon_anchor": [14, 40],
     "popup_anchor": [0, -34],
 }
+
+DEFAULT_VALHALLA_COSTING_OPTIONS = ["auto", "bicycle", "pedestrian"]
 
 SUPPORTED_LOOKUP_OPERATORS = {"exact", "n"}
 FIELD_OPERATOR_NAMES = (
@@ -140,6 +142,45 @@ DEFAULT_POPUP_SECTIONS = {
         {"title": "Custom Fields", "mode": "table", "field": "custom_fields"},
     ],
 }
+
+
+def decode_polyline(shape, precision=6):
+    coordinates = []
+    lat = 0
+    lon = 0
+    index = 0
+    factor = 10**precision
+
+    while index < len(shape):
+        shift = 0
+        result = 0
+        while True:
+            if index >= len(shape):
+                return coordinates
+            chunk = ord(shape[index]) - 63
+            index += 1
+            result |= (chunk & 0x1F) << shift
+            shift += 5
+            if chunk < 0x20:
+                break
+        lat += ~(result >> 1) if result & 1 else result >> 1
+
+        shift = 0
+        result = 0
+        while True:
+            if index >= len(shape):
+                return coordinates
+            chunk = ord(shape[index]) - 63
+            index += 1
+            result |= (chunk & 0x1F) << shift
+            shift += 5
+            if chunk < 0x20:
+                break
+        lon += ~(result >> 1) if result & 1 else result >> 1
+
+        coordinates.append([lat / factor, lon / factor])
+
+    return coordinates
 
 
 def apply_saved_filter_parameters(data):
@@ -255,6 +296,82 @@ class GeoViewConfigMixin:
         if value is None:
             return True
         return bool(value)
+
+    def get_valhalla_url(self):
+        value = str(self.get_setting("valhalla_url") or "").strip()
+        if not value:
+            return ""
+        parsed = urlparse(value)
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            return ""
+        return value
+
+    def get_valhalla_timeout(self):
+        try:
+            timeout = float(self.get_setting("valhalla_timeout") or 10)
+        except (TypeError, ValueError):
+            timeout = 10
+        return max(1.0, min(timeout, 60.0))
+
+    def get_valhalla_query(self):
+        query = self.get_setting("valhalla_query")
+        if not isinstance(query, dict):
+            return {}
+        return {str(key): str(value) for key, value in query.items()}
+
+    def get_valhalla_headers(self):
+        headers = self.get_setting("valhalla_headers")
+        if not isinstance(headers, dict):
+            return {}
+        return {str(key): str(value) for key, value in headers.items()}
+
+    def get_valhalla_request_defaults(self):
+        request_defaults = self.get_setting("valhalla_request_defaults")
+        if not isinstance(request_defaults, dict):
+            return {}
+        return request_defaults.copy()
+
+    def get_valhalla_costing_options(self):
+        configured = self.get_setting("valhalla_costing_options")
+        options = []
+        if isinstance(configured, (list, tuple)):
+            for option in configured:
+                value = str(option or "").strip().lower()
+                if value and value not in options:
+                    options.append(value)
+        if options:
+            return options
+        return DEFAULT_VALHALLA_COSTING_OPTIONS.copy()
+
+    def get_valhalla_default_costing(self):
+        desired = str(self.get_setting("valhalla_default_costing") or "").strip().lower()
+        options = self.get_valhalla_costing_options()
+        if desired in options:
+            return desired
+        return options[0]
+
+    def get_routing_config(self):
+        valhalla_url = self.get_valhalla_url()
+        costing_options = self.get_valhalla_costing_options()
+        costing_labels = {
+            "auto": _("Car"),
+            "bicycle": _("Bicycle"),
+            "pedestrian": _("Walking"),
+            "motorcycle": _("Motorcycle"),
+            "bus": _("Bus"),
+            "truck": _("Truck"),
+            "taxi": _("Taxi"),
+        }
+        return {
+            "enabled": bool(valhalla_url),
+            "endpoint": reverse("plugins:netbox_geoview:route"),
+            "costing_options": costing_options,
+            "default_costing": self.get_valhalla_default_costing(),
+            "costing_labels": {
+                option: costing_labels.get(option, option.title())
+                for option in costing_options
+            },
+        }
 
     def normalize_marker_style(self, marker_style, fallback=None):
         base = dict(fallback or DEFAULT_SITE_MARKER)
@@ -739,6 +856,7 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
             }
             for layer in tile_layers
         ]
+        routing_config = self.get_routing_config()
         return {
             "lat": map_state["lat"],
             "lon": map_state["lon"],
@@ -747,6 +865,19 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
             "max_zoom": self.get_zoom_bounds()[1],
             "scroll_wheel_zoom": self.get_scroll_wheel_zoom(),
             "default_tile_layer_id": self.get_default_tile_layer_id(tile_layers),
+            "routing": routing_config,
+            "ui": {
+                "netbox": _("NetBox"),
+                "open_google_maps": _("Open in Google Maps"),
+                "set_start": _("Set as start"),
+                "set_end": _("Set as end"),
+                "route_error": _("Route could not be calculated."),
+                "distance": _("Distance"),
+                "duration": _("Duration"),
+                "mode": _("Mode"),
+                "alternative": _("Alternative"),
+                "calculating_route": _("Calculating route..."),
+            },
             "tile_proxy_url_template": reverse(
                 "plugins:netbox_geoview:tile",
                 kwargs={"layer_id": "__layer__", "z": 0, "x": 0, "y": 0},
@@ -764,6 +895,7 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
         filtered_sites = self.get_filtered_sites(cleaned_data, operators)
         filtered_devices = self.get_filtered_devices(cleaned_data, operators)
         has_active_filters = self.get_active_filter_count(cleaned_data) > 0
+        routing_config = self.get_routing_config()
         active_filter_badges = []
         for group in self.build_selection_groups(cleaned_data, operators):
             entries = ", ".join(group["entries"])
@@ -819,6 +951,15 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
                 "active_filter_badges": active_filter_badges,
                 "save_filter_url": save_filter_url,
                 "filter_ops": operators,
+                "asset_version": f"{__version__}-routing-2",
+                "routing_profiles": [
+                    {
+                        "value": option,
+                        "label": routing_config["costing_labels"].get(option, option.title()),
+                    }
+                    for option in routing_config["costing_options"]
+                ],
+                "routing_default_profile": routing_config["default_costing"],
             }
         )
         return context
@@ -945,3 +1086,209 @@ class GeoViewTileView(GeoViewConfigMixin, View):
         response = HttpResponse(content, content_type=content_type)
         response["Cache-Control"] = "public, max-age=86400"
         return response
+
+
+class GeoViewRouteView(GeoViewConfigMixin, View):
+    http_method_names = ["get"]
+
+    def get_float_query_param(self, request, key, min_value, max_value):
+        raw_value = request.GET.get(key)
+        if raw_value is None:
+            raise ValueError
+        value = float(raw_value)
+        if value < min_value or value > max_value:
+            raise ValueError
+        return value
+
+    def parse_valhalla_error(self, response_data):
+        if isinstance(response_data, dict):
+            for key in ("error", "message"):
+                value = response_data.get(key)
+                if value:
+                    return str(value)
+            error_code = response_data.get("error_code")
+            error_text = response_data.get("error")
+            if error_code and error_text:
+                return f"{error_code}: {error_text}"
+        return _("Routing service returned an error.")
+
+    def get_distance_unit(self, payload):
+        directions_options = payload.get("directions_options", {})
+        if not isinstance(directions_options, dict):
+            return "km"
+        units = str(directions_options.get("units") or "").strip().lower()
+        if units == "miles":
+            return "mi"
+        return "km"
+
+    def build_route_geometry(self, trip):
+        if not isinstance(trip, dict):
+            return []
+        legs = trip.get("legs")
+        if not isinstance(legs, list):
+            shape = trip.get("shape")
+            if shape:
+                return decode_polyline(str(shape), precision=6)
+            return []
+        geometry = []
+        for leg in legs:
+            if not isinstance(leg, dict):
+                continue
+            shape = leg.get("shape")
+            if not shape:
+                continue
+            decoded = decode_polyline(str(shape), precision=6)
+            if not decoded:
+                continue
+            if geometry and geometry[-1] == decoded[0]:
+                geometry.extend(decoded[1:])
+            else:
+                geometry.extend(decoded)
+        return geometry
+
+    def normalize_route(self, trip, distance_unit):
+        if not isinstance(trip, dict):
+            return None
+        summary = trip.get("summary", {})
+        if not isinstance(summary, dict):
+            summary = {}
+        try:
+            distance = float(summary.get("length", 0))
+        except (TypeError, ValueError):
+            distance = 0.0
+        try:
+            duration_seconds = float(summary.get("time", 0))
+        except (TypeError, ValueError):
+            duration_seconds = 0.0
+        geometry = self.build_route_geometry(trip)
+        return {
+            "distance": round(distance, 3),
+            "distance_unit": distance_unit,
+            "duration_seconds": round(duration_seconds, 1),
+            "duration_minutes": round(duration_seconds / 60, 1),
+            "geometry": geometry,
+        }
+
+    def build_upstream_url(self):
+        base_url = self.get_valhalla_url()
+        if not base_url:
+            return ""
+        query = self.get_valhalla_query()
+        if query:
+            separator = "&" if "?" in base_url else "?"
+            return f"{base_url}{separator}{urlencode(query)}"
+        return base_url
+
+    def get(self, request):
+        valhalla_url = self.build_upstream_url()
+        if not valhalla_url:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": _("Routing is not configured."),
+                },
+                status=503,
+            )
+        try:
+            start_lat = self.get_float_query_param(request, "start_lat", -90, 90)
+            start_lon = self.get_float_query_param(request, "start_lon", -180, 180)
+            end_lat = self.get_float_query_param(request, "end_lat", -90, 90)
+            end_lon = self.get_float_query_param(request, "end_lon", -180, 180)
+        except (TypeError, ValueError):
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": _("Invalid coordinates."),
+                },
+                status=400,
+            )
+
+        costing_options = self.get_valhalla_costing_options()
+        costing = str(request.GET.get("costing") or self.get_valhalla_default_costing()).lower()
+        if costing not in costing_options:
+            costing = self.get_valhalla_default_costing()
+
+        payload = self.get_valhalla_request_defaults()
+        payload["locations"] = [
+            {"lat": start_lat, "lon": start_lon},
+            {"lat": end_lat, "lon": end_lon},
+        ]
+        payload["costing"] = costing
+        distance_unit = self.get_distance_unit(payload)
+
+        request_headers = {
+            "User-Agent": f"netbox-geoview/{__version__}",
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        }
+        request_headers.update(self.get_valhalla_headers())
+
+        try:
+            with urlopen(
+                Request(
+                    valhalla_url,
+                    data=json.dumps(payload).encode("utf-8"),
+                    headers=request_headers,
+                    method="POST",
+                ),
+                timeout=self.get_valhalla_timeout(),
+            ) as upstream_response:
+                response_data = json.loads(upstream_response.read().decode("utf-8"))
+        except HTTPError as exc:
+            response_data = None
+            try:
+                response_data = json.loads(exc.read().decode("utf-8"))
+            except Exception:
+                response_data = None
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": self.parse_valhalla_error(response_data),
+                },
+                status=400 if exc.code < 500 else 502,
+            )
+        except (URLError, TimeoutError):
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": _("Routing service is unavailable."),
+                },
+                status=502,
+            )
+        except json.JSONDecodeError:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": _("Routing service returned an invalid response."),
+                },
+                status=502,
+            )
+
+        trip = response_data.get("trip") if isinstance(response_data, dict) else None
+        route = self.normalize_route(trip, distance_unit)
+        if not route or not route["geometry"]:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": _("No route found."),
+                },
+                status=404,
+            )
+
+        alternatives = []
+        alternates_raw = response_data.get("alternates", []) if isinstance(response_data, dict) else []
+        if isinstance(alternates_raw, list):
+            for alternate in alternates_raw:
+                alt_trip = alternate.get("trip") if isinstance(alternate, dict) else alternate
+                normalized = self.normalize_route(alt_trip, distance_unit)
+                if normalized and normalized["geometry"]:
+                    alternatives.append(normalized)
+
+        return JsonResponse(
+            {
+                "success": True,
+                "route": route,
+                "alternatives": alternatives,
+                "costing": costing,
+            }
+        )

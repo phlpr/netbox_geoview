@@ -30,11 +30,11 @@
 {% block head %}
   {{ block.super }}
   <link rel="stylesheet" href="{% static 'netbox_geoview/vendor/leaflet/leaflet.css' %}">
-  <link rel="stylesheet" href="{% static 'netbox_geoview/geoview.css' %}">
+  <link rel="stylesheet" href="{% static 'netbox_geoview/geoview.css' %}?v={{ asset_version }}">
 {% endblock head %}
 
 {% block javascript %}
   {{ block.super }}
   <script src="{% static 'netbox_geoview/vendor/leaflet/leaflet.js' %}"></script>
-  <script src="{% static 'netbox_geoview/geoview.js' %}"></script>
+  <script src="{% static 'netbox_geoview/geoview.js' %}?v={{ asset_version }}"></script>
 {% endblock javascript %}

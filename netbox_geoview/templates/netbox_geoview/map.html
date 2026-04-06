@@ -20,10 +20,54 @@
   {% endif %}
   <div class="tab-pane geoview-viewport{% if active_tab == 'map' %} show active{% endif %}" id="map-panel" role="tabpanel" aria-labelledby="map-tab">
     <div
-      class="geoview-map geoview-map--fullscreen"
-      data-geoview-map
-      data-config-id="geoview-map-config"
-    ></div>
+      class="geoview-map-layout geoview-map-layout--panel-hidden"
+      data-geoview-route-panel
+      data-label-not-set="{% trans 'Not set' %}"
+      data-label-start="{% trans 'Start' %}"
+      data-label-end="{% trans 'Destination' %}"
+      data-label-calculate-route="{% trans 'Calculate route' %}"
+      data-label-clear-route="{% trans 'Clear' %}"
+      data-label-calculating-route="{% trans 'Calculating route...' %}"
+      data-label-route-error="{% trans 'Route could not be calculated.' %}"
+      data-label-no-route="{% trans 'No route calculated yet.' %}"
+      data-label-distance="{% trans 'Distance' %}"
+      data-label-duration="{% trans 'Duration' %}"
+      data-label-mode="{% trans 'Mode' %}"
+      data-label-alternative="{% trans 'Alternative' %}"
+    >
+      <aside class="geoview-route-panel is-hidden" data-route-panel>
+        <h3 class="geoview-route-panel__title">{% trans "Route Planner" %}</h3>
+        <div class="geoview-route-panel__row">
+          <div class="geoview-route-panel__label">{% trans "Profile" %}</div>
+          <select class="form-select form-select-sm geoview-route-panel__select" data-route-costing>
+            {% for profile in routing_profiles %}
+              <option value="{{ profile.value }}"{% if profile.value == routing_default_profile %} selected{% endif %}>{{ profile.label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="geoview-route-panel__row">
+          <div class="geoview-route-panel__label">{% trans "Start" %}</div>
+          <div class="geoview-route-panel__value" data-route-start>{% trans "Not set" %}</div>
+        </div>
+        <div class="geoview-route-panel__row">
+          <div class="geoview-route-panel__label">{% trans "Destination" %}</div>
+          <div class="geoview-route-panel__value" data-route-end>{% trans "Not set" %}</div>
+        </div>
+        <div class="geoview-route-panel__actions">
+          <button type="button" class="btn btn-primary btn-sm" data-route-open disabled>{% trans "Calculate route" %}</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-route-clear>{% trans "Clear" %}</button>
+        </div>
+        <div class="geoview-route-panel__error alert alert-warning d-none" data-route-error></div>
+        <div class="geoview-route-panel__summary" data-route-summary>{% trans "No route calculated yet." %}</div>
+        <div class="geoview-route-panel__alternatives" data-route-alternatives></div>
+        <div class="geoview-route-panel__hint text-secondary">{% trans "Set start and destination using marker popup actions." %}</div>
+      </aside>
+      <div
+        class="geoview-map geoview-map--fullscreen"
+        data-geoview-map
+        data-config-id="geoview-map-config"
+      ></div>
+    </div>
   </div>
   <div class="tab-pane{% if active_tab == 'filter' %} show active{% endif %}" id="filter-panel" role="tabpanel" aria-labelledby="filter-tab">
     {% include 'netbox_geoview/filter.html' %}

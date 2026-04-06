@@ -6,6 +6,111 @@
     background: #d9e4ec;
 }
 
+.geoview-map-layout {
+    display: grid;
+    grid-template-columns: minmax(18rem, 22rem) minmax(0, 1fr);
+    gap: 0.75rem;
+    height: 100%;
+}
+
+.geoview-map-layout--panel-hidden {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.geoview-route-panel {
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.875rem;
+    background: var(--bs-body-bg);
+    padding: 0.75rem;
+    overflow-y: auto;
+}
+
+.geoview-route-panel.is-hidden {
+    display: none;
+}
+
+.geoview-route-panel__title {
+    margin: 0 0 0.6rem 0;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.geoview-route-panel__row + .geoview-route-panel__row {
+    margin-top: 0.6rem;
+}
+
+.geoview-route-panel__label {
+    font-size: 0.8rem;
+    color: var(--bs-secondary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.geoview-route-panel__value {
+    margin-top: 0.15rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    word-break: break-word;
+}
+
+.geoview-route-panel__actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.85rem;
+}
+
+.geoview-route-panel__select {
+    margin-top: 0.2rem;
+}
+
+.geoview-route-panel__error {
+    margin-top: 0.75rem;
+    margin-bottom: 0;
+    font-size: 0.82rem;
+}
+
+.geoview-route-panel__summary {
+    margin-top: 0.75rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.55rem;
+    padding: 0.5rem 0.6rem;
+    font-size: 0.82rem;
+}
+
+.geoview-route-panel__summary-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.geoview-route-panel__summary-row + .geoview-route-panel__summary-row {
+    margin-top: 0.2rem;
+}
+
+.geoview-route-panel__alternatives {
+    margin-top: 0.55rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.geoview-route-panel__alternative {
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.55rem;
+    padding: 0.45rem 0.55rem;
+    font-size: 0.8rem;
+}
+
+.geoview-route-panel__alternative-title {
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+}
+
+.geoview-route-panel__hint {
+    margin-top: 0.75rem;
+    font-size: 0.78rem;
+}
+
 .geoview-viewport {
     height: calc(100dvh - 16.5rem);
 }
@@ -109,6 +214,12 @@
 
 .geoview-popup-section + .geoview-popup-section {
     margin-top: 0.75rem;
+}
+
+.geoview-popup-route-actions {
+    display: flex;
+    gap: 0.45rem;
+    margin-bottom: 0.6rem;
 }
 
 .geoview-popup-section-title {
@@ -281,6 +392,15 @@
 }
 
 @media (max-width: 767.98px) {
+    .geoview-map-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .geoview-route-panel {
+        max-height: 11rem;
+    }
+
     .geoview-map {
         min-height: 24rem;
     }
