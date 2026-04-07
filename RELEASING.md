@@ -34,6 +34,11 @@ In PyPI project settings, add a Trusted Publisher with:
 
 ## Release flows
 
+## CI checks
+
+- Workflow `Tests` runs on pushes to `main` and on pull requests.
+- Current scope: lightweight unit tests that do not require a full NetBox test environment.
+
 ### Test release (manual)
 
 - Run GitHub Actions workflow `Publish to TestPyPI` manually.
