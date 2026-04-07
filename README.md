@@ -29,6 +29,20 @@ Most of the code was generated with Codex as a coding co-pilot, but maintenance 
 |---|---|
 | `0.1.x` | `4.5.5` to `4.5.x` |
 
+## Installation
+
+Install inside the NetBox virtual environment:
+
+```bash
+pip install netbox-geoview
+```
+
+Optional: install directly from a tagged GitHub source archive:
+
+```bash
+pip install https://github.com/phlpr/netbox_geoview/archive/refs/tags/v0.1.0.tar.gz
+```
+
 ## Configuration
 
 Example plugin settings for `configuration.py`:
