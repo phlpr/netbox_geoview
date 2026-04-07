@@ -27,7 +27,7 @@ Most of the code was generated with Codex as a coding co-pilot, but maintenance 
 
 | Plugin Release | NetBox |
 |---|---|
-| `0.1.x` | `4.5.5` to `4.5.x` |
+| `0.1.x` | `4.5.4` to `4.5.x` |
 
 ## Installation
 
@@ -170,7 +170,7 @@ Recommendation:
 
 ## Requirements
 
-- NetBox `4.5.5` (or `4.5.x` compatible with this plugin release)
+- NetBox `4.5.4` (or `4.5.x` compatible with this plugin release)
 - Python `>=3.12`
 - No additional Python runtime dependencies are required beyond NetBox's own environment
 - Installation in the NetBox virtual environment (for example: `pip install <path-to-plugin>`)

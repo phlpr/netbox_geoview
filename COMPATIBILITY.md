@@ -33,5 +33,5 @@ Recommended branch model:
 
 | Plugin Release | Minimum NetBox | Maximum NetBox | Notes |
 |---|---|---|---|
-| 0.1.x | 4.5.5 | 4.5.x | Current active line |
+| 0.1.x | 4.5.4 | 4.5.x | Current active line |
 | 0.0.x | 3.7.10 | 3.7.x | Reserved backport line |
