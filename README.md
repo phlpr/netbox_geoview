@@ -17,6 +17,12 @@ The plugin uses Semantic Versioning in the format `MAJOR.MINOR.PATCH`.
 
 NetBox compatibility is managed separately through `min_version` and `max_version` in the plugin.
 
+## Project Note
+
+This is a personal project to see how far one can go with a practical NetBox plugin idea.
+
+Most of the code was generated with Codex as a coding co-pilot, but maintenance responsibility stays with the developer (the human still carries the pager).
+
 ## Compatibility
 
 | Plugin Release | NetBox |
