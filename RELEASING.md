@@ -53,6 +53,6 @@ In PyPI project settings, add a Trusted Publisher with:
 Example:
 
 ```bash
-git tag v0.1.1
-git push origin v0.1.1
+git tag v0.2.0
+git push origin v0.2.0
 ```

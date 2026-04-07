@@ -18,7 +18,7 @@ NetBox compatibility is tracked separately through:
 
 Recommended maintenance lines:
 
-- `0.1.x` for NetBox `4.5.x`
+- `0.2.x` for NetBox `4.5.x`
 - `0.0.x` for NetBox `3.7.x`
 - older NetBox branches keep their own patch line if needed
 
@@ -33,5 +33,6 @@ Recommended branch model:
 
 | Plugin Release | Minimum NetBox | Maximum NetBox | Notes |
 |---|---|---|---|
-| 0.1.x | 4.5.4 | 4.5.x | Current active line |
+| 0.2.x | 4.5.4 | 4.5.x | Current active line |
+| 0.1.x | 4.5.4 | 4.5.x | Previous line |
 | 0.0.x | 3.7.10 | 3.7.x | Reserved backport line |

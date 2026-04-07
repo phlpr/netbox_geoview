@@ -27,7 +27,7 @@ Most of the code was generated with Codex as a coding co-pilot, but maintenance 
 
 | Plugin Release | NetBox |
 |---|---|
-| `0.1.x` | `4.5.4` to `4.5.x` |
+| `0.2.x` | `4.5.4` to `4.5.x` |
 
 ## Installation
 
@@ -40,7 +40,7 @@ pip install netbox-geoview
 Optional: install directly from a tagged GitHub source archive:
 
 ```bash
-pip install https://github.com/phlpr/netbox_geoview/archive/refs/tags/v0.1.0.tar.gz
+pip install https://github.com/phlpr/netbox_geoview/archive/refs/tags/v0.2.0.tar.gz
 ```
 
 ## Configuration
