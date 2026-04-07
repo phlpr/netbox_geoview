@@ -13,7 +13,7 @@ else:
         verbose_name = _("Geo-View")
         description = _("Geospatial view with map and filter tabs")
         version = __version__
-        author = "Codex"
+        author = "Philipp Prohaszka"
         base_url = "geoview"
         min_version = NETBOX_MIN_VERSION
         max_version = NETBOX_MAX_VERSION
