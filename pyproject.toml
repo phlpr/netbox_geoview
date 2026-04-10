@@ -45,4 +45,7 @@ netbox_geoview = [
     "templates/netbox_geoview/*.html",
     "static/netbox_geoview/*.css",
     "static/netbox_geoview/*.js",
+    "static/netbox_geoview/vendor/leaflet/*.css",
+    "static/netbox_geoview/vendor/leaflet/*.js",
+    "static/netbox_geoview/vendor/leaflet/images/*.png",
 ]

@@ -19,6 +19,7 @@
     </div>
   {% endif %}
   <div class="tab-pane geoview-viewport{% if active_tab == 'map' %} show active{% endif %}" id="map-panel" role="tabpanel" aria-labelledby="map-tab">
+    <div class="alert alert-warning d-none mb-3" data-geoview-static-warning role="alert"></div>
     <div
       class="geoview-map-layout geoview-map-layout--panel-hidden"
       data-geoview-route-panel
@@ -81,4 +82,26 @@
   <div class="tab-pane{% if active_tab == 'filter' %} show active{% endif %}" id="filter-panel" role="tabpanel" aria-labelledby="filter-tab">
     {% include 'netbox_geoview/filter.html' %}
   </div>
+  <script>
+    (function () {
+      document.addEventListener('DOMContentLoaded', function () {
+        window.setTimeout(function () {
+          var warning = document.querySelector('[data-geoview-static-warning]');
+          var mapElement = document.querySelector('[data-geoview-map]');
+
+          if (!warning || !mapElement || mapElement.dataset.geoviewRendered === '1') {
+            return;
+          }
+
+          var message = '{% trans "Geo-View map could not be initialized. Please verify collectstatic output, static file permissions, and browser console errors." %}';
+          if (!window.L || mapElement.dataset.geoviewRenderReason === 'leaflet-missing') {
+            message = '{% trans "Geo-View map assets (Leaflet) are missing. Please run collectstatic and verify static file permissions for netbox_geoview." %}';
+          }
+
+          warning.textContent = message;
+          warning.classList.remove('d-none');
+        }, 1200);
+      });
+    }());
+  </script>
 {% endblock content %}

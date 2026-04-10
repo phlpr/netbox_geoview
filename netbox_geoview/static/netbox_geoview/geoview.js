@@ -282,13 +282,17 @@
     }
 
     function renderMap(element) {
+        element.dataset.geoviewRendered = "0";
+
         if (!window.L) {
+            element.dataset.geoviewRenderReason = "leaflet-missing";
             return;
         }
 
         const config = getMapConfig(element);
 
         if (!config || !Array.isArray(config.tile_layers) || config.tile_layers.length === 0) {
+            element.dataset.geoviewRenderReason = "config-invalid";
             return;
         }
 
@@ -683,9 +687,21 @@
         setRouteSummary(null, defaultCosting);
         updatePanelToggleButton();
         updateRoutePanel();
+        element.dataset.geoviewRenderReason = "";
+        element.dataset.geoviewRendered = "1";
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll("[data-geoview-map]").forEach(renderMap);
+        document.querySelectorAll("[data-geoview-map]").forEach(function (element) {
+            try {
+                renderMap(element);
+            } catch (error) {
+                element.dataset.geoviewRenderReason = "render-error";
+                element.dataset.geoviewRendered = "0";
+                if (window.console && typeof window.console.error === "function") {
+                    window.console.error("GeoView map initialization failed", error);
+                }
+            }
+        });
     });
 }());
