@@ -96,13 +96,19 @@ jobs:
       contents: write
 
     steps:
+      - name: Checkout repository (with tags)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
       - name: Create GitHub release for tag
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
-          if gh release view "$TAG" >/dev/null 2>&1; then
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo "GitHub release for $TAG already exists. Skipping."
             exit 0
           fi
-          gh release create "$TAG" --verify-tag --generate-notes --title "$TAG"
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes --title "$TAG"
