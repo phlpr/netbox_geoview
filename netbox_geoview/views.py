@@ -1,10 +1,9 @@
 import json
 from datetime import date, datetime
 from hashlib import sha256
-from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, urlparse
-from urllib.request import Request, urlopen
 
+import requests
 from django.conf import settings
 from django.core.cache import cache
 from django.contrib import messages
@@ -1025,16 +1024,17 @@ class GeoViewTileView(GeoViewConfigMixin, View):
         request_headers.update(layer_headers)
 
         try:
-            with urlopen(
-                Request(upstream_url, headers=request_headers), timeout=10
-            ) as upstream_response:
-                content = upstream_response.read()
-                content_type = upstream_response.headers.get_content_type()
-        except HTTPError as exc:
-            if exc.code == 404:
-                raise Http404 from exc
-            return HttpResponse(status=502)
-        except URLError:
+            upstream_response = requests.get(
+                upstream_url, headers=request_headers, timeout=10
+            )
+            if upstream_response.status_code == 404:
+                raise Http404
+            upstream_response.raise_for_status()
+            content = upstream_response.content
+            content_type = (upstream_response.headers.get("Content-Type") or "").split(
+                ";", 1
+            )[0]
+        except requests.exceptions.RequestException:
             return HttpResponse(status=502)
 
         if not content_type.startswith("image/"):
@@ -1186,30 +1186,31 @@ class GeoViewRouteView(GeoViewConfigMixin, View):
         request_headers.update(self.get_valhalla_headers())
 
         try:
-            with urlopen(
-                Request(
-                    valhalla_url,
-                    data=json.dumps(payload).encode("utf-8"),
-                    headers=request_headers,
-                    method="POST",
-                ),
+            upstream_response = requests.post(
+                valhalla_url,
+                json=payload,
+                headers=request_headers,
                 timeout=self.get_valhalla_timeout(),
-            ) as upstream_response:
-                response_data = json.loads(upstream_response.read().decode("utf-8"))
-        except HTTPError as exc:
-            response_data = None
-            try:
-                response_data = json.loads(exc.read().decode("utf-8"))
-            except Exception:
-                response_data = None
-            return JsonResponse(
-                {
-                    "success": False,
-                    "error": self.parse_valhalla_error(response_data),
-                },
-                status=400 if exc.code < 500 else 502,
             )
-        except (URLError, TimeoutError):
+            try:
+                response_data = upstream_response.json()
+            except ValueError:
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error": _("Routing service returned an invalid response."),
+                    },
+                    status=502,
+                )
+            if upstream_response.status_code >= 400:
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error": self.parse_valhalla_error(response_data),
+                    },
+                    status=400 if upstream_response.status_code < 500 else 502,
+                )
+        except requests.exceptions.Timeout:
             return JsonResponse(
                 {
                     "success": False,
@@ -1217,11 +1218,11 @@ class GeoViewRouteView(GeoViewConfigMixin, View):
                 },
                 status=502,
             )
-        except json.JSONDecodeError:
+        except requests.exceptions.RequestException:
             return JsonResponse(
                 {
                     "success": False,
-                    "error": _("Routing service returned an invalid response."),
+                    "error": _("Routing service is unavailable."),
                 },
                 status=502,
             )
