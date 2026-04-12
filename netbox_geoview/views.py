@@ -1,6 +1,7 @@
 import json
 from datetime import date, datetime
 from hashlib import sha256
+from math import asin, cos, radians, sin, sqrt
 from urllib.parse import urlencode, urlparse
 
 import requests
@@ -1052,6 +1053,8 @@ class GeoViewTileView(GeoViewConfigMixin, View):
 
 class GeoViewRouteView(GeoViewConfigMixin, View):
     http_method_names = ["get"]
+    LONG_DISTANCE_PROFILES = {"bicycle", "pedestrian"}
+    LONG_DISTANCE_LIMIT_METERS = 200000.0
 
     def get_float_query_param(self, request, key, min_value, max_value):
         raw_value = request.GET.get(key)
@@ -1062,8 +1065,21 @@ class GeoViewRouteView(GeoViewConfigMixin, View):
             raise ValueError
         return value
 
-    def parse_valhalla_error(self, response_data):
+    def parse_valhalla_error(self, response_data, costing=None):
         if isinstance(response_data, dict):
+            long_distance_message = (
+                response_data.get("error")
+                or response_data.get("message")
+                or ""
+            )
+            if (
+                costing in self.LONG_DISTANCE_PROFILES
+                and isinstance(long_distance_message, str)
+                and "Path distance exceeds the max distance limit" in long_distance_message
+            ):
+                return _(
+                    "The selected route is too long for the chosen mode. Bicycle and walking routes are limited to about 200 km. Please choose car mode or select points that are closer together."
+                )
             for key in ("error", "message"):
                 value = response_data.get(key)
                 if value:
@@ -1082,6 +1098,21 @@ class GeoViewRouteView(GeoViewConfigMixin, View):
         if units == "miles":
             return "mi"
         return "km"
+
+    def calculate_direct_distance_meters(self, start_lat, start_lon, end_lat, end_lon):
+        earth_radius_m = 6371000.0
+        lat1 = radians(start_lat)
+        lon1 = radians(start_lon)
+        lat2 = radians(end_lat)
+        lon2 = radians(end_lon)
+        delta_lat = lat2 - lat1
+        delta_lon = lon2 - lon1
+        haversine = (
+            sin(delta_lat / 2) ** 2
+            + cos(lat1) * cos(lat2) * sin(delta_lon / 2) ** 2
+        )
+        arc = 2 * asin(min(1.0, sqrt(max(0.0, haversine))))
+        return earth_radius_m * arc
 
     def build_route_geometry(self, trip):
         if not isinstance(trip, dict):
@@ -1169,6 +1200,23 @@ class GeoViewRouteView(GeoViewConfigMixin, View):
         costing = str(request.GET.get("costing") or self.get_valhalla_default_costing()).lower()
         if costing not in costing_options:
             costing = self.get_valhalla_default_costing()
+        if costing in self.LONG_DISTANCE_PROFILES:
+            direct_distance_m = self.calculate_direct_distance_meters(
+                start_lat,
+                start_lon,
+                end_lat,
+                end_lon,
+            )
+            if direct_distance_m > self.LONG_DISTANCE_LIMIT_METERS:
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error": _(
+                            "The selected route is too long for the chosen mode. Bicycle and walking routes are limited to about 200 km. Please choose car mode or select points that are closer together."
+                        ),
+                    },
+                    status=400,
+                )
 
         payload = self.get_valhalla_request_defaults()
         payload["locations"] = [
@@ -1206,7 +1254,7 @@ class GeoViewRouteView(GeoViewConfigMixin, View):
                 return JsonResponse(
                     {
                         "success": False,
-                        "error": self.parse_valhalla_error(response_data),
+                        "error": self.parse_valhalla_error(response_data, costing=costing),
                     },
                     status=400 if upstream_response.status_code < 500 else 502,
                 )
