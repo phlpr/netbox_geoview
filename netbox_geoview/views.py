@@ -833,6 +833,7 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
                 "open_google_maps": _("Open in Google Maps"),
                 "set_start": _("Set as start"),
                 "set_end": _("Set as end"),
+                "close": _("Close"),
                 "route_error": _("Route could not be calculated."),
                 "distance": _("Distance"),
                 "duration": _("Duration"),

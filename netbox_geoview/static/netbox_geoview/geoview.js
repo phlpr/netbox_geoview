@@ -101,6 +101,13 @@
         const mapsBlock = googleMapsUrl
             ? `<div class="geoview-popup-link"><a href="${escapeHtml(googleMapsUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(labels.open_google_maps || "Open in Google Maps")}</a></div>`
             : "";
+        const closeButtonBlock = `
+            <div class="geoview-popup-actions">
+                <button type="button" class="btn btn-sm btn-secondary" data-popup-close>
+                    ${escapeHtml(labels.close || "Close")}
+                </button>
+            </div>
+        `;
         const routeActionsBlock = hasCoordinates
             ? `
                 <div class="geoview-popup-route-actions">
@@ -148,6 +155,7 @@
                     ${routeActionsBlock}
                     ${sectionBlocks}
                 </div>
+                ${closeButtonBlock}
             </div>
         `;
     }
@@ -273,6 +281,11 @@
                         return;
                     }
                     routeApi.setPoint(pointType, markerData);
+                });
+            });
+            popupElement.querySelectorAll("[data-popup-close]").forEach(function (button) {
+                button.addEventListener("click", function () {
+                    map.closePopup(event.popup);
                 });
             });
         });

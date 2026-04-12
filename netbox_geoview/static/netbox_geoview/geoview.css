@@ -240,6 +240,8 @@
     width: min(31rem, 72vw);
     max-width: 31rem;
     font-size: 0.82rem;
+    display: flex;
+    flex-direction: column;
 }
 
 .geoview-popup-body {
@@ -266,6 +268,15 @@
     display: flex;
     gap: 0.45rem;
     margin-bottom: 0.6rem;
+}
+
+.geoview-popup-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+    padding-top: 0.45rem;
+    border-top: 1px solid var(--bs-border-color);
+    background: var(--bs-body-bg);
 }
 
 .geoview-popup-section-title {
