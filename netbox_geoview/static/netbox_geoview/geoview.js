@@ -360,6 +360,7 @@
             end: null,
             line: null,
             alternativeLines: [],
+            measureLine: null,
             isCalculating: false,
             panelCollapsed: false,
         };
@@ -370,10 +371,12 @@
             start: routeContainer ? routeContainer.querySelector("[data-route-start]") : null,
             end: routeContainer ? routeContainer.querySelector("[data-route-end]") : null,
             open: routeContainer ? routeContainer.querySelector("[data-route-open]") : null,
+            distance: routeContainer ? routeContainer.querySelector("[data-route-distance]") : null,
             clear: routeContainer ? routeContainer.querySelector("[data-route-clear]") : null,
             costing: routeContainer ? routeContainer.querySelector("[data-route-costing]") : null,
             error: routeContainer ? routeContainer.querySelector("[data-route-error]") : null,
             summary: routeContainer ? routeContainer.querySelector("[data-route-summary]") : null,
+            measureSummary: routeContainer ? routeContainer.querySelector("[data-measure-summary]") : null,
             alternatives: routeContainer ? routeContainer.querySelector("[data-route-alternatives]") : null,
             notSetLabel: routeContainer ? (routeContainer.dataset.labelNotSet || "Not set") : "Not set",
             calculateLabel: routeContainer ? (routeContainer.dataset.labelCalculateRoute || "Calculate route") : "Calculate route",
@@ -387,6 +390,9 @@
             alternativeLabel: routeContainer ? (routeContainer.dataset.labelAlternative || "Alternative") : "Alternative",
             collapsePanelLabel: routeContainer ? (routeContainer.dataset.labelCollapseRoutePanel || "Collapse route panel") : "Collapse route panel",
             expandPanelLabel: routeContainer ? (routeContainer.dataset.labelExpandRoutePanel || "Expand route panel") : "Expand route panel",
+            calculateDistanceLabel: routeContainer ? (routeContainer.dataset.labelCalculateDistance || "Calculate distance") : "Calculate distance",
+            directDistanceLabel: routeContainer ? (routeContainer.dataset.labelDirectDistance || "Direct distance") : "Direct distance",
+            measureNotSetLabel: routeContainer ? (routeContainer.dataset.labelMeasureNotSet || "No distance measured yet.") : "No distance measured yet.",
         };
 
         function clearRouteLines() {
@@ -398,6 +404,13 @@
                 map.removeLayer(line);
             });
             routeState.alternativeLines = [];
+        }
+
+        function clearMeasureLine() {
+            if (routeState.measureLine) {
+                map.removeLayer(routeState.measureLine);
+                routeState.measureLine = null;
+            }
         }
 
         function updateRouteLine() {
@@ -415,6 +428,25 @@
                     weight: 4,
                     opacity: 0.85,
                     dashArray: "10 8",
+                }
+            ).addTo(map);
+        }
+
+        function updateMeasureLine() {
+            clearMeasureLine();
+            if (!routeState.start || !routeState.end) {
+                return;
+            }
+            routeState.measureLine = window.L.polyline(
+                [
+                    [routeState.start.latitude, routeState.start.longitude],
+                    [routeState.end.latitude, routeState.end.longitude],
+                ],
+                {
+                    color: "#198754",
+                    weight: 4,
+                    opacity: 0.9,
+                    dashArray: "6 6",
                 }
             ).addTo(map);
         }
@@ -474,6 +506,25 @@
                     </div>
                 `;
             }).join("");
+        }
+
+        function setMeasureSummary() {
+            if (!routeUi.measureSummary) {
+                return;
+            }
+            if (!routeState.start || !routeState.end) {
+                routeUi.measureSummary.innerHTML = escapeHtml(routeUi.measureNotSetLabel);
+                return;
+            }
+            const startLatLng = window.L.latLng(routeState.start.latitude, routeState.start.longitude);
+            const endLatLng = window.L.latLng(routeState.end.latitude, routeState.end.longitude);
+            const distanceKm = startLatLng.distanceTo(endLatLng) / 1000;
+            routeUi.measureSummary.innerHTML = `
+                <div class="geoview-route-panel__summary-row">
+                    <span>${escapeHtml(routeUi.directDistanceLabel)}</span>
+                    <strong>${escapeHtml(formatDistance(distanceKm, "km"))}</strong>
+                </div>
+            `;
         }
 
         function drawValhallaRoute(route, alternatives) {
@@ -560,6 +611,11 @@
             if (routeUi.costing) {
                 routeUi.costing.disabled = !routingEnabled || routeState.isCalculating;
             }
+            if (routeUi.distance) {
+                const canCalculateDistance = Boolean(routeState.start && routeState.end);
+                routeUi.distance.disabled = !canCalculateDistance;
+                routeUi.distance.textContent = routeUi.calculateDistanceLabel;
+            }
         }
 
         function updateRoutePanel() {
@@ -584,11 +640,18 @@
             }
         }
 
+        function clearMeasurement() {
+            clearMeasureLine();
+            setMeasureSummary();
+            updateRoutePanel();
+        }
+
         function setRoutePoint(pointType, markerData) {
             if (pointType !== "start" && pointType !== "end") {
                 return;
             }
             routeState[pointType] = markerData;
+            clearMeasurement();
             resetRouteOutput();
             updateRoutePanel();
         }
@@ -597,6 +660,7 @@
             routeState.start = null;
             routeState.end = null;
             resetRouteOutput();
+            clearMeasurement();
             updateRoutePanel();
         }
 
@@ -671,6 +735,14 @@
             }
         }
 
+        function calculateDistance() {
+            if (!routeState.start || !routeState.end) {
+                return;
+            }
+            updateMeasureLine();
+            setMeasureSummary();
+        }
+
         if (routeUi.open) {
             routeUi.open.addEventListener("click", function () {
                 calculateRoute();
@@ -678,6 +750,11 @@
         }
         if (routeUi.clear) {
             routeUi.clear.addEventListener("click", clearRoute);
+        }
+        if (routeUi.distance) {
+            routeUi.distance.addEventListener("click", function () {
+                calculateDistance();
+            });
         }
         if (routeUi.toggle) {
             routeUi.toggle.addEventListener("click", function () {
@@ -698,6 +775,7 @@
         addRecenterControl(map, config, markerBounds);
         setCostingOptions();
         setRouteSummary(null, defaultCosting);
+        setMeasureSummary();
         updatePanelToggleButton();
         updateRoutePanel();
         element.dataset.geoviewRenderReason = "";

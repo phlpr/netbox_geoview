@@ -37,6 +37,9 @@
       data-label-alternative="{% trans 'Alternative' %}"
       data-label-collapse-route-panel="{% trans 'Collapse route panel' %}"
       data-label-expand-route-panel="{% trans 'Expand route panel' %}"
+      data-label-calculate-distance="{% trans 'Calculate distance' %}"
+      data-label-direct-distance="{% trans 'Direct distance' %}"
+      data-label-measure-not-set="{% trans 'No distance measured yet.' %}"
     >
       <aside class="geoview-route-panel is-hidden" data-route-panel>
         <div class="geoview-route-panel__head">
@@ -64,10 +67,12 @@
           </div>
           <div class="geoview-route-panel__actions">
             <button type="button" class="btn btn-primary btn-sm" data-route-open disabled>{% trans "Calculate route" %}</button>
+            <button type="button" class="btn btn-outline-success btn-sm" data-route-distance disabled>{% trans "Calculate distance" %}</button>
             <button type="button" class="btn btn-outline-secondary btn-sm" data-route-clear>{% trans "Clear" %}</button>
           </div>
           <div class="geoview-route-panel__error alert alert-warning d-none" data-route-error></div>
           <div class="geoview-route-panel__summary" data-route-summary>{% trans "No route calculated yet." %}</div>
+          <div class="geoview-route-panel__summary" data-measure-summary>{% trans "No distance measured yet." %}</div>
           <div class="geoview-route-panel__alternatives" data-route-alternatives></div>
           <div class="geoview-route-panel__hint text-secondary">{% trans "Set start and destination using marker popup actions." %}</div>
         </div>
