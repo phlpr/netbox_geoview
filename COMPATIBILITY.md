@@ -17,7 +17,7 @@ NetBox compatibility is tracked separately through:
 
 Recommended maintenance lines:
 
-- `0.6.x` for NetBox `4.5.4` through `4.6.x`
+- `0.7.x` for NetBox `4.5.4` through `4.6.x`
 - older plugin releases remain available for installations that cannot upgrade
 
 Recommended branch model:
@@ -30,7 +30,8 @@ Recommended branch model:
 
 | Plugin Release | Minimum NetBox | Maximum NetBox | Notes |
 |---|---|---|---|
-| 0.6.x | 4.5.4 | 4.6.x | Current active line; tested with NetBox 4.6.8 |
+| 0.7.x | 4.5.4 | 4.6.x | Current active line; tested with NetBox 4.6.8 |
+| 0.6.x | 4.5.4 | 4.6.x | Previous release line |
 | 0.5.x | 4.5.4 | 4.5.x | Previous release line |
 | 0.4.x | 4.5.4 | 4.5.x | Previous release line |
 | 0.3.x | 4.5.4 | 4.5.x | Previous release line |

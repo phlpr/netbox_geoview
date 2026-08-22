@@ -3,6 +3,14 @@
 All notable changes to NetBox GeoView are documented in this file. The project
 uses semantic versioning for plugin releases.
 
+## 0.7.0 - 2026-08-22
+
+### Fixed
+
+- Leaflet popups, tooltips, map controls, attribution, and GeoView panels now
+  follow NetBox's light and dark themes using the supported Tabler CSS
+  variables.
+
 ## 0.6.0 - 2026-08-22
 
 ### Added

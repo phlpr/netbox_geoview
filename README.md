@@ -30,7 +30,8 @@ Most of the code was generated with Codex as a coding co-pilot, but maintenance 
 
 | Plugin Release | NetBox |
 |---|---|
-| `0.6.x` | `4.5.4` to `4.6.x` (tested with `4.6.8`) |
+| `0.7.x` | `4.5.4` to `4.6.x` (tested with `4.6.8`) |
+| `0.6.x` | `4.5.4` to `4.6.x` |
 | `0.5.x` | `4.5.4` to `4.5.x` |
 | `0.2.x` | `4.5.4` to `4.5.x` |
 
@@ -45,7 +46,7 @@ pip install netbox-geoview
 Optional: install directly from a tagged GitHub source archive:
 
 ```bash
-pip install https://github.com/phlpr/netbox_geoview/archive/refs/tags/v0.6.0.tar.gz
+pip install https://github.com/phlpr/netbox_geoview/archive/refs/tags/v0.7.0.tar.gz
 ```
 
 ## Configuration
@@ -177,7 +178,7 @@ Recommendation:
 
 ## Requirements
 
-- NetBox `4.5.4` through `4.6.x`; release `0.6.0` is tested with NetBox `4.6.8`
+- NetBox `4.5.4` through `4.6.x`; release `0.7.0` is tested with NetBox `4.6.8`
 - Python `>=3.12`
 - No additional Python runtime dependencies are required beyond NetBox's own environment
 - Installation in the NetBox virtual environment (for example: `pip install <path-to-plugin>`)
