@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=69"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -11,13 +11,13 @@ readme = "README.md"
 authors = [
     { name = "Philipp Prohaszka" },
 ]
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 keywords = ["netbox", "plugin", "geospatial", "map", "gis", "network"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Framework :: Django",
     "Intended Audience :: System Administrators",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -48,4 +48,5 @@ netbox_geoview = [
     "static/netbox_geoview/vendor/leaflet/*.css",
     "static/netbox_geoview/vendor/leaflet/*.js",
     "static/netbox_geoview/vendor/leaflet/images/*.png",
+    "testdata/*.json",
 ]

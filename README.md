@@ -2,10 +2,13 @@
 
 NetBox GeoView is a NetBox plugin for displaying infrastructure in a map-oriented view.
 
-The current skeleton provides two tabs:
+It provides:
 
-- `Map`: primary view with an OpenStreetMap tile preview
-- `Filter`: selection of devices, sites, locations, roles, and map parameters
+- a Leaflet map with configurable raster tile layers
+- filters for sites, devices, tags, ownership, tenancy, and related objects
+- configurable site and device popups, including custom fields
+- direct-distance measurement and optional Valhalla route calculation
+- reusable development test data for sites, locations, device types, devices, and custom fields
 
 ## Versioning
 
@@ -27,6 +30,8 @@ Most of the code was generated with Codex as a coding co-pilot, but maintenance 
 
 | Plugin Release | NetBox |
 |---|---|
+| `0.6.x` | `4.5.4` to `4.6.x` (tested with `4.6.8`) |
+| `0.5.x` | `4.5.4` to `4.5.x` |
 | `0.2.x` | `4.5.4` to `4.5.x` |
 
 ## Installation
@@ -40,7 +45,7 @@ pip install netbox-geoview
 Optional: install directly from a tagged GitHub source archive:
 
 ```bash
-pip install https://github.com/phlpr/netbox_geoview/archive/refs/tags/v0.2.0.tar.gz
+pip install https://github.com/phlpr/netbox_geoview/archive/refs/tags/v0.6.0.tar.gz
 ```
 
 ## Configuration
@@ -67,7 +72,9 @@ PLUGINS_CONFIG = {
                 "units": "kilometers",
             },
         },
-        "valhalla_headers": {},
+        "valhalla_headers": {
+            "X-Client-Id": "your-company-netbox-geoview",
+        },
         "valhalla_query": {},
         "default_tile_layer": "OpenStreetMap",
         "scroll_wheel_zoom": True,
@@ -170,7 +177,7 @@ Recommendation:
 
 ## Requirements
 
-- NetBox `4.5.4` (or `4.5.x` compatible with this plugin release)
+- NetBox `4.5.4` through `4.6.x`; release `0.6.0` is tested with NetBox `4.6.8`
 - Python `>=3.12`
 - No additional Python runtime dependencies are required beyond NetBox's own environment
 - Installation in the NetBox virtual environment (for example: `pip install <path-to-plugin>`)
@@ -179,6 +186,20 @@ Recommendation:
   - `PLUGINS_CONFIG = {"netbox_geoview": {...}}`
 - For MapTiler layers: valid API key (`query.key`)
 - Optional for routing: reachable Valhalla endpoint (`valhalla_url`)
+
+## Development Test Data
+
+Release `0.6.0` includes an idempotent management command that creates a
+reusable development data set:
+
+```bash
+python manage.py seed_geoview_testdata
+```
+
+The command is intended only for development and test databases. It creates or
+updates clearly prefixed sites, locations, device types, devices, roles, and
+custom fields. See [TESTDATA.md](./TESTDATA.md) for details and for using a
+custom JSON definition.
 
 ## Firewall / Network Allowlist
 
@@ -198,5 +219,16 @@ Optional when routing is enabled (Valhalla):
 
 - `HTTPS/443` to your configured Valhalla host from `valhalla_url`
 - For the shipped example: `HTTPS/443` to `valhalla1.openstreetmap.de`
+
+Valhalla itself is MIT-licensed and can be self-hosted commercially. The
+example endpoint is a public demonstration service, not an enterprise service:
+fair-use limits apply and no availability guarantee is provided. Applications
+using that endpoint should send an identifying `X-Client-Id` header. For
+production or high-volume use, self-host Valhalla or use a provider with an
+appropriate SLA.
+
+The default map and routing data is based on OpenStreetMap. Keep the visible
+`© OpenStreetMap contributors` attribution and comply with the ODbL when using
+or redistributing derived data.
 
 If your environment uses an explicit outbound proxy, make sure NetBox can reach these hosts through that proxy and that TLS inspection does not break certificate validation.

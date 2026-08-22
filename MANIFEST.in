@@ -1,0 +1,7 @@
+include CHANGELOG.md
+include COMPATIBILITY.md
+include LICENSE
+include README.md
+include RELEASING.md
+include TESTDATA.md
+include configuration.example.py

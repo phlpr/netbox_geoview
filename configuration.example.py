@@ -17,7 +17,9 @@ PLUGINS_CONFIG = {
                 "units": "kilometers",
             },
         },
-        "valhalla_headers": {},
+        "valhalla_headers": {
+            "X-Client-Id": "your-company-netbox-geoview",
+        },
         "valhalla_query": {},
         "default_tile_layer": "OpenStreetMap",
         "scroll_wheel_zoom": True,

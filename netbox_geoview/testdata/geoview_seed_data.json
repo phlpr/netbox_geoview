@@ -1,0 +1,222 @@
+{
+  "region": {
+    "name": "GeoView Test Austria",
+    "slug": "geoview-test-austria",
+    "description": "Reusable GeoView development data"
+  },
+  "site_group": {
+    "name": "GeoView Test Sites",
+    "slug": "geoview-test-sites",
+    "description": "Sites managed by the GeoView test-data seeder"
+  },
+  "manufacturer": {
+    "name": "GeoView Test Labs",
+    "slug": "geoview-test-labs",
+    "description": "Synthetic manufacturer for GeoView development"
+  },
+  "platform": {
+    "name": "GeoView Test OS",
+    "slug": "geoview-test-os",
+    "description": "Synthetic network operating system"
+  },
+  "custom_fields": [
+    {
+      "name": "geoview_mapping",
+      "label": "GeoView Mapping",
+      "type": "json",
+      "description": "Structured mapping to a synthetic external CMDB record"
+    },
+    {
+      "name": "geoview_service",
+      "label": "GeoView Service",
+      "type": "text",
+      "description": "Service represented by this map object"
+    },
+    {
+      "name": "geoview_criticality",
+      "label": "GeoView Criticality",
+      "type": "text",
+      "description": "Synthetic business criticality"
+    },
+    {
+      "name": "geoview_enabled",
+      "label": "GeoView Enabled",
+      "type": "boolean",
+      "description": "Marks objects included in the reusable GeoView test set"
+    }
+  ],
+  "sites": [
+    {
+      "key": "vienna",
+      "name": "GeoView Vienna DC",
+      "slug": "geoview-vienna-dc",
+      "facility": "GV-VIE-01",
+      "physical_address": "Stephansplatz 1, 1010 Wien, Austria",
+      "latitude": "48.208490",
+      "longitude": "16.372080",
+      "description": "Primary synthetic data center",
+      "custom_fields": {
+        "geoview_mapping": {"source": "lab-cmdb", "external_id": "SITE-VIE-001", "layer": "core"},
+        "geoview_service": "Central Europe Backbone",
+        "geoview_criticality": "critical",
+        "geoview_enabled": true
+      }
+    },
+    {
+      "key": "graz",
+      "name": "GeoView Graz Edge",
+      "slug": "geoview-graz-edge",
+      "facility": "GV-GRZ-01",
+      "physical_address": "Hauptplatz 1, 8010 Graz, Austria",
+      "latitude": "47.070710",
+      "longitude": "15.439500",
+      "description": "Synthetic regional edge site",
+      "custom_fields": {
+        "geoview_mapping": {"source": "lab-cmdb", "external_id": "SITE-GRZ-001", "layer": "edge"},
+        "geoview_service": "Southern Region Edge",
+        "geoview_criticality": "high",
+        "geoview_enabled": true
+      }
+    },
+    {
+      "key": "linz",
+      "name": "GeoView Linz Hub",
+      "slug": "geoview-linz-hub",
+      "facility": "GV-LNZ-01",
+      "physical_address": "Hauptplatz 1, 4020 Linz, Austria",
+      "latitude": "48.306940",
+      "longitude": "14.285830",
+      "description": "Synthetic northern aggregation hub",
+      "custom_fields": {
+        "geoview_mapping": {"source": "lab-cmdb", "external_id": "SITE-LNZ-001", "layer": "aggregation"},
+        "geoview_service": "Northern Region Hub",
+        "geoview_criticality": "high",
+        "geoview_enabled": true
+      }
+    }
+  ],
+  "locations": [
+    {"key": "vie-building", "site": "vienna", "name": "Building A", "slug": "building-a", "facility": "VIE-A"},
+    {"key": "vie-room", "site": "vienna", "parent": "vie-building", "name": "Network Room 101", "slug": "network-room-101", "facility": "VIE-A-101"},
+    {"key": "graz-building", "site": "graz", "name": "Edge Building", "slug": "edge-building", "facility": "GRZ-E"},
+    {"key": "graz-room", "site": "graz", "parent": "graz-building", "name": "Network Room 201", "slug": "network-room-201", "facility": "GRZ-E-201"},
+    {"key": "linz-building", "site": "linz", "name": "Hub Building", "slug": "hub-building", "facility": "LNZ-H"},
+    {"key": "linz-room", "site": "linz", "parent": "linz-building", "name": "Network Room 301", "slug": "network-room-301", "facility": "LNZ-H-301"}
+  ],
+  "roles": [
+    {"key": "core", "name": "GeoView Core Router", "slug": "geoview-core-router", "color": "e91e63"},
+    {"key": "access", "name": "GeoView Access Switch", "slug": "geoview-access-switch", "color": "2196f3"},
+    {"key": "firewall", "name": "GeoView Firewall", "slug": "geoview-firewall", "color": "f44336"},
+    {"key": "sensor", "name": "GeoView Environmental Sensor", "slug": "geoview-environmental-sensor", "color": "4caf50"}
+  ],
+  "device_types": [
+    {"key": "router", "model": "GV-R1000", "slug": "gv-r1000", "part_number": "GV-R1000", "u_height": "1.0", "is_full_depth": true},
+    {"key": "switch", "model": "GV-S48", "slug": "gv-s48", "part_number": "GV-S48", "u_height": "1.0", "is_full_depth": true},
+    {"key": "firewall", "model": "GV-FW200", "slug": "gv-fw200", "part_number": "GV-FW200", "u_height": "1.0", "is_full_depth": true},
+    {"key": "sensor", "model": "GV-ENV1", "slug": "gv-env1", "part_number": "GV-ENV1", "u_height": "1.0", "is_full_depth": false}
+  ],
+  "devices": [
+    {
+      "name": "gv-vie-core-01",
+      "site": "vienna",
+      "location": "vie-room",
+      "device_type": "router",
+      "role": "core",
+      "serial": "GV-VIE-RTR-0001",
+      "asset_tag": "GV-ASSET-0001",
+      "latitude": "48.208800",
+      "longitude": "16.373200",
+      "custom_fields": {
+        "geoview_mapping": {"source": "lab-cmdb", "external_id": "DEV-VIE-CORE-01", "marker": {"symbol": "R", "class": "core"}},
+        "geoview_service": "MPLS Backbone",
+        "geoview_criticality": "critical",
+        "geoview_enabled": true
+      }
+    },
+    {
+      "name": "gv-vie-access-01",
+      "site": "vienna",
+      "location": "vie-room",
+      "device_type": "switch",
+      "role": "access",
+      "serial": "GV-VIE-SW-0001",
+      "asset_tag": "GV-ASSET-0002",
+      "latitude": null,
+      "longitude": null,
+      "custom_fields": {
+        "geoview_mapping": {"source": "lab-cmdb", "external_id": "DEV-VIE-ACCESS-01", "coordinate_source": "site-fallback"},
+        "geoview_service": "Campus Access",
+        "geoview_criticality": "medium",
+        "geoview_enabled": true
+      }
+    },
+    {
+      "name": "gv-graz-fw-01",
+      "site": "graz",
+      "location": "graz-room",
+      "device_type": "firewall",
+      "role": "firewall",
+      "serial": "GV-GRZ-FW-0001",
+      "asset_tag": "GV-ASSET-0003",
+      "latitude": "47.071050",
+      "longitude": "15.440100",
+      "custom_fields": {
+        "geoview_mapping": {"source": "lab-cmdb", "external_id": "DEV-GRZ-FW-01", "marker": {"symbol": "F", "class": "security"}},
+        "geoview_service": "Regional Security Gateway",
+        "geoview_criticality": "critical",
+        "geoview_enabled": true
+      }
+    },
+    {
+      "name": "gv-graz-access-01",
+      "site": "graz",
+      "location": "graz-room",
+      "device_type": "switch",
+      "role": "access",
+      "serial": "GV-GRZ-SW-0001",
+      "asset_tag": "GV-ASSET-0004",
+      "latitude": null,
+      "longitude": null,
+      "custom_fields": {
+        "geoview_mapping": {"source": "lab-cmdb", "external_id": "DEV-GRZ-ACCESS-01", "coordinate_source": "site-fallback"},
+        "geoview_service": "Branch Access",
+        "geoview_criticality": "medium",
+        "geoview_enabled": true
+      }
+    },
+    {
+      "name": "gv-linz-core-01",
+      "site": "linz",
+      "location": "linz-room",
+      "device_type": "router",
+      "role": "core",
+      "serial": "GV-LNZ-RTR-0001",
+      "asset_tag": "GV-ASSET-0005",
+      "latitude": null,
+      "longitude": null,
+      "custom_fields": {
+        "geoview_mapping": {"source": "lab-cmdb", "external_id": "DEV-LNZ-CORE-01", "coordinate_source": "site-fallback"},
+        "geoview_service": "Northern Backbone",
+        "geoview_criticality": "high",
+        "geoview_enabled": true
+      }
+    },
+    {
+      "name": "gv-linz-sensor-01",
+      "site": "linz",
+      "location": "linz-room",
+      "device_type": "sensor",
+      "role": "sensor",
+      "serial": "GV-LNZ-ENV-0001",
+      "asset_tag": "GV-ASSET-0006",
+      "latitude": "48.307200",
+      "longitude": "14.286300",
+      "custom_fields": {
+        "geoview_mapping": {"source": "lab-cmdb", "external_id": "DEV-LNZ-ENV-01", "marker": {"symbol": "S", "class": "environment"}},
+        "geoview_service": "Environmental Monitoring",
+        "geoview_criticality": "low",
+        "geoview_enabled": true
+      }
+    }
+  ]
+}
