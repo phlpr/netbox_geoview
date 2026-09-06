@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 from core.models import ObjectType
@@ -53,6 +54,13 @@ def get_saved_filter_models(source=None):
     if models:
         return models
     return [Site, Device]
+
+
+def get_usable_saved_filters(user):
+    visible = Q(shared=True)
+    if user.is_authenticated:
+        visible |= Q(user=user)
+    return SavedFilter.objects.restrict(user, "view").filter(visible, enabled=True)
 
 
 class GeoViewFilterForm(forms.Form):
@@ -140,7 +148,14 @@ class GeoViewFilterForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
+        if user is not None:
+            for field in self.fields.values():
+                queryset = getattr(field, "queryset", None)
+                if queryset is not None and hasattr(queryset, "restrict"):
+                    field.queryset = queryset.restrict(user, "view")
+            self.fields["filter_id"].queryset = get_usable_saved_filters(user)
         object_type_ids = [
             ObjectType.objects.get_for_model(model).pk
             for model in get_saved_filter_models(self.data if self.is_bound else None)

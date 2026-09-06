@@ -1,7 +1,7 @@
 import json
 from datetime import date, datetime
 from hashlib import sha256
-from math import asin, cos, radians, sin, sqrt
+from math import asin, cos, isfinite, radians, sin, sqrt
 from urllib.parse import urlencode, urlparse
 
 import requests
@@ -19,14 +19,15 @@ from django.views import View
 from django.views.generic import TemplateView
 
 from dcim.models import Device, Site
-from extras.models import SavedFilter
 from netbox.plugins import get_plugin_config
+from utilities.views import ConditionalLoginRequiredMixin
 
 from .forms import (
     DEVICE_FILTER_FIELDS,
     SITE_FILTER_FIELDS,
     GeoViewFilterForm,
     get_saved_filter_models,
+    get_usable_saved_filters,
 )
 from .polyline import decode_polyline
 from .version import __version__
@@ -145,12 +146,19 @@ DEFAULT_POPUP_SECTIONS = {
 }
 
 
-def apply_saved_filter_parameters(data):
+def apply_saved_filter_parameters(data, user):
     if not data or ("filter" not in data and "filter_id" not in data):
         return data
     data = data.copy()
-    saved_filters = SavedFilter.objects.filter(
-        Q(slug__in=data.getlist("filter")) | Q(pk__in=data.getlist("filter_id"))
+    filter_ids = []
+    for value in data.getlist("filter_id"):
+        try:
+            filter_ids.append(int(value))
+        except (TypeError, ValueError):
+            # Preserve the submitted value for normal form validation.
+            continue
+    saved_filters = get_usable_saved_filters(user).filter(
+        Q(slug__in=data.getlist("filter")) | Q(pk__in=filter_ids),
     )
     for saved_filter in saved_filters:
         for key, value in saved_filter.parameters.items():
@@ -163,7 +171,7 @@ def apply_saved_filter_parameters(data):
     return data
 
 
-class GeoViewConfigMixin:
+class GeoViewConfigMixin(ConditionalLoginRequiredMixin):
     plugin_name = "netbox_geoview"
 
     def get_plugin_settings(self):
@@ -553,8 +561,8 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
         }
 
     def get_form(self):
-        data = apply_saved_filter_parameters(self.request.GET or None)
-        form = GeoViewFilterForm(data=data)
+        data = apply_saved_filter_parameters(self.request.GET or None, self.request.user)
+        form = GeoViewFilterForm(data=data, user=self.request.user)
         if form.is_bound:
             form.is_valid()
         else:
@@ -592,9 +600,12 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
     def get_filtered_sites(self, cleaned_data, operators):
         if not self.has_site_filters(cleaned_data):
             return Site.objects.none()
-        queryset = Site.objects.select_related("group", "region", "tenant").prefetch_related(
-            "tags"
-        ).order_by("name")
+        queryset = (
+            Site.objects.restrict(self.request.user, "view")
+            .select_related("group", "region", "tenant")
+            .prefetch_related("tags")
+            .order_by("name")
+        )
         queryset = self.apply_inclusion_filter(
             queryset, "region", cleaned_data.get("region"), operators["region"]
         )
@@ -609,7 +620,7 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
     def get_filtered_devices(self, cleaned_data, operators):
         if not self.has_device_filters(cleaned_data):
             return Device.objects.none()
-        queryset = Device.objects.select_related(
+        queryset = Device.objects.restrict(self.request.user, "view").select_related(
             "site__group",
             "site__region",
             "site__tenant",
@@ -942,7 +953,10 @@ class GeoViewApplyFiltersView(GeoViewConfigMixin, View):
     http_method_names = ["get"]
 
     def get(self, request):
-        form = GeoViewFilterForm(data=apply_saved_filter_parameters(request.GET or None))
+        form = GeoViewFilterForm(
+            data=apply_saved_filter_parameters(request.GET or None, request.user),
+            user=request.user,
+        )
         form.is_valid()
         cleaned_data = form.cleaned_data if form.is_valid() else {}
         selected_devices = cleaned_data.get("device")
@@ -1062,7 +1076,7 @@ class GeoViewRouteView(GeoViewConfigMixin, View):
         if raw_value is None:
             raise ValueError
         value = float(raw_value)
-        if value < min_value or value > max_value:
+        if not isfinite(value) or value < min_value or value > max_value:
             raise ValueError
         return value
 
