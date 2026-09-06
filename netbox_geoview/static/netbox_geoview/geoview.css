@@ -162,6 +162,19 @@
     height: calc(100dvh - 16.5rem);
 }
 
+.geoview-filter-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.geoview-filter-badges .badge {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: left;
+}
+
 .geoview-viewport.active {
     display: flex;
     flex-direction: column;
@@ -510,6 +523,10 @@
 
     .geoview-map-layout--panel-collapsed {
         grid-template-columns: 1fr;
+    }
+
+    .geoview-map-layout--panel-hidden {
+        grid-template-rows: minmax(0, 1fr);
     }
 
     .geoview-route-panel {
