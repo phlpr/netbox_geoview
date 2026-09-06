@@ -1,8 +1,8 @@
 # Local NetBox 4.7.0 validation — 2026-09-06
 
-The updated GeoView source checkout passes the local plugin integration and
-browser suites on NetBox 4.7.0. A new published plugin release has **not** been
-created. The published 0.7.0 package still declares a maximum of NetBox 4.6.99.
+This report records the local plugin integration and browser validation for
+GeoView 0.8.0 on NetBox 4.7.0. The previous 0.7.0 package declares a maximum of
+NetBox 4.6.99.
 
 ## Environment and isolation
 
@@ -14,7 +14,7 @@ created. The published 0.7.0 package still declares a maximum of NetBox 4.6.99.
 | PostgreSQL | 16.15 |
 | Redis | 7.4.10 |
 | Browser | Chromium 151.0.7922.34, Playwright |
-| Plugin | Unreleased source changes based on 0.7.0 |
+| Plugin | Source changes for 0.8.0, based on 0.7.0 |
 | Integration database | `test_netbox_geoview`, created and migrated separately |
 | Integration Redis | Databases 14 and 15 |
 | Browser server | Additional local listener on `127.0.0.1:8001` |
@@ -123,7 +123,6 @@ screenshots, `results.json`, coverage data and package artifacts were stored in
 `/tmp/geoview-netbox47-qXANRa/`; temporary artifacts are not part of the release
 and may be removed by the operating system.
 
-Before publishing, select a new plugin version, recheck the older versions that
-will remain in the declared compatibility range, and follow
-[RELEASING.md](../../RELEASING.md). Committing this validation does not publish
-a new plugin package; publishing remains a separate release step.
+GeoView 0.8.0 packages these validated changes. Before extending support to
+additional NetBox versions, recheck the versions that will remain in the declared
+compatibility range and follow [RELEASING.md](../../RELEASING.md).

@@ -17,7 +17,7 @@ NetBox compatibility is tracked separately through:
 
 Recommended maintenance lines:
 
-- The unreleased source checkout supports NetBox `4.5.4` through `4.7.0`;
+- `0.8.x` for NetBox `4.5.4` through `4.7.0`;
   see the [NetBox 4.7.0 validation report](docs/validation/netbox-4.7.0.md).
 - `0.7.x` for NetBox `4.5.4` through `4.6.x`
 - older plugin releases remain available for installations that cannot upgrade
@@ -32,8 +32,8 @@ Recommended branch model:
 
 | Plugin Release | Minimum NetBox | Maximum NetBox | Notes |
 |---|---|---|---|
-| Unreleased source | 4.5.4 | 4.7.0 | Locally tested with NetBox 4.7.0 / Django 6.1; not published yet |
-| 0.7.x | 4.5.4 | 4.6.x | Current active line; tested with NetBox 4.6.8 |
+| 0.8.x | 4.5.4 | 4.7.0 | Current active line; locally tested with NetBox 4.7.0 / Django 6.1 |
+| 0.7.x | 4.5.4 | 4.6.x | Previous release line; tested with NetBox 4.6.8 |
 | 0.6.x | 4.5.4 | 4.6.x | Previous release line |
 | 0.5.x | 4.5.4 | 4.5.x | Previous release line |
 | 0.4.x | 4.5.4 | 4.5.x | Previous release line |

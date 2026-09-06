@@ -3,7 +3,7 @@
 All notable changes to NetBox GeoView are documented in this file. The project
 uses semantic versioning for plugin releases.
 
-## Unreleased
+## 0.8.0 - 2026-09-06
 
 ### Compatibility
 
