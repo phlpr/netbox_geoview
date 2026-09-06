@@ -1,3 +1,3 @@
 __version__ = "0.7.0"
 NETBOX_MIN_VERSION = "4.5.4"
-NETBOX_MAX_VERSION = "4.6.99"
+NETBOX_MAX_VERSION = "4.7.0"

@@ -30,10 +30,20 @@ Most of the code was generated with Codex as a coding co-pilot, but maintenance 
 
 | Plugin Release | NetBox |
 |---|---|
+| Unreleased source | `4.5.4` to `4.7.0` (locally tested with `4.7.0`) |
 | `0.7.x` | `4.5.4` to `4.6.x` (tested with `4.6.8`) |
 | `0.6.x` | `4.5.4` to `4.6.x` |
 | `0.5.x` | `4.5.4` to `4.5.x` |
 | `0.2.x` | `4.5.4` to `4.5.x` |
+
+NetBox 4.7.0 support is currently available from the updated source checkout;
+the published 0.7.0 release does not include it. See the
+[validation report](docs/validation/netbox-4.7.0.md) and
+[local test instructions](TESTING.md).
+
+GeoView honors NetBox's login requirement and object permissions. Users need
+view access to the sites/devices and related filter objects they want to select.
+Saved filters must be enabled and shared or owned by the current user.
 
 ## Installation
 

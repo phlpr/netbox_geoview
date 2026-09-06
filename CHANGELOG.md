@@ -3,6 +3,26 @@
 All notable changes to NetBox GeoView are documented in this file. The project
 uses semantic versioning for plugin releases.
 
+## Unreleased
+
+### Compatibility
+
+- Validate NetBox 4.7.0 with Django 6.1 and Python 3.14.7 locally, and raise the
+  maximum supported NetBox version from 4.6.99 to 4.7.0.
+- Add repeatable PostgreSQL integration tests and Playwright browser checks;
+  see `TESTING.md` and `docs/validation/netbox-4.7.0.md` for scope and results.
+
+### Fixed
+
+- Apply NetBox's login requirement to all GeoView endpoints and respect object
+  permissions in map queries and filter choices.
+- Only expand enabled saved filters that the user can access and which are
+  shared or belong to that user.
+- Handle malformed saved-filter IDs with normal form validation instead of a
+  server error; reject non-finite routing coordinates before contacting Valhalla.
+- Wrap long active filter badges on narrow screens and remove the unused mobile
+  grid row when the route panel is hidden.
+
 ## 0.7.0 - 2026-08-22
 
 ### Fixed

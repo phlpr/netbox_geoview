@@ -38,6 +38,8 @@ In PyPI project settings, add a Trusted Publisher with:
 
 - Workflow `Tests` runs on pushes to `main` and on pull requests.
 - Current scope: lightweight unit tests that do not require a full NetBox test environment.
+- Run the separate local integration and browser suites in [TESTING.md](TESTING.md)
+  for each newly supported NetBox version; the lightweight CI job alone is insufficient.
 
 ## Release preparation
 

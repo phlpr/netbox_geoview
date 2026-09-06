@@ -4,4 +4,7 @@ include LICENSE
 include README.md
 include RELEASING.md
 include TESTDATA.md
+include TESTING.md
+recursive-include docs/validation *.md
+recursive-include tests *.py *.cjs
 include configuration.example.py
