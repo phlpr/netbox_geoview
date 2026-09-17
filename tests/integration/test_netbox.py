@@ -7,6 +7,7 @@ from io import StringIO
 from unittest.mock import Mock, patch
 
 import requests
+from packaging.version import Version
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -16,7 +17,8 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from core.models import ObjectType
 from dcim.models import Device, DeviceType, Location, Region, Site, SiteGroup
-from extras.models import CustomField, SavedFilter, Tag
+from extras.choices import CustomFieldTypeChoices
+from extras.models import CustomField, CustomFieldChoiceSet, SavedFilter, Tag
 from tenancy.models import Tenant, TenantGroup
 from users.models import ObjectPermission, Owner, OwnerGroup
 
@@ -226,6 +228,90 @@ class MapIntegrationTests(TestCase):
             with self.assertRaises(KeyError):
                 call_command("seed_geoview_testdata", stdout=StringIO())
         self.assertFalse(Region.objects.filter(name="Should be rolled back").exists())
+
+    def test_unicode_device_search_matches_dynamic_dropdown(self):
+        if Version(settings.VERSION) < Version("4.7.1"):
+            self.skipTest("NetBox's collation fix is available from 4.7.1 (#23012)")
+        device = Device.objects.first()
+        device.name = "Straße Switch"
+        device.save()
+        for query in ("straße", "STRASSE"):
+            with self.subTest(query=query):
+                response = self.get_map({"q": query})
+                names = [m["name"] for m in response.context["map_config"]["site_markers"]]
+                self.assertEqual(names, [device.name])
+                response = self.client.get("/api/dcim/devices/", {"q": query})
+                self.assertEqual(response.status_code, 200)
+                ids = [d["id"] for d in response.json()["results"]]
+                self.assertEqual(ids, [device.pk])
+
+    def test_hierarchical_filter_choices_after_move_and_rename(self):
+        for model, form_field, site_field, endpoint, api_filter in (
+            (Region, "region", "region", "regions", "region_id"),
+            (SiteGroup, "site_group", "group", "site-groups", "group_id"),
+        ):
+            with self.subTest(model=model.__name__):
+                original = model.objects.create(name="Original", slug="original")
+                target = model.objects.create(name="Target", slug="target")
+                child = model.objects.create(name="Child", slug="child", parent=original)
+                leaf = model.objects.create(name="Leaf", slug="leaf", parent=child)
+                site = Site.objects.first()
+                setattr(site, site_field, leaf)
+                site.save()
+                child.parent = target
+                child.name = "Renamed child"
+                child.save()
+                leaf.refresh_from_db()
+                self.assertEqual(list(leaf.get_ancestors()), [target, child])
+                if hasattr(leaf, "sort_path"):
+                    self.assertEqual(leaf.sort_path, "Target\tRenamed child\tLeaf")
+                response = self.get_map({form_field: leaf.pk})
+                self.assertEqual(
+                    [m["name"] for m in response.context["map_config"]["site_markers"]],
+                    [site.name],
+                )
+                response = self.client.get(f"/api/dcim/{endpoint}/", {"q": "Renamed child"})
+                self.assertEqual(response.status_code, 200)
+                self.assertIn(child.pk, [obj["id"] for obj in response.json()["results"]])
+                # NetBox's cascading site selector must follow the new ancestor, not the old one.
+                for ancestor, expected in ((target, [site.pk]), (original, [])):
+                    response = self.client.get("/api/dcim/sites/", {api_filter: ancestor.pk})
+                    self.assertEqual(response.status_code, 200)
+                    self.assertEqual([obj["id"] for obj in response.json()["results"]], expected)
+
+    def test_location_move_and_rename_preserve_device_mapping(self):
+        child = Location.objects.exclude(parent=None).first()
+        parent = child.parent
+        device = Device.objects.filter(location=child).first()
+        self.assertIsNotNone(device)
+        before = GeoViewBaseView().get_device_coordinates(device)
+        target = Location.objects.create(name="New building", slug="new-building", site=child.site)
+        parent.parent = target
+        parent.name = "Renamed floor"
+        parent.save()
+        child.refresh_from_db()
+        self.assertEqual(list(child.get_ancestors()), [target, parent])
+        if hasattr(child, "sort_path"):
+            self.assertEqual(child.sort_path, f"New building\tRenamed floor\t{child.name}")
+        marker = self.get_map({"device": device.pk}).context["map_config"]["site_markers"][0]
+        self.assertEqual((marker["latitude"], marker["longitude"]), before)
+
+    def test_multiselect_custom_fields_are_displayed_in_popup(self):
+        choices = CustomFieldChoiceSet.objects.create(
+            name="GeoView services", extra_choices=[["access", "Access"], ["core", "Core"]]
+        )
+        field = CustomField.objects.create(
+            name="geoview_services", type=CustomFieldTypeChoices.TYPE_MULTISELECT, choice_set=choices
+        )
+        field.object_types.add(ObjectType.objects.get_for_model(Device))
+        device = Device.objects.first()
+        device.custom_field_data["geoview_services"] = ["access", "core"]
+        device.save()
+        marker = self.get_map({"device": device.pk}).context["map_config"]["site_markers"][0]
+        fields = next(s for s in marker["popup_sections"] if s["title"] == "Custom Fields")
+        value = dict(fields["rows"])["geoview_services"]
+        self.assertIn("access", value)
+        self.assertIn("core", value)
 
     def test_saved_filter_model_selection(self):
         self.assertEqual(get_saved_filter_models({"site": [1]}), [Site])
