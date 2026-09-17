@@ -17,7 +17,9 @@ NetBox compatibility is tracked separately through:
 
 Recommended maintenance lines:
 
-- `0.8.x` for NetBox `4.5.4` through `4.7.0`;
+- the development checkout extends support through NetBox `4.7.1`;
+  see the [NetBox 4.7.1 validation report](docs/validation/netbox-4.7.1.md).
+- published `0.8.0` for NetBox `4.5.4` through `4.7.0`;
   see the [NetBox 4.7.0 validation report](docs/validation/netbox-4.7.0.md).
 - `0.7.x` for NetBox `4.5.4` through `4.6.x`
 - older plugin releases remain available for installations that cannot upgrade
@@ -32,7 +34,8 @@ Recommended branch model:
 
 | Plugin Release | Minimum NetBox | Maximum NetBox | Notes |
 |---|---|---|---|
-| 0.8.x | 4.5.4 | 4.7.0 | Current active line; locally tested with NetBox 4.7.0 / Django 6.1 |
+| Development (unreleased) | 4.5.4 | 4.7.1 | Locally tested with NetBox 4.7.1 / Django 6.1.1 |
+| 0.8.0 | 4.5.4 | 4.7.0 | Published release; locally tested with NetBox 4.7.0 / Django 6.1 |
 | 0.7.x | 4.5.4 | 4.6.x | Previous release line; tested with NetBox 4.6.8 |
 | 0.6.x | 4.5.4 | 4.6.x | Previous release line |
 | 0.5.x | 4.5.4 | 4.5.x | Previous release line |
@@ -41,6 +44,8 @@ Recommended branch model:
 | 0.2.x | 4.5.4 | 4.5.x | Previous release line |
 | 0.1.x | 4.5.4 | 4.5.x | Previous release line |
 
-The 4.7.0 maximum is deliberately exact: later NetBox patch releases still need
-validation. The published 0.7.0 package retains its original 4.6.99 maximum.
-The older supported versions were not re-tested during the 4.7.0 validation.
+The development maximum of 4.7.1 is deliberately exact: later NetBox patch
+releases still need validation. The published 0.8.0 package retains its 4.7.0
+maximum; 0.7.0 retains its original 4.6.99 maximum. A new plugin release is
+required to distribute the 4.7.1 compatibility change through PyPI.
+Older supported versions were not re-tested during the 4.7.1 validation.

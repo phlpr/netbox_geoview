@@ -87,5 +87,9 @@ NetBox can report a successful system check while skipping an incompatible
 plugin with a warning. Tests must verify the plugin's URLs and rendered views.
 
 See [the NetBox 4.7.0 report](docs/validation/netbox-4.7.0.md) for the recorded
-local validation and limitations. GitHub CI currently runs the lightweight
+local validation and limitations, and the
+[NetBox 4.7.1 report](docs/validation/netbox-4.7.1.md) for the isolated patch-version
+validation and targeted upstream regressions. The Unicode search regression is
+skipped below NetBox 4.7.1 because it exercises that version's core collation fix.
+GitHub CI currently runs the lightweight
 suite; it does not run this local integration/browser environment automatically.

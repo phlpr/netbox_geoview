@@ -30,7 +30,8 @@ Most of the code was generated with Codex as a coding co-pilot, but maintenance 
 
 | Plugin Release | NetBox |
 |---|---|
-| `0.8.x` | `4.5.4` to `4.7.0` (locally tested with `4.7.0`) |
+| Development (unreleased) | `4.5.4` to `4.7.1` (locally tested with `4.7.1`) |
+| `0.8.0` | `4.5.4` to `4.7.0` (locally tested with `4.7.0`) |
 | `0.7.x` | `4.5.4` to `4.6.x` (tested with `4.6.8`) |
 | `0.6.x` | `4.5.4` to `4.6.x` |
 | `0.5.x` | `4.5.4` to `4.5.x` |
@@ -41,9 +42,16 @@ support for this NetBox version. See the
 [validation report](docs/validation/netbox-4.7.0.md) and
 [local test instructions](TESTING.md).
 
+NetBox 4.7.1 is validated in the development checkout; see its
+[validation report](docs/validation/netbox-4.7.1.md). This compatibility change
+is not yet published: installing GeoView 0.8.0 from PyPI still limits NetBox to
+4.7.0. Later NetBox versions are not included automatically.
+
 GeoView honors NetBox's login requirement and object permissions. Users need
 view access to the sites/devices and related filter objects they want to select.
 Saved filters must be enabled and shared or owned by the current user.
+Only GeoView's supported filter fields are applied from saved filters; arbitrary
+NetBox filters such as `cf_*` custom-field filters are not currently supported.
 
 ## Installation
 
@@ -188,7 +196,8 @@ Recommendation:
 
 ## Requirements
 
-- NetBox `4.5.4` through `4.7.0`; release `0.8.0` is tested with NetBox `4.7.0`
+- Development checkout: NetBox `4.5.4` through `4.7.1`, tested with `4.7.1`.
+  Published release `0.8.0`: NetBox `4.5.4` through `4.7.0`, tested with `4.7.0`.
 - Python `>=3.12`
 - No additional Python runtime dependencies are required beyond NetBox's own environment
 - Installation in the NetBox virtual environment (for example: `pip install <path-to-plugin>`)
