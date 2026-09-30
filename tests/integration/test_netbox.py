@@ -327,11 +327,11 @@ class MapIntegrationTests(TestCase):
                 self.assertEqual(response.status_code, 302)
                 self.assertIn("login", response.url)
 
-    def test_user_without_object_permissions_sees_no_devices(self):
+    def test_user_without_object_permissions_is_denied(self):
         user = get_user_model().objects.create_user(username="unprivileged")
         self.client.force_login(user)
-        response = self.get_map({"q": "geoview"})
-        self.assertEqual(response.context["map_config"]["site_markers"], [])
+        response = self.client.get(self.map_url, {"q": "geoview"})
+        self.assertEqual(response.status_code, 403)
 
     def test_object_permissions_limit_devices(self):
         user = get_user_model().objects.create_user(username="restricted")
@@ -448,6 +448,7 @@ class ProxyIntegrationTests(TestCase):
                 response = self.client.get(self.tile_url)
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(response.content, b"image")
+                self.assertEqual(response["Cache-Control"], "private, no-cache")
             get.assert_called_once()
 
     def test_unknown_tile_layer(self):

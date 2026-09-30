@@ -3,8 +3,8 @@
 The development checkout is compatible with NetBox 4.7.1 in the environment
 below after increasing `NETBOX_MAX_VERSION` from `4.7.0` to exactly `4.7.1`.
 No functional plugin changes or plugin database migrations were necessary.
-This is an **unreleased** compatibility change: the published GeoView 0.8.0
-package still declares a maximum of NetBox 4.7.0.
+The compatibility change was unreleased at the time of this validation and is
+included in GeoView 0.8.1. GeoView 0.8.0 still declares a maximum of NetBox 4.7.0.
 
 ## Environment and isolation
 
@@ -50,9 +50,9 @@ skipped GeoView even though `manage.py check` returned success. After the versio
 limit change, the app registry, plugin URLs, rendered views and browser checks
 confirmed that GeoView was actually enabled.
 
-The local build retains the source version number 0.8.0 for validation only;
-it is not the published PyPI artifact and was not uploaded. Select a new version
-before releasing these changes. The wheel was installed into a separate target
+The local build used the source version number 0.8.0 for validation only;
+it was not the published PyPI artifact and was not uploaded. The changes are
+released as 0.8.1. The wheel was installed into a separate target
 directory, and its import/template paths were asserted before testing.
 
 The four added integration tests cover:

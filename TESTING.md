@@ -49,6 +49,30 @@ plus routing and tile-proxy success/error handling. These integration tests mock
 external HTTP calls; the browser suite separately checks the configured live
 tile and Valhalla services.
 
+The access-control regressions in `tests/integration/test_permissions.py` render
+NetBox's actual navigation and exercise all five GeoView endpoints. They cover
+anonymous users (including public NetBox configurations), missing/unrelated/
+change-only/disabled permissions, Site-only and Device-only readers, groups,
+superusers, default and exempt permissions, switching users and revoking rights
+after a tile has been cached. Existing map tests verify object constraints.
+
+The access-control change was validated on 2026-09-30 against NetBox 4.5.10
+(Django 5.2.13 / Python 3.13.14) and 4.7.0 (Django 6.1 / Python 3.14.7):
+48 integration tests passed and the 4.7.1-only Unicode regression was skipped
+on each version. All six lightweight tests also passed. The 4.5.10 run used an
+isolated source archive, virtual environment and `test_netbox_geoview_access_4510`
+database; it did not downgrade the existing NetBox checkout or database. Its
+system check reported only missing generated documentation static files in the
+source archive. Browser interactions were not rerun for this access-only change;
+the integration tests render the real menu and templates.
+
+The final 0.8.1 wheel was additionally installed and tested on NetBox 4.5.10
+(48 passed, one version-specific skip) and 4.7.1 (Django 6.1.1 / Python 3.14.6;
+49 passed). Wheel/sdist contents and metadata validation passed. The 4.7.1
+package check confirmed the installed wheel, plugin registration and URLs;
+`collectstatic` collected the plugin assets successfully. The source archives
+reported only the missing generated documentation static-directory warning.
+
 ## Browser tests
 
 Use Playwright with its Chromium browser installed. Start an additional local

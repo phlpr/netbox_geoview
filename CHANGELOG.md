@@ -5,6 +5,17 @@ uses semantic versioning for plugin releases.
 
 ## Unreleased
 
+## 0.8.1 - 2026-09-30
+
+### Fixed
+
+- Require login and either Site or Device view permission for the GeoView menu
+  and all endpoints, including tiles and routing, even with `LOGIN_REQUIRED`
+  disabled. Use existing NetBox permissions and retain object constraints;
+  no new permission or database migration is required.
+- Mark tile responses private and require revalidation so shared HTTP caches
+  cannot bypass the access check. The internal tile cache remains enabled.
+
 ### Compatibility
 
 - Validate NetBox 4.7.1 with Django 6.1.1 and Python 3.14.7 in an isolated local
@@ -13,8 +24,8 @@ uses semantic versioning for plugin releases.
   after move/rename, device mapping after location changes, and multiselect
   custom-field popup values. No plugin model migration is required.
 - Document the NetBox 4.7.1 hierarchy-restore warning and validation scope in
-  `docs/validation/netbox-4.7.1.md`. Published GeoView 0.8.0 remains limited to
-  NetBox 4.7.0 until a new plugin release is published.
+  `docs/validation/netbox-4.7.1.md`. GeoView 0.8.0 remains limited to NetBox 4.7.0;
+  support for NetBox 4.7.1 starts with this release.
 
 ## 0.8.0 - 2026-09-06
 

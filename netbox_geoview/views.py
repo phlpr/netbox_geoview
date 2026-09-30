@@ -20,7 +20,6 @@ from django.views.generic import TemplateView
 
 from dcim.models import Device, Site
 from netbox.plugins import get_plugin_config
-from utilities.views import ConditionalLoginRequiredMixin
 
 from .forms import (
     DEVICE_FILTER_FIELDS,
@@ -29,6 +28,7 @@ from .forms import (
     get_saved_filter_models,
     get_usable_saved_filters,
 )
+from .permissions import GeoViewPermissionRequiredMixin
 from .polyline import decode_polyline
 from .version import __version__
 
@@ -171,7 +171,7 @@ def apply_saved_filter_parameters(data, user):
     return data
 
 
-class GeoViewConfigMixin(ConditionalLoginRequiredMixin):
+class GeoViewConfigMixin(GeoViewPermissionRequiredMixin):
     plugin_name = "netbox_geoview"
 
     def get_plugin_settings(self):
@@ -1028,7 +1028,7 @@ class GeoViewTileView(GeoViewConfigMixin, View):
             response = HttpResponse(
                 cached_tile["content"], content_type=cached_tile["content_type"]
             )
-            response["Cache-Control"] = "public, max-age=86400"
+            response["Cache-Control"] = "private, no-cache"
             return response
 
         request_headers = {
@@ -1062,7 +1062,7 @@ class GeoViewTileView(GeoViewConfigMixin, View):
             timeout=86400,
         )
         response = HttpResponse(content, content_type=content_type)
-        response["Cache-Control"] = "public, max-age=86400"
+        response["Cache-Control"] = "private, no-cache"
         return response
 
 

@@ -30,7 +30,7 @@ Most of the code was generated with Codex as a coding co-pilot, but maintenance 
 
 | Plugin Release | NetBox |
 |---|---|
-| Development (unreleased) | `4.5.4` to `4.7.1` (locally tested with `4.7.1`) |
+| `0.8.1` | `4.5.4` to `4.7.1` (locally tested with `4.5.10`, `4.7.0`, and `4.7.1`) |
 | `0.8.0` | `4.5.4` to `4.7.0` (locally tested with `4.7.0`) |
 | `0.7.x` | `4.5.4` to `4.6.x` (tested with `4.6.8`) |
 | `0.6.x` | `4.5.4` to `4.6.x` |
@@ -42,13 +42,22 @@ support for this NetBox version. See the
 [validation report](docs/validation/netbox-4.7.0.md) and
 [local test instructions](TESTING.md).
 
-NetBox 4.7.1 is validated in the development checkout; see its
-[validation report](docs/validation/netbox-4.7.1.md). This compatibility change
-is not yet published: installing GeoView 0.8.0 from PyPI still limits NetBox to
-4.7.0. Later NetBox versions are not included automatically.
+NetBox 4.7.1 requires GeoView 0.8.1 or later; see its
+[validation report](docs/validation/netbox-4.7.1.md). GeoView 0.8.0 remains limited
+to NetBox 4.7.0. Later NetBox versions are not included automatically.
 
-GeoView honors NetBox's login requirement and object permissions. Users need
-view access to the sites/devices and related filter objects they want to select.
+Starting with 0.8.1, GeoView requires an authenticated, active user with
+`dcim.view_site` **or** `dcim.view_device`. The menu is hidden otherwise, and the
+same rule protects every GeoView endpoint, including tiles and routing. Anonymous
+requests redirect to login even when NetBox's `LOGIN_REQUIRED` is disabled;
+authenticated users without either permission receive HTTP 403. This also
+applies on NetBox 4.5.10.
+
+Permissions are evaluated through NetBox, including group/default permissions,
+superusers and `EXEMPT_VIEW_PERMISSIONS`. Exemptions do not bypass GeoView's login
+requirement. No separate GeoView permission or plugin model is needed. Object
+constraints still limit the sites/devices shown, and users need view access to
+related filter objects they want to select.
 Saved filters must be enabled and shared or owned by the current user.
 Only GeoView's supported filter fields are applied from saved filters; arbitrary
 NetBox filters such as `cf_*` custom-field filters are not currently supported.
@@ -64,7 +73,7 @@ pip install netbox-geoview
 Optional: install directly from a tagged GitHub source archive:
 
 ```bash
-pip install https://github.com/phlpr/netbox_geoview/archive/refs/tags/v0.8.0.tar.gz
+pip install https://github.com/phlpr/netbox_geoview/archive/refs/tags/v0.8.1.tar.gz
 ```
 
 ## Configuration
@@ -196,8 +205,7 @@ Recommendation:
 
 ## Requirements
 
-- Development checkout: NetBox `4.5.4` through `4.7.1`, tested with `4.7.1`.
-  Published release `0.8.0`: NetBox `4.5.4` through `4.7.0`, tested with `4.7.0`.
+- GeoView `0.8.1`: NetBox `4.5.4` through `4.7.1`, tested with `4.5.10`, `4.7.0`, and `4.7.1`.
 - Python `>=3.12`
 - No additional Python runtime dependencies are required beyond NetBox's own environment
 - Installation in the NetBox virtual environment (for example: `pip install <path-to-plugin>`)
