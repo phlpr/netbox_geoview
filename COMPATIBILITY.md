@@ -17,7 +17,7 @@ NetBox compatibility is tracked separately through:
 
 Recommended release:
 
-- `0.8.1` for NetBox `4.5.4` through `4.7.1`
+- `0.8.2` for NetBox `4.5.4` through `4.7.2`
 
 Recommended branch model:
 
@@ -29,9 +29,9 @@ Recommended branch model:
 
 | Plugin Release | Minimum NetBox | Maximum NetBox |
 |---|---|---|
-| 0.8.1 | 4.5.4 | 4.7.1 |
+| 0.8.2 | 4.5.4 | 4.7.2 |
 
-The 0.8.1 maximum of 4.7.1 is deliberately exact: later NetBox patch
+The 0.8.2 maximum of 4.7.2 is deliberately exact: later NetBox patch
 releases still need validation.
 
 See [testing details](TESTING.md) for validation reports and test instructions.

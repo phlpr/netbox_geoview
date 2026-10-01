@@ -30,7 +30,7 @@ Most of the code was generated with Codex as a coding co-pilot, but maintenance 
 
 | Plugin Release | NetBox |
 |---|---|
-| `0.8.1` | `4.5.4` to `4.7.1` |
+| `0.8.2` | `4.5.4` to `4.7.2` |
 
 Later NetBox versions are not included automatically. See
 [testing details](TESTING.md) for validation reports and test instructions.
@@ -53,16 +53,17 @@ NetBox filters such as `cf_*` custom-field filters are not currently supported.
 
 ## Installation
 
-Install inside the NetBox virtual environment:
+Install [netbox-geoview from PyPI](https://pypi.org/project/netbox-geoview/)
+inside the NetBox virtual environment:
 
 ```bash
-pip install netbox-geoview
+python -m pip install --upgrade netbox-geoview==0.8.2
 ```
 
 Optional: install directly from a tagged GitHub source archive:
 
 ```bash
-pip install https://github.com/phlpr/netbox_geoview/archive/refs/tags/v0.8.1.tar.gz
+pip install https://github.com/phlpr/netbox_geoview/archive/refs/tags/v0.8.2.tar.gz
 ```
 
 ## Configuration
@@ -194,10 +195,10 @@ Recommendation:
 
 ## Requirements
 
-- GeoView `0.8.1`: NetBox `4.5.4` through `4.7.1`.
+- GeoView `0.8.2`: NetBox `4.5.4` through `4.7.2`.
 - Python `>=3.12`
 - No additional Python runtime dependencies are required beyond NetBox's own environment
-- Installation in the NetBox virtual environment (for example: `pip install <path-to-plugin>`)
+- Installation in the NetBox virtual environment (see [Installation](#installation))
 - Plugin activation in `configuration.py`:
   - `PLUGINS = ["netbox_geoview"]`
   - `PLUGINS_CONFIG = {"netbox_geoview": {...}}`

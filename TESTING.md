@@ -115,5 +115,12 @@ local validation and limitations, and the
 [NetBox 4.7.1 report](docs/validation/netbox-4.7.1.md) for the isolated patch-version
 validation and targeted upstream regressions. The Unicode search regression is
 skipped below NetBox 4.7.1 because it exercises that version's core collation fix.
+The [NetBox 4.7.2 check](docs/validation/netbox-4.7.2.md) passed with only an
+expanded version limit in a disposable copy. GeoView 0.8.2 includes this change;
+unchanged GeoView 0.8.1 still declares a maximum of NetBox 4.7.1 and is skipped
+on 4.7.2.
+The 0.8.2 release wheel also passed all 49 integration tests on NetBox 4.7.2,
+with installed-package imports, registration, templates and static collection
+verified. Wheel/sdist metadata and packaged resources passed validation.
 GitHub CI currently runs the lightweight
 suite; it does not run this local integration/browser environment automatically.

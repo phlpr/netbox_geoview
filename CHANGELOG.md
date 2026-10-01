@@ -5,6 +5,21 @@ uses semantic versioning for plugin releases.
 
 ## Unreleased
 
+## 0.8.2 - 2026-10-01
+
+### Compatibility
+
+- Support NetBox 4.5.4 through 4.7.2 by raising the maximum supported version
+  to exactly 4.7.2. No functional plugin changes or database migrations are
+  required. GeoView 0.8.1 remains limited to NetBox 4.7.1.
+- Validate NetBox 4.7.2 with 49 GeoView integration tests, 14 focused upstream
+  regressions and 13 browser checks; see `docs/validation/netbox-4.7.2.md`.
+
+### Documentation
+
+- Show only the current release in the compatibility matrix and link the
+  README installation instructions directly to the PyPI project.
+
 ## 0.8.1 - 2026-09-30
 
 ### Fixed
