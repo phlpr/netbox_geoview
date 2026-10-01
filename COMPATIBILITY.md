@@ -15,14 +15,9 @@ NetBox compatibility is tracked separately through:
 - `min_version` and `max_version` in `netbox_geoview/version.py`
 - this compatibility matrix
 
-Recommended maintenance lines:
+Recommended release:
 
-- `0.8.1` for NetBox `4.5.4` through `4.7.1`;
-  see the [NetBox 4.7.1 validation report](docs/validation/netbox-4.7.1.md).
-- `0.8.0` for NetBox `4.5.4` through `4.7.0`;
-  see the [NetBox 4.7.0 validation report](docs/validation/netbox-4.7.0.md).
-- `0.7.x` for NetBox `4.5.4` through `4.6.x`
-- older plugin releases remain available for installations that cannot upgrade
+- `0.8.1` for NetBox `4.5.4` through `4.7.1`
 
 Recommended branch model:
 
@@ -32,23 +27,11 @@ Recommended branch model:
 
 ## Release Matrix
 
-| Plugin Release | Minimum NetBox | Maximum NetBox | Notes |
-|---|---|---|---|
-| 0.8.1 | 4.5.4 | 4.7.1 | Access controls; tested with NetBox 4.5.10, 4.7.0, and 4.7.1 |
-| 0.8.0 | 4.5.4 | 4.7.0 | Published release; locally tested with NetBox 4.7.0 / Django 6.1 |
-| 0.7.x | 4.5.4 | 4.6.x | Previous release line; tested with NetBox 4.6.8 |
-| 0.6.x | 4.5.4 | 4.6.x | Previous release line |
-| 0.5.x | 4.5.4 | 4.5.x | Previous release line |
-| 0.4.x | 4.5.4 | 4.5.x | Previous release line |
-| 0.3.x | 4.5.4 | 4.5.x | Previous release line |
-| 0.2.x | 4.5.4 | 4.5.x | Previous release line |
-| 0.1.x | 4.5.4 | 4.5.x | Previous release line |
+| Plugin Release | Minimum NetBox | Maximum NetBox |
+|---|---|---|
+| 0.8.1 | 4.5.4 | 4.7.1 |
 
 The 0.8.1 maximum of 4.7.1 is deliberately exact: later NetBox patch
-releases still need validation. The 0.8.0 package retains its 4.7.0
-maximum; 0.7.0 retains its original 4.6.99 maximum.
-Older supported versions were not re-tested during the 4.7.1 validation.
+releases still need validation.
 
-The access-control change included in 0.8.1 was integration-tested on
-NetBox 4.5.10 and 4.7.0 on 2026-09-30, with 48 passing tests and one
-version-specific skip on each. See [testing details](TESTING.md).
+See [testing details](TESTING.md) for validation reports and test instructions.
