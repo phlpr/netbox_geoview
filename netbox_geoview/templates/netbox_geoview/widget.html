@@ -1,0 +1,18 @@
+{% load static i18n %}
+<div class="geoview-widget" data-geoview-widget="{{ widget_id }}"
+     data-url="{{ data_url }}"
+     data-leaflet-js="{% static 'netbox_geoview/vendor/leaflet/leaflet.js' %}"
+     data-leaflet-css="{% static 'netbox_geoview/vendor/leaflet/leaflet.css' %}"
+     data-geoview-js="{% static 'netbox_geoview/geoview.js' %}?v={{ asset_version }}"
+     data-geoview-css="{% static 'netbox_geoview/geoview.css' %}?v={{ asset_version }}"
+     data-loading="{% trans 'Loading map…' %}"
+     data-empty="{% trans 'No matching objects with coordinates.' %}"
+     data-error="{% trans 'The map could not be loaded. Check the saved filter and your permissions.' %}">
+  <div class="geoview-widget-toolbar d-flex align-items-center gap-2 mb-1">
+    <a data-geoview-open class="btn btn-sm btn-outline-primary d-none">{% trans "Open in GeoView" %}</a>
+    <button type="button" data-geoview-refresh class="btn btn-sm btn-outline-secondary">{% trans "Refresh" %}</button>
+  </div>
+  <div data-geoview-status class="small text-secondary" role="status">{% trans "Loading map…" %}</div>
+  <div class="geoview-map geoview-map--widget" data-geoview-widget-map></div>
+</div>
+<script src="{% static 'netbox_geoview/widget.js' %}?v={{ asset_version }}"></script>

@@ -252,3 +252,105 @@ msgstr "Der Routing-Dienst hat eine ungueltige Antwort geliefert."
 msgid "No route found."
 msgstr "Keine Route gefunden."
 
+msgid "Save filter"
+msgstr "Filter speichern"
+
+msgid "Save as new filter"
+msgstr "Als neuen Filter speichern"
+
+msgid "Update saved filter"
+msgstr "Gespeicherten Filter aktualisieren"
+
+msgid "Load filter"
+msgstr "Filter laden"
+
+msgid "Save GeoView filter"
+msgstr "GeoView-Filter speichern"
+
+msgid "Update GeoView filter"
+msgstr "GeoView-Filter aktualisieren"
+
+msgid "Sharing makes this filter available to other users; it does not grant access to sites or devices."
+msgstr "Durch die Freigabe können andere Benutzer diesen Filter verwenden. Sie erhalten dadurch keine zusätzlichen Zugriffsrechte auf Standorte oder Geräte."
+
+msgid "Invalid filter parameters."
+msgstr "Ungültige Filterbedingungen."
+
+msgid "Filter parameters must be an object."
+msgstr "Filterbedingungen müssen als JSON-Objekt angegeben werden."
+
+msgid "Filter values must be simple values or lists."
+msgstr "Filterwerte müssen einfache Werte oder Listen sein."
+
+msgid "This filter contains unsupported conditions: %(field)s"
+msgstr "Dieser Filter enthält nicht unterstützte Bedingungen: %(field)s"
+
+msgid "Unsupported filter operator."
+msgstr "Nicht unterstützter Filteroperator."
+
+msgid "The saved filter is unavailable."
+msgstr "Der gespeicherte Filter ist nicht verfügbar."
+
+msgid "Saved filters contain a circular or excessively nested reference."
+msgstr "Gespeicherte Filter enthalten einen zirkulären oder zu tief verschachtelten Verweis."
+
+msgid "This saved filter does not apply to sites or devices."
+msgstr "Dieser gespeicherte Filter gilt nicht für Standorte oder Geräte."
+
+msgid "The selected filters contain conflicting operators."
+msgstr "Die ausgewählten Filter enthalten widersprüchliche Operatoren."
+
+msgid "Some filter selections are invalid or no longer accessible."
+msgstr "Einige Filterauswahlen sind ungültig oder nicht mehr zugänglich."
+
+msgid "Select at least one filter condition before saving."
+msgstr "Bitte vor dem Speichern mindestens eine Filterbedingung auswählen."
+
+msgid "GeoView filter saved."
+msgstr "GeoView-Filter gespeichert."
+
+msgid "Select a saved filter for this widget."
+msgstr "Bitte einen gespeicherten Filter für dieses Widget auswählen."
+
+msgid "The filter is unavailable, incompatible, or contains inaccessible selections."
+msgstr "Der Filter ist nicht verfügbar, inkompatibel oder enthält nicht zugängliche Auswahlen."
+
+msgid "The saved filter has no supported conditions."
+msgstr "Der gespeicherte Filter enthält keine unterstützten Bedingungen."
+
+msgid "GeoView map"
+msgstr "GeoView-Karte"
+
+msgid "Display a GeoView map using a saved filter."
+msgstr "Eine GeoView-Karte mit einem gespeicherten Filter anzeigen."
+
+msgid "Saved filter"
+msgstr "Gespeicherter Filter"
+
+msgid "Choose an enabled GeoView-compatible filter you own or which is shared."
+msgstr "Einen aktivierten, GeoView-kompatiblen eigenen oder freigegebenen Filter auswählen."
+
+msgid "Fit map to markers"
+msgstr "Kartenausschnitt an Markierungen anpassen"
+
+msgid "The saved filter is disabled."
+msgstr "Der gespeicherte Filter ist deaktiviert."
+
+msgid "You do not have permission to view GeoView."
+msgstr "Sie haben keine Berechtigung, GeoView anzuzeigen."
+
+msgid "Loading map…"
+msgstr "Karte wird geladen …"
+
+msgid "No matching objects with coordinates."
+msgstr "Keine passenden Objekte mit Koordinaten."
+
+msgid "The map could not be loaded. Check the saved filter and your permissions."
+msgstr "Die Karte konnte nicht geladen werden. Bitte den gespeicherten Filter und die Berechtigungen prüfen."
+
+msgid "Open in GeoView"
+msgstr "In GeoView öffnen"
+
+msgid "Refresh"
+msgstr "Aktualisieren"
+

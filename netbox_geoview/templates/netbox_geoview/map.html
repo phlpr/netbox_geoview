@@ -5,6 +5,7 @@
 {% block content %}
   {{ map_config|json_script:"geoview-map-config" }}
   <div class="tab-pane geoview-viewport{% if active_tab == 'map' %} show active{% endif %}" id="map-panel" role="tabpanel" aria-labelledby="map-tab">
+    {% if filter_form.errors %}<div class="alert alert-warning mb-2" role="alert">{{ filter_form.errors }}</div>{% endif %}
     {% if active_tab == 'map' and active_filter_badges %}
       <div class="geoview-filter-badges mb-3">
         {% for badge in active_filter_badges %}
@@ -14,8 +15,11 @@
         {% endfor %}
         {% if save_filter_url %}
           <a href="{{ save_filter_url }}" class="badge rounded-pill text-bg-success text-decoration-none">
-            <i class="mdi mdi-content-save"></i> {% trans "Save" %}
+            <i class="mdi mdi-content-save"></i> {% if source_filter_id %}{% trans "Save as new filter" %}{% else %}{% trans "Save filter" %}{% endif %}
           </a>
+        {% endif %}
+        {% if update_filter_url %}
+          <a href="{{ update_filter_url }}" class="badge rounded-pill text-bg-success text-decoration-none"><i class="mdi mdi-content-save"></i> {% trans "Update saved filter" %}</a>
         {% endif %}
       </div>
     {% endif %}

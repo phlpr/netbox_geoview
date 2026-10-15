@@ -1,4 +1,9 @@
 (function () {
+    if (window.GeoView) {
+        window.GeoView.init(document);
+        return;
+    }
+    const instances = new WeakMap();
     function escapeHtml(value) {
         return String(value)
             .replaceAll("&", "&amp;")
@@ -108,7 +113,7 @@
                 </button>
             </div>
         `;
-        const routeActionsBlock = hasCoordinates
+        const routeActionsBlock = hasCoordinates && labels.show_route_actions !== false
             ? `
                 <div class="geoview-popup-route-actions">
                     <button
@@ -161,7 +166,7 @@
     }
 
     function fitMapToBounds(map, bounds, config) {
-        if (bounds.length > 0) {
+        if (bounds.length > 0 && config.fit_bounds !== false) {
             map.fitBounds(bounds, {
                 padding: [24, 24],
                 maxZoom: Math.max(config.zoom, 10),
@@ -295,6 +300,7 @@
     }
 
     function renderMap(element) {
+        if (instances.has(element)) return;
         element.dataset.geoviewRendered = "0";
 
         if (!window.L) {
@@ -317,6 +323,21 @@
             scrollWheelZoom: Boolean(config.scroll_wheel_zoom),
             zoomControl: true,
         });
+        let markerBounds = [];
+        const observer = new ResizeObserver(function () {
+            if (element.isConnected) {
+                if (element.hasAttribute("data-geoview-widget-map")) {
+                    element.style.setProperty("--geoview-widget-popup-width", Math.max(120, element.clientWidth - 72) + "px");
+                    element.style.setProperty("--geoview-widget-popup-height", Math.max(60, element.clientHeight - 120) + "px");
+                }
+                map.invalidateSize({pan: false});
+                if (element.hasAttribute("data-geoview-widget-map") && config.fit_bounds !== false && markerBounds.length) {
+                    fitMapToBounds(map, markerBounds, config);
+                }
+            }
+        });
+        observer.observe(element);
+        instances.set(element, {map: map, observer: observer});
 
         const baseLayers = {};
         let activeLayer = null;
@@ -771,7 +792,7 @@
             position: "topright",
         }).addTo(map);
 
-        const markerBounds = addSiteMarkers(map, config, { setPoint: setRoutePoint });
+        markerBounds = addSiteMarkers(map, config, { setPoint: setRoutePoint });
         addRecenterControl(map, config, markerBounds);
         setCostingOptions();
         setRouteSummary(null, defaultCosting);
@@ -782,11 +803,24 @@
         element.dataset.geoviewRendered = "1";
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll("[data-geoview-map]").forEach(function (element) {
+    function destroy(element) {
+        const instance = instances.get(element);
+        if (instance) {
+            instance.observer.disconnect();
+            instance.map.remove();
+            instances.delete(element);
+        }
+        element.dataset.geoviewRendered = "0";
+    }
+
+    function init(context) {
+        const elements = Array.from(context.querySelectorAll("[data-geoview-map]"));
+        if (context.matches && context.matches("[data-geoview-map]")) elements.unshift(context);
+        elements.forEach(function (element) {
             try {
                 renderMap(element);
             } catch (error) {
+                destroy(element);
                 element.dataset.geoviewRenderReason = "render-error";
                 element.dataset.geoviewRendered = "0";
                 if (window.console && typeof window.console.error === "function") {
@@ -794,5 +828,14 @@
                 }
             }
         });
+    }
+    window.GeoView = {init: init, destroy: destroy};
+    document.addEventListener("htmx:load", event => init(event.detail.elt));
+    document.addEventListener("htmx:beforeCleanupElement", function (event) {
+        const root = event.detail.elt;
+        if (root.matches("[data-geoview-map]")) destroy(root);
+        root.querySelectorAll("[data-geoview-map]").forEach(destroy);
     });
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", () => init(document));
+    else init(document);
 }());

@@ -17,6 +17,11 @@ else:
         base_url = "geoview"
         min_version = NETBOX_MIN_VERSION
         max_version = NETBOX_MAX_VERSION
+
+        def ready(self):
+            super().ready()
+            from . import widgets  # noqa: F401 -- register after apps are ready.
+
         default_settings = {
             "start_latitude": 20.0,
             "start_longitude": 0.0,

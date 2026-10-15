@@ -1,0 +1,22 @@
+{% extends 'generic/_base.html' %}
+{% load i18n %}
+{% load form_helpers %}
+{% block title %}{% if editing %}{% trans "Update GeoView filter" %}{% else %}{% trans "Save GeoView filter" %}{% endif %}{% endblock %}
+{% block content %}
+  <div class="card"><div class="card-body">
+    {% if filter_error %}<div class="alert alert-warning">{{ filter_error.messages|join:", " }}</div>{% endif %}
+    <form method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+      {{ form.parameters }}
+      {% render_field form.name %}
+      {% render_field form.slug %}
+      {% render_field form.description %}
+      {% render_field form.shared %}
+      {% if form.parameters.errors %}<div class="alert alert-danger">{{ form.parameters.errors }}</div>{% endif %}
+      <p class="text-secondary">{% trans "Sharing makes this filter available to other users; it does not grant access to sites or devices." %}</p>
+      <button class="btn btn-primary" type="submit">{% trans "Save" %}</button>
+      <a class="btn btn-outline-secondary" href="{% url 'plugins:netbox_geoview:map' %}">{% trans "Cancel" %}</a>
+    </form>
+  </div></div>
+{% endblock %}

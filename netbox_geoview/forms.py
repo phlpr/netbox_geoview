@@ -1,9 +1,18 @@
+import json
+
 from django import forms
-from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 from core.models import ObjectType
-from dcim.models import Device, DeviceType, Manufacturer, Platform, Region, Site, SiteGroup
+from dcim.models import (
+    Device,
+    DeviceType,
+    Manufacturer,
+    Platform,
+    Region,
+    Site,
+    SiteGroup,
+)
 from extras.models import SavedFilter
 from tenancy.models import Tenant, TenantGroup
 from users.models import Owner, OwnerGroup
@@ -14,53 +23,24 @@ from utilities.forms.fields import (
 )
 
 
-SITE_FILTER_FIELDS = ("region", "site_group", "site")
-DEVICE_FILTER_FIELDS = (
-    "q",
-    "tag",
-    "manufacturer",
-    "device_type",
-    "platform",
-    "tenant_group",
-    "tenant",
-    "owner_group",
-    "owner",
-    "device",
-)
+from .filters import get_saved_filter_models as get_saved_filter_models
+from .filters import get_usable_saved_filters, normalize_parameters
 
 
-def _has_filter_value(source, field_name):
-    if source is None:
-        return False
-    if hasattr(source, "getlist"):
-        values = source.getlist(field_name)
-        return any(str(value).strip() for value in values)
-    value = source.get(field_name)
-    if value is None:
-        return False
-    if hasattr(value, "exists"):
-        return value.exists()
-    if isinstance(value, (list, tuple, set)):
-        return bool(value)
-    return bool(str(value).strip())
+class GeoViewSavedFilterForm(forms.ModelForm):
+    parameters = forms.CharField(widget=forms.HiddenInput)
 
+    class Meta:
+        model = SavedFilter
+        fields = ("name", "slug", "description", "shared", "parameters")
+        widgets = {"description": forms.Textarea(attrs={"rows": 2})}
 
-def get_saved_filter_models(source=None):
-    models = []
-    if any(_has_filter_value(source, field) for field in SITE_FILTER_FIELDS):
-        models.append(Site)
-    if any(_has_filter_value(source, field) for field in DEVICE_FILTER_FIELDS):
-        models.append(Device)
-    if models:
-        return models
-    return [Site, Device]
-
-
-def get_usable_saved_filters(user):
-    visible = Q(shared=True)
-    if user.is_authenticated:
-        visible |= Q(user=user)
-    return SavedFilter.objects.restrict(user, "view").filter(visible, enabled=True)
+    def clean_parameters(self):
+        try:
+            data = json.loads(self.cleaned_data["parameters"])
+        except (TypeError, ValueError):
+            raise forms.ValidationError(_("Invalid filter parameters.")) from None
+        return dict(normalize_parameters(data, strict=True).lists())
 
 
 class GeoViewFilterForm(forms.Form):

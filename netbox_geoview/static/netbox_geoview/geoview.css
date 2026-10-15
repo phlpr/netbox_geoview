@@ -6,6 +6,44 @@
     background: var(--tblr-bg-surface-secondary, #d9e4ec);
 }
 
+.geoview-widget {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+.geoview-widget .geoview-map--widget {
+    flex: 1 1 auto;
+    height: 100%;
+    min-height: 10rem;
+    border-radius: var(--tblr-border-radius);
+}
+
+.geoview-widget-toolbar {
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+}
+
+.geoview-map--widget .geoview-popup {
+    width: var(--geoview-widget-popup-width, 18rem);
+    max-width: 31rem;
+}
+
+.geoview-map--widget .geoview-popup-body {
+    max-height: var(--geoview-widget-popup-height, 12rem);
+}
+
+.geoview-map--widget .geoview-popup-table th {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+/* Give compact popups the control area while retaining bottom attribution. */
+.geoview-map--widget:has(.leaflet-popup) .leaflet-top {
+    visibility: hidden;
+}
+
 .geoview-map-layout {
     display: grid;
     grid-template-columns: minmax(18rem, 22rem) minmax(0, 1fr);
@@ -273,12 +311,12 @@
     color: var(--tblr-body-color);
 }
 
-.geoview-map .leaflet-container a.leaflet-popup-close-button {
+.geoview-map a.leaflet-popup-close-button {
     color: var(--tblr-secondary-color);
 }
 
-.geoview-map .leaflet-container a.leaflet-popup-close-button:hover,
-.geoview-map .leaflet-container a.leaflet-popup-close-button:focus {
+.geoview-map a.leaflet-popup-close-button:hover,
+.geoview-map a.leaflet-popup-close-button:focus {
     color: var(--tblr-emphasis-color);
 }
 

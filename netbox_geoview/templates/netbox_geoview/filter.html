@@ -1,6 +1,15 @@
 {% load i18n %}
 
-<form action="{{ apply_url }}" method="get">
+{% if filter_form.errors %}<div class="alert alert-warning">{{ filter_form.errors }}</div>{% endif %}
+<form action="{{ map_base_url }}" method="get" class="mb-3">
+  <div class="row align-items-center g-2">
+    <div class="col-lg-2"><label class="col-form-label" for="{{ filter_form.filter_id.id_for_label }}">{{ filter_form.filter_id.label }}</label></div>
+    <div class="col-lg-8">{{ filter_form.filter_id }}</div>
+    <div class="col-lg-2"><button class="btn btn-outline-primary" type="submit">{% trans "Load filter" %}</button></div>
+  </div>
+</form>
+<form action="{{ apply_url }}" method="get" data-geoview-filter-edit>
+  {% if source_filter_id %}<input type="hidden" name="source_filter_id" value="{{ source_filter_id }}">{% endif %}
   {% for field in filter_form.hidden_fields %}
     {{ field }}
   {% endfor %}
@@ -13,14 +22,6 @@
           </div>
           <div class="col-lg-10">
             {{ filter_form.q }}
-          </div>
-        </div>
-        <div class="row align-items-center g-2 geoview-filter-form__row">
-          <div class="col-lg-2">
-            <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.filter_id.id_for_label }}">{{ filter_form.filter_id.label }}</label>
-          </div>
-          <div class="col-lg-10">
-            {{ filter_form.filter_id }}
           </div>
         </div>
         <div class="row align-items-center g-2 geoview-filter-form__row">

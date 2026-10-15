@@ -48,7 +48,7 @@ const { chromium } = require('playwright');
     await check('Filter tab and dynamic search', async () => {
         await page.locator('#filter-tab').click();
         await page.locator('#id_q').fill('geoview');
-        const form = page.locator('#filter-panel form');
+        const form = page.locator('[data-geoview-filter-edit]');
         await Promise.all([page.waitForURL('**/plugins/geoview/**'), form.locator('button[type="submit"]').click()]);
         await page.locator('[data-geoview-rendered="1"]').waitFor();
         // The user's local database can contain additional matching devices.
