@@ -5,6 +5,32 @@ uses semantic versioning for plugin releases.
 
 ## Unreleased
 
+### Added
+
+- Save, reload, update and copy GeoView filters using NetBox's existing SavedFilter
+  model, including names, descriptions, ownership and sharing. Effective filter
+  conditions are stored without nested filter references or map display settings.
+- Add a native GeoView dashboard widget with a saved-filter selector, automatic
+  marker bounds, manual refresh, popups and a link to the full map. Multiple widgets
+  can share the same assets and resize independently.
+
+### Fixed
+
+- Resolve saved inclusion/exclusion operators together with filter values, and
+  constrain device results by selected site/region/site-group conditions.
+- Reject unavailable, incompatible, unsupported and circular saved filters instead
+  of falling back to an unfiltered map. Explicit URL selections override saved values.
+- Recheck filter and object permissions for widget data requests and send marker
+  responses with private/no-store caching. Updating filters requires ownership (or
+  a superuser) and NetBox's existing change permission; creating requires add permission.
+- Initialize maps idempotently on page and HTMX loads, resize Leaflet maps with their
+  containers, and clean up map instances when fragments are removed.
+
+### Documentation
+
+- Document the saved-filter and dashboard workflow, compatibility validation,
+  supported conditions, sharing behavior and reproducible browser checks.
+
 ## 0.8.2 - 2026-10-01
 
 ### Compatibility

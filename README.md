@@ -6,6 +6,7 @@ It provides:
 
 - a Leaflet map with configurable raster tile layers
 - filters for sites, devices, tags, ownership, tenancy, and related objects
+- reusable saved filters and native dashboard map widgets (development checkout)
 - configurable site and device popups, including custom fields
 - direct-distance measurement and optional Valhalla route calculation
 - reusable development test data for sites, locations, device types, devices, and custom fields
@@ -48,8 +49,13 @@ requirement. No separate GeoView permission or plugin model is needed. Object
 constraints still limit the sites/devices shown, and users need view access to
 related filter objects they want to select.
 Saved filters must be enabled and shared or owned by the current user.
-Only GeoView's supported filter fields are applied from saved filters; arbitrary
-NetBox filters such as `cf_*` custom-field filters are not currently supported.
+Saved filters containing unsupported conditions, such as `cf_*` custom-field
+filters, are rejected with a visible error rather than silently broadening the map.
+
+The development checkout adds a dedicated save/update/copy workflow and a native
+NetBox dashboard widget. See [saved filters and widgets](docs/saved-filters-widgets.md)
+for usage, filter semantics and permissions. This feature is not part of the
+published 0.8.2 release.
 
 ## Installation
 

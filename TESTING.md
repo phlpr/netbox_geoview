@@ -50,7 +50,7 @@ external HTTP calls; the browser suite separately checks the configured live
 tile and Valhalla services.
 
 The access-control regressions in `tests/integration/test_permissions.py` render
-NetBox's actual navigation and exercise all five GeoView endpoints. They cover
+NetBox's actual navigation and exercise map, filter, apply, tile and routing endpoints. They cover
 anonymous users (including public NetBox configurations), missing/unrelated/
 change-only/disabled permissions, Site-only and Device-only readers, groups,
 superusers, default and exempt permissions, switching users and revoking rights
@@ -124,3 +124,34 @@ with installed-package imports, registration, templates and static collection
 verified. Wheel/sdist metadata and packaged resources passed validation.
 GitHub CI currently runs the lightweight
 suite; it does not run this local integration/browser environment automatically.
+
+## Saved-filter and dashboard feature checks
+
+`tests/integration/test_widgets.py` adds 20 integration tests. They exercise
+create/update/copy round trips, saved operators, edited/cleared selections,
+mixed site/device constraints, unsupported and circular filters, CSRF, ownership,
+object permissions and the real NetBox dashboard configuration views. The full
+suite now discovers 69 tests; the Unicode-only regression is skipped below 4.7.1.
+
+Run the nine widget browser scenarios against a server backed by a dedicated test
+database and a temporary authenticated test session:
+
+```bash
+GEOVIEW_BASE_URL=http://127.0.0.1:8001 \
+GEOVIEW_COOKIE_FILE=/private/path/session.json \
+GEOVIEW_SITE_IDS=1,2,3 \
+GEOVIEW_ARTIFACTS=/tmp/geoview-widget-results \
+node tests/browser/widgets.cjs
+```
+
+This script creates saved filters and two widgets in the authenticated user's
+dashboard. Use a disposable test account, not your ordinary development account.
+Start with no GeoView widgets on that account's dashboard. The two widgets use
+different filters and must show different marker sets. Checks cover refresh,
+unavailable filters clearing old data, idempotent HTMX initialization, resizing,
+light/dark popups and mobile overflow. JSON results and screenshots are retained
+under the artifact directory. Revoke the session and disable the disposable test
+account when finished.
+
+For the 2026-10-15 matrix results and environment details, see
+[the saved-filter/widget validation report](docs/validation/saved-filters-widgets.md).

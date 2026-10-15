@@ -35,3 +35,11 @@ The 0.8.2 maximum of 4.7.2 is deliberately exact: later NetBox patch
 releases still need validation.
 
 See [testing details](TESTING.md) for validation reports and test instructions.
+
+## Development feature: saved filters and dashboard widgets
+
+The unreleased feature was validated on NetBox 4.5.10, 4.6.10 and 4.7.2 on
+2026-10-15. Each target passed its integration suite and nine dashboard browser
+scenarios. See the [feature validation report](docs/validation/saved-filters-widgets.md).
+The published 0.8.2 package does not include this feature. These checks do not
+extend the declared maximum beyond 4.7.2 or newly validate other older patches.
