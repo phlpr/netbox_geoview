@@ -125,8 +125,8 @@ verified. Wheel/sdist metadata and packaged resources passed validation.
 The [NetBox 4.7.3 check](docs/validation/netbox-4.7.3.md) passed all 94 development
 integration tests, the 49 release-era tests against published 0.8.2 code, nine
 targeted upstream tests and 32 browser checks. Only the maximum NetBox version
-was raised in disposable plugin copies. The repository and published release
-still declare a maximum of 4.7.2 and are skipped on 4.7.3 without that change.
+was raised in disposable plugin copies. GeoView 0.9.0 includes that compatibility
+change; the unchanged 0.8.2 release remains limited to 4.7.2.
 GitHub CI currently runs the lightweight
 suite; it does not run this local integration/browser environment automatically.
 

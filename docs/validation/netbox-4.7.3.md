@@ -5,12 +5,12 @@ GeoView works on NetBox 4.7.3 after raising only `NETBOX_MAX_VERSION` from
 and the development checkout at `75ec937` passed their integration suites.
 No functional plugin changes, new dependencies or plugin migrations were needed.
 
-**Unchanged GeoView 0.8.2 and the current checkout do not load on NetBox 4.7.3.**
+**Unchanged GeoView 0.8.2 and the checkout at `75ec937` do not load on NetBox 4.7.3.**
 Their maximum supported version is still 4.7.2. The baseline check reproduced
 NetBox's version warning and asserted that GeoView was absent from Django's app
 registry. Updating that compatibility limit is necessary to enable the plugin.
-This validation changes the limit only in test copies; repository and release
-compatibility metadata remain 4.5.4–4.7.2.
+The initial validation changed the limit only in test copies. GeoView 0.9.0
+incorporates the validated change and declares compatibility with 4.5.4–4.7.3.
 
 ## Environment
 
@@ -110,7 +110,8 @@ suites. Run tests sequentially when sharing the reserved Redis databases.
 Local wrappers, configuration, browser setup/cleanup scripts, logs, results and
 screenshots are retained under `/home/prohph/geoview-netbox473-6zHKedO2/`.
 The published wheel contents were tested from the extracted copy, rather than
-installed as a newly built wheel. No release was built or published.
+installed as a newly built wheel. That initial compatibility check did not build
+or publish a release; the subsequent 0.9.0 package validation is recorded below.
 
 The temporary server was stopped, browser sessions revoked, private credential
 files removed, and disposable users and their saved filters/dashboard records
@@ -121,3 +122,22 @@ This validates a fresh isolated installation. An in-place production upgrade,
 the full upstream NetBox suite, other Python/database versions, Firefox/WebKit,
 SSO and load testing were not part of this check. Versions after 4.7.3 are outside
 the tested scope.
+
+## GeoView 0.9.0 release package validation
+
+The 0.9.0 wheel and source distribution were built and passed `twine check`.
+All 61 tracked plugin source/resource files were compared byte-for-byte with
+the wheel, including templates, CSS/JavaScript, translations, Leaflet assets,
+management commands and test-data JSON. The source distribution includes the
+saved-filter/widget guide and the validation reports.
+
+The wheel was installed without dependencies into the isolated NetBox 4.7.3
+environment, which had no installed GeoView distribution. The wheel runner
+excludes plugin source copies from `PYTHONPATH`. Smoke checks assert imports
+from the virtual environment's `site-packages`, package/app version 0.9.0,
+NetBox limits 4.5.4–4.7.3, plugin registration and URLs, and installed template
+and static-file origins. All 94 integration tests passed again with no skips.
+System checks and static collection passed with the archive warning above.
+The five role-marker browser checks also passed against the installed wheel,
+including successful decoding of the custom image, explicit color overrides,
+site colors and native widget parity.

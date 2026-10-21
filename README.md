@@ -6,9 +6,9 @@ It provides:
 
 - a Leaflet map with configurable raster tile layers
 - filters for sites, devices, tags, ownership, tenancy, and related objects
-- reusable saved filters and native dashboard map widgets (development checkout)
-- device-role filters with inclusion/exclusion and descendant roles (development checkout)
-- optional device-role colors and per-role marker styles (development checkout)
+- reusable saved filters and native dashboard map widgets
+- device-role filters with inclusion/exclusion and descendant roles
+- optional device-role colors and per-role marker styles
 - configurable site and device popups, including custom fields
 - direct-distance measurement and optional Valhalla route calculation
 - reusable development test data for sites, locations, device types, devices, and custom fields
@@ -33,7 +33,7 @@ Most of the code was generated with Codex as a coding co-pilot, but maintenance 
 
 | Plugin Release | NetBox |
 |---|---|
-| `0.8.2` | `4.5.4` to `4.7.2` |
+| `0.9.0` | `4.5.4` to `4.7.3` |
 
 Later NetBox versions are not included automatically. See
 [testing details](TESTING.md) for validation reports and test instructions.
@@ -54,10 +54,11 @@ Saved filters must be enabled and shared or owned by the current user.
 Saved filters containing unsupported conditions, such as `cf_*` custom-field
 filters, are rejected with a visible error rather than silently broadening the map.
 
-The development checkout adds a dedicated save/update/copy workflow and a native
+GeoView 0.9.0 adds a dedicated save/update/copy workflow and a native
 NetBox dashboard widget. See [saved filters and widgets](docs/saved-filters-widgets.md)
-for usage, filter semantics and permissions. This feature is not part of the
-published 0.8.2 release.
+for usage, filter semantics and permissions. It also adds device-role filtering
+and optional role-based marker styles. See the [NetBox 4.7.3 validation report](docs/validation/netbox-4.7.3.md)
+for compatibility checks.
 
 ## Installation
 
@@ -65,13 +66,13 @@ Install [netbox-geoview from PyPI](https://pypi.org/project/netbox-geoview/)
 inside the NetBox virtual environment:
 
 ```bash
-python -m pip install --upgrade netbox-geoview==0.8.2
+python -m pip install --upgrade netbox-geoview==0.9.0
 ```
 
 Optional: install directly from a tagged GitHub source archive:
 
 ```bash
-pip install https://github.com/phlpr/netbox_geoview/archive/refs/tags/v0.8.2.tar.gz
+pip install https://github.com/phlpr/netbox_geoview/archive/refs/tags/v0.9.0.tar.gz
 ```
 
 ## Configuration
@@ -194,7 +195,7 @@ Available settings:
 - `headers`: optional HTTP headers per layer
 - `tile_provider_url`: upstream tile URL template with `{z}`, `{x}`, and `{y}`
 
-### Device-role marker appearance (development checkout)
+### Device-role marker appearance
 
 Set `use_role_colors=True` to color device pins with their assigned NetBox
 DeviceRole's color. Only the Boolean `True` enables this; do not use strings
@@ -253,7 +254,7 @@ Recommendation:
 
 ## Requirements
 
-- GeoView `0.8.2`: NetBox `4.5.4` through `4.7.2`.
+- GeoView `0.9.0`: NetBox `4.5.4` through `4.7.3`.
 - Python `>=3.12`
 - No additional Python runtime dependencies are required beyond NetBox's own environment
 - Installation in the NetBox virtual environment (see [Installation](#installation))

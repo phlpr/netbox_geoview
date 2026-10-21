@@ -3,7 +3,7 @@
 All notable changes to NetBox GeoView are documented in this file. The project
 uses semantic versioning for plugin releases.
 
-## Unreleased
+## 0.9.0 - 2026-10-22
 
 ### Added
 
@@ -13,6 +13,11 @@ uses semantic versioning for plugin releases.
 - Add a native GeoView dashboard widget with a saved-filter selector, automatic
   marker bounds, manual refresh, popups and a link to the full map. Multiple widgets
   can share the same assets and resize independently.
+- Filter devices by role, including or excluding descendant roles, with matching
+  dynamic device choices, saved filters and dashboard results.
+- Optionally use NetBox device-role colors with the Boolean `use_role_colors`
+  setting (default `False`). Configure per-role colors, text symbols or custom
+  images through `device_role_markers`; explicit role overrides take precedence.
 
 ### Fixed
 
@@ -25,11 +30,18 @@ uses semantic versioning for plugin releases.
   a superuser) and NetBox's existing change permission; creating requires add permission.
 - Initialize maps idempotently on page and HTMX loads, resize Leaflet maps with their
   containers, and clean up map instances when fragments are removed.
+- Keep marker symbols upright and centered within the pin head.
+
+### Compatibility
+
+- Support NetBox 4.5.4 through exactly 4.7.3. The 4.7.3 compatibility check passed
+  94 GeoView integration tests, nine focused upstream regressions and 32 browser
+  checks. No plugin database migration is required.
 
 ### Documentation
 
-- Document the saved-filter and dashboard workflow, compatibility validation,
-  supported conditions, sharing behavior and reproducible browser checks.
+- Document saved filters, dashboard widgets, device roles and marker configuration,
+  compatibility validation, permissions and reproducible browser checks.
 
 ## 0.8.2 - 2026-10-01
 

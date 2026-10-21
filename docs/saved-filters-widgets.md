@@ -1,7 +1,7 @@
 # Saved filters and dashboard maps
 
-This feature is available in the development checkout, not in the published
-GeoView 0.8.2 package. It uses NetBox's existing SavedFilter and Dashboard models;
+This feature is available starting with GeoView 0.9.0.
+It uses NetBox's existing SavedFilter and Dashboard models;
 there are no GeoView database models or migrations.
 
 ## Save and reuse a map selection
@@ -39,7 +39,7 @@ The default widget is six columns wide and five dashboard rows high.
 Role colors and per-role markers use the instance's `use_role_colors` and
 `device_role_markers` plugin settings, just like the full map. These settings
 are not copied into saved filters or widget configuration; refreshed data uses
-the current settings. See [marker appearance](../README.md#device-role-marker-appearance-development-checkout).
+the current settings. See [marker appearance](../README.md#device-role-marker-appearance).
 The toolbar wraps in narrow cards. With automatic bounds enabled, resizing the
 widget also refits its markers; otherwise the current map center is preserved.
 
