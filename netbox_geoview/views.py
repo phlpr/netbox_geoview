@@ -223,7 +223,7 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
                 "update_filter_url": update_filter_url,
                 "source_filter_id": source_filter.pk if source_filter else "",
                 "filter_ops": operators,
-                "asset_version": f"{__version__}-role-markers-1",
+                "asset_version": f"{__version__}-role-markers-2",
                 "routing_profiles": [
                     {
                         "value": option,

@@ -56,7 +56,11 @@ The running local NetBox has `use_role_colors=True` and role-specific letter
 symbols for manual review. The existing symbol CSS rotation was corrected so
 letters remain upright; the full-map/widget asset versions were advanced to
 reload that CSS. The browser checks assert upright symbol transforms, and
-desktop screenshots were inspected. Browser
+desktop screenshots were inspected. A follow-up centering check removed a
+3.36-pixel upward offset: all 17 letter boxes now share the circular pin head's
+center at 1440-pixel desktop and 428-pixel mobile viewport widths. Enlarged
+marker screenshots were inspected, and map/widget asset versions were advanced
+again so existing browsers load the correction. Browser
 authentication uses a disposable account and a temporary session; the session
 and account/filter/dashboard records are removed after the checks. Artifacts
 are under `/home/prohph/.local/share/netbox-geoview/issue-4/`.
