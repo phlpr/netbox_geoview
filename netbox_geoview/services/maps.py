@@ -10,6 +10,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext as _
 from dcim.models import Device, Site
 from netbox.plugins import get_plugin_config
+from utilities.filters import TreeNodeMultipleChoiceFilter
 
 from ..filters import DEVICE_FILTER_FIELDS, SITE_FILTER_FIELDS
 
@@ -513,6 +514,14 @@ class GeoViewMapService:
             return queryset.exclude(**{f"{field_name}__in": values})
         return queryset.filter(**{f"{field_name}__in": values})
 
+    def apply_role_filter(self, queryset, roles, operator):
+        if not roles:
+            return queryset
+        # Match NetBox's device filter, including descendants on both tree backends.
+        return TreeNodeMultipleChoiceFilter(
+            field_name="role", lookup_expr="in", exclude=operator == "n"
+        ).filter(queryset, roles)
+
     def get_filtered_sites(self, cleaned_data, operators):
         if not self.has_site_filters(cleaned_data):
             return Site.objects.none()
@@ -606,6 +615,9 @@ class GeoViewMapService:
         queryset = self.apply_inclusion_filter(
             queryset, "platform", cleaned_data.get("platform"), operators["platform"]
         )
+        queryset = self.apply_role_filter(
+            queryset, cleaned_data.get("role"), operators["role"]
+        )
         queryset = self.apply_inclusion_filter(
             queryset,
             "tenant__group",
@@ -661,6 +673,7 @@ class GeoViewMapService:
             ("manufacturer", _("Manufacturer")),
             ("device_type", _("Model")),
             ("platform", _("Operating system")),
+            ("role", _("Device roles")),
             ("tenant_group", _("Tenant group")),
             ("tenant", _("Tenant")),
             ("owner_group", _("Owner group")),
@@ -697,6 +710,7 @@ class GeoViewMapService:
             "manufacturer",
             "device_type",
             "platform",
+            "role",
             "tenant_group",
             "tenant",
             "owner_group",

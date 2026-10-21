@@ -16,6 +16,7 @@ DEVICE_FILTER_FIELDS = (
     "manufacturer",
     "device_type",
     "platform",
+    "role",
     "tenant_group",
     "tenant",
     "owner_group",

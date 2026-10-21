@@ -7,6 +7,7 @@ It provides:
 - a Leaflet map with configurable raster tile layers
 - filters for sites, devices, tags, ownership, tenancy, and related objects
 - reusable saved filters and native dashboard map widgets (development checkout)
+- device-role filters with inclusion/exclusion and descendant roles (development checkout)
 - configurable site and device popups, including custom fields
 - direct-distance measurement and optional Valhalla route calculation
 - reusable development test data for sites, locations, device types, devices, and custom fields

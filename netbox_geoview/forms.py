@@ -1,11 +1,13 @@
 import json
 
 from django import forms
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from core.models import ObjectType
 from dcim.models import (
     Device,
+    DeviceRole,
     DeviceType,
     Manufacturer,
     Platform,
@@ -90,6 +92,11 @@ class GeoViewFilterForm(forms.Form):
         queryset=Platform.objects.order_by("name"),
         query_params={"manufacturer_id": "$manufacturer"},
     )
+    role = DynamicModelMultipleChoiceField(
+        label=_("Device roles"),
+        required=False,
+        queryset=DeviceRole.objects.all(),
+    )
     tenant_group = DynamicModelMultipleChoiceField(
         label=_("Tenant group"),
         required=False,
@@ -120,6 +127,8 @@ class GeoViewFilterForm(forms.Form):
             "manufacturer_id": "$manufacturer",
             "device_type_id": "$device_type",
             "platform_id": "$platform",
+            "geoview_role": "$role",
+            "geoview_role_op": "$role_op",
             "tenant_group_id": "$tenant_group",
             "tenant_id": "$tenant",
             "owner_group_id": "$owner_group",
@@ -130,6 +139,9 @@ class GeoViewFilterForm(forms.Form):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
+        self.fields["device"].widget.attrs["data-url"] = reverse(
+            "plugins:netbox_geoview:device_choices"
+        )
         if user is not None:
             for field in self.fields.values():
                 queryset = getattr(field, "queryset", None)

@@ -2,6 +2,7 @@ from django.urls import path
 
 from .views import (
     GeoViewApplyFiltersView,
+    GeoViewDeviceChoicesView,
     GeoViewFilterView,
     GeoViewMapView,
     GeoViewRouteView,
@@ -13,6 +14,11 @@ from .views import (
 app_name = "netbox_geoview"
 
 urlpatterns = [
+    path(
+        "device-choices/",
+        GeoViewDeviceChoicesView.as_view({"get": "list"}),
+        name="device_choices",
+    ),
     path("map-data/", GeoViewMapDataView.as_view(), name="map_data"),
     path("saved-filters/add/", GeoViewSaveFilterView.as_view(), name="savedfilter_add"),
     path("saved-filters/<int:pk>/edit/", GeoViewSaveFilterView.as_view(), name="savedfilter_edit"),

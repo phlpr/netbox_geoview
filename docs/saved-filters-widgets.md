@@ -51,10 +51,14 @@ they do not cover its content or close button. Attribution remains visible.
 ## Conditions and matching
 
 Supported conditions are search, tags, region, site group, site, manufacturer,
-device type, platform, tenant group, tenant, owner group, owner and device.
+device type, platform, device role, tenant group, tenant, owner group, owner and device.
 List selections support inclusion (`exact`) and exclusion (`n`). Multiple values
 within a normal selection are alternatives; different conditions are combined.
 Tags retain GeoView's existing all-selected-tags behavior and untagged support.
+Device roles include all descendant roles, matching NetBox's device filters.
+Excluding a role excludes its descendants as well. The device selector follows
+the selected roles and operator. Role choices require NetBox view access to
+those roles; device results remain limited by the user's device permissions.
 
 Site conditions select site markers. Device conditions select device markers.
 When both are present, device results are also constrained to the selected sites.
@@ -72,7 +76,7 @@ Saved filters use GeoView's parameter names, for example:
 }
 ```
 
-Common NetBox ID aliases such as `site_id`, `region_id` and `manufacturer_id`
+Common NetBox ID aliases such as `site_id`, `region_id`, `manufacturer_id` and `role_id`
 are accepted. This is not a general NetBox filter engine: conditions such as
 `status`, arbitrary lookups and `cf_*` custom-field filters are unsupported.
 An incompatible saved filter yields an explicit error and no marker data.

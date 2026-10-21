@@ -146,6 +146,20 @@
         </div>
         <div class="row align-items-center g-2 geoview-filter-form__row">
           <div class="col-lg-2">
+            <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.role.id_for_label }}">{{ filter_form.role.label }}</label>
+          </div>
+          <div class="col-lg-2">
+            <select class="form-select geoview-filter-form__operator" name="role_op" aria-label="{% trans 'Operator' %}">
+              <option value="exact"{% if filter_ops.role != 'n' %} selected{% endif %}>{% trans 'is' %}</option>
+              <option value="n"{% if filter_ops.role == 'n' %} selected{% endif %}>{% trans 'is not' %}</option>
+            </select>
+          </div>
+          <div class="col-lg-8">
+            {{ filter_form.role }}
+          </div>
+        </div>
+        <div class="row align-items-center g-2 geoview-filter-form__row">
+          <div class="col-lg-2">
             <label class="col-form-label geoview-filter-form__label text-lg-end w-100" for="{{ filter_form.device.id_for_label }}">{{ filter_form.device.label }}</label>
           </div>
           <div class="col-lg-2">

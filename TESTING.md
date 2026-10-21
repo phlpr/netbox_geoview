@@ -131,7 +131,8 @@ suite; it does not run this local integration/browser environment automatically.
 create/update/copy round trips, saved operators, edited/cleared selections,
 mixed site/device constraints, unsupported and circular filters, CSRF, ownership,
 object permissions and the real NetBox dashboard configuration views. The full
-suite now discovers 69 tests; the Unicode-only regression is skipped below 4.7.1.
+suite now discovers 82 tests, including the role-filter cases below; the
+Unicode-only regression is skipped below 4.7.1.
 
 Run the nine widget browser scenarios against a server backed by a dedicated test
 database and a temporary authenticated test session:
@@ -155,3 +156,16 @@ account when finished.
 
 For the 2026-10-15 matrix results and environment details, see
 [the saved-filter/widget validation report](docs/validation/saved-filters-widgets.md).
+
+## Device-role filter checks
+
+`tests/integration/test_roles.py` adds 13 tests with a direct role assignment,
+child and grandchild roles, an empty role and hardware from another manufacturer.
+They cover inclusion/exclusion, overlapping multi-selections, site/hardware/device
+combinations, the dynamic device selector, saved-filter round trips, live hierarchy
+changes, widgets and constrained role/device permissions. They seed only the
+isolated test database and do not require additional local development data.
+
+Run only these cases by adding `--pattern test_roles.py` to the integration
+command above. See [the role-filter validation report](docs/validation/device-role-filter.md)
+for the tested NetBox versions and browser results.

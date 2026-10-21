@@ -16,8 +16,10 @@ from django.utils.translation import gettext as _
 from django.views import View
 from django.views.generic import TemplateView
 
+from dcim.api.views import DeviceViewSet
 from dcim.models import Device
 from extras.models import SavedFilter
+from rest_framework.exceptions import ValidationError as APIValidationError
 
 from .forms import (
     GeoViewFilterForm,
@@ -45,6 +47,29 @@ apply_saved_filter_parameters = resolve_filter_parameters
 
 class GeoViewConfigMixin(GeoViewPermissionRequiredMixin, GeoViewMapService):
     pass
+
+
+class GeoViewDeviceChoicesView(GeoViewConfigMixin, DeviceViewSet):
+    """Keep NetBox's device selector aligned with GeoView role operators."""
+
+    def filter_queryset(self, queryset):
+        queryset = super().filter_queryset(queryset)
+        try:
+            parameters = normalize_parameters(
+                {
+                    "role": self.request.query_params.getlist("geoview_role"),
+                    "role_op": self.request.query_params.get("geoview_role_op", "exact"),
+                },
+                strict=True,
+            )
+        except ValidationError as exc:
+            raise APIValidationError(exc.messages) from exc
+        form = GeoViewFilterForm(data=parameters, user=self.request.user)
+        if not form.is_valid():
+            raise APIValidationError(form.errors)
+        return self.apply_role_filter(
+            queryset, form.cleaned_data["role"], parameters["role_op"]
+        )
 
 
 class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
