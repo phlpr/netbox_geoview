@@ -36,6 +36,10 @@ Each widget stores the saved filter's ID and its own display settings in your
 NetBox dashboard configuration. Renaming a filter does not break the reference.
 Multiple widgets can show different filters or different views of the same filter.
 The default widget is six columns wide and five dashboard rows high.
+Role colors and per-role markers use the instance's `use_role_colors` and
+`device_role_markers` plugin settings, just like the full map. These settings
+are not copied into saved filters or widget configuration; refreshed data uses
+the current settings. See [marker appearance](../README.md#device-role-marker-appearance-development-checkout).
 The toolbar wraps in narrow cards. With automatic bounds enabled, resizing the
 widget also refits its markers; otherwise the current map center is preserved.
 

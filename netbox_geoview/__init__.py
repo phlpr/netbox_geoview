@@ -39,6 +39,8 @@ else:
                 "popup_anchor": [0, -34],
             },
             "site_group_markers": {},
+            "use_role_colors": False,
+            "device_role_markers": {},
             "tile_layers": [
                 {
                     "name": "OpenStreetMap",

@@ -85,7 +85,7 @@ class GeoViewMapWidget(DashboardWidget):
             {
                 "widget_id": self.id,
                 "data_url": reverse("plugins:netbox_geoview:map_data") + "?" + query,
-                "asset_version": f"{__version__}-widgets-1",
+                "asset_version": f"{__version__}-role-markers-1",
             },
             request=request,
         )

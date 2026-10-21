@@ -131,7 +131,7 @@ suite; it does not run this local integration/browser environment automatically.
 create/update/copy round trips, saved operators, edited/cleared selections,
 mixed site/device constraints, unsupported and circular filters, CSRF, ownership,
 object permissions and the real NetBox dashboard configuration views. The full
-suite now discovers 82 tests, including the role-filter cases below; the
+suite now discovers 94 tests, including the role-filter and marker cases below; the
 Unicode-only regression is skipped below 4.7.1.
 
 Run the nine widget browser scenarios against a server backed by a dedicated test
@@ -169,3 +169,14 @@ isolated test database and do not require additional local development data.
 Run only these cases by adding `--pattern test_roles.py` to the integration
 command above. See [the role-filter validation report](docs/validation/device-role-filter.md)
 for the tested NetBox versions and browser results.
+
+## Device-role marker checks
+
+`tests/integration/test_role_markers.py` adds 12 tests for the Boolean color
+switch, unchanged default/site styles, explicit color overrides, ID/slug/name
+matching, custom images and anchors, clearing inherited images, independent
+child-role styles, malformed legacy colors, widget parity and preloaded queries.
+
+Run only these cases with `--pattern test_role_markers.py`. See the
+[role-marker validation report](docs/validation/device-role-markers.md) for
+compatibility and browser checks.

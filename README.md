@@ -8,6 +8,7 @@ It provides:
 - filters for sites, devices, tags, ownership, tenancy, and related objects
 - reusable saved filters and native dashboard map widgets (development checkout)
 - device-role filters with inclusion/exclusion and descendant roles (development checkout)
+- optional device-role colors and per-role marker styles (development checkout)
 - configurable site and device popups, including custom fields
 - direct-distance measurement and optional Valhalla route calculation
 - reusable development test data for sites, locations, device types, devices, and custom fields
@@ -122,6 +123,12 @@ PLUGINS_CONFIG = {
             "vorarlberg": {"color": "#34495e"},
             "wien": {"color": "#f39c12"},
         },
+        "use_role_colors": False,
+        "device_role_markers": {
+            "core-router": {"symbol": "R"},
+            "access-switch": {"symbol": "S"},
+            "firewall": {"color": "#e74c3c", "symbol": "F"},
+        },
         "tile_layers": [
             {
                 "name": "OpenStreetMap",
@@ -178,12 +185,56 @@ Available settings:
 - `valhalla_query`: optional query string parameters for Valhalla requests
 - `default_tile_layer`: default base layer name or ID
 - `scroll_wheel_zoom`: enables zooming with the mouse wheel
-- `site_marker`: default marker appearance for selected sites
+- `site_marker`: base marker appearance for sites and devices
 - `site_group_markers`: marker overrides by site group name or slug
+- `use_role_colors`: Boolean switch to use NetBox device-role colors; default `False`
+- `device_role_markers`: per-role color, symbol or image overrides by role ID, slug or name
 - `tile_layers`: list of available base layers
 - `query`: optional query string parameters per layer, useful for API keys
 - `headers`: optional HTTP headers per layer
 - `tile_provider_url`: upstream tile URL template with `{z}`, `{x}`, and `{y}`
+
+### Device-role marker appearance (development checkout)
+
+Set `use_role_colors=True` to color device pins with their assigned NetBox
+DeviceRole's color. Only the Boolean `True` enables this; do not use strings
+such as `"true"` or `"false"`. Site markers keep their existing appearance.
+
+Styles are applied in this order, with later values overriding earlier ones:
+
+1. The existing `site_marker` and matching `site_group_markers` style.
+2. The NetBox role color, when `use_role_colors` is `True`.
+3. A matching `device_role_markers` entry, independently of the switch.
+
+With the switch off and no role override, device markers look as before.
+Role overrides support the same fields as `site_marker`: `color`, `symbol`,
+`icon_url`, `icon_size`, `icon_anchor` and `popup_anchor`. Specify only the fields
+you want to change. An explicit role-marker `color` wins over the NetBox color.
+Use `icon_url=""` to clear an inherited image and return to a colored pin.
+
+For a custom image, provide its URL and optional sizing, for example:
+
+```python
+"device_role_markers": {
+    "core-router": {
+        "icon_url": "https://assets.example.net/netbox/router.svg",
+        "icon_size": [32, 40],
+        "icon_anchor": [16, 40],
+        "popup_anchor": [0, -34],
+    },
+}
+```
+
+Replace the example URL with an image you host; local `/static/...` URLs also
+work. Custom images retain their own colors; the role color applies to the
+built-in pin. The `symbol` option adds plain text to that pin.
+
+Matching is case-insensitive. If multiple entries match, the role's numeric ID
+(an integer or string key) wins over its slug, which wins over its name. IDs
+can distinguish duplicate names/slugs in a role hierarchy. Overrides apply to
+the assigned role itself; child roles use their own color and configuration.
+The full map and dashboard widgets share this styling. Restart NetBox after
+changing plugin configuration.
 
 ## Satellite Providers
 

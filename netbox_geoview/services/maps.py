@@ -1,5 +1,6 @@
 """Shared map configuration, queries and marker preparation for views and widgets."""
 
+import re
 from datetime import date, datetime
 from urllib.parse import urlparse
 
@@ -319,6 +320,28 @@ class GeoViewMapService:
                 return self.normalize_marker_style(style, default_style)
 
         return default_style
+
+    def get_device_marker_style(self, device):
+        site = device.site
+        style = self.get_site_marker_style(site.group if site else None)
+        role = device.role
+        if role is None:
+            return style
+
+        if self.get_setting("use_role_colors") is True:
+            color = str(role.color or "").removeprefix("#")
+            if re.fullmatch(r"[0-9a-fA-F]{6}", color):
+                style["color"] = f"#{color}"
+
+        overrides = self.get_setting("device_role_markers")
+        if isinstance(overrides, dict):
+            # IDs disambiguate duplicate names/slugs in nested role trees.
+            configured = {str(key).strip().casefold(): value for key, value in overrides.items()}
+            for candidate in (str(role.pk), role.slug, role.name):
+                override = configured.get(str(candidate).strip().casefold())
+                if isinstance(override, dict):
+                    return self.normalize_marker_style(override, style)
+        return style
 
     def stringify_popup_value(self, value):
         if value is None:
@@ -758,9 +781,7 @@ class GeoViewMapService:
                     ),
                     "latitude": latitude,
                     "longitude": longitude,
-                    "marker_style": self.get_site_marker_style(
-                        site.group if site and site.group else None
-                    ),
+                    "marker_style": self.get_device_marker_style(device),
                     "popup_sections": self.render_popup_sections(
                         "device", popup_values
                     ),

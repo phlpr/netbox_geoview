@@ -504,7 +504,7 @@
     font-size: 0.75rem;
     font-weight: 700;
     line-height: 1;
-    transform: rotate(45deg) translate(0, -12%);
+    transform: translate(0, -12%);
 }
 
 .geoview-stat-grid {

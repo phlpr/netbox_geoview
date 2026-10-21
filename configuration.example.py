@@ -42,6 +42,16 @@ PLUGINS_CONFIG = {
             "vorarlberg": {"color": "#34495e"},
             "wien": {"color": "#f39c12"},
         },
+        # A Boolean switch: inherit NetBox DeviceRole.color only when True.
+        "use_role_colors": False,
+        # Optional overrides by role ID, slug or name (in that priority order).
+        # These also work when use_role_colors is False.
+        "device_role_markers": {
+            "core-router": {"symbol": "R"},
+            "access-switch": {"symbol": "S"},
+            "firewall": {"color": "#e74c3c", "symbol": "F"},
+            # An icon_url may replace the pin; see README for sizing and anchors.
+        },
         "tile_layers": [
             {
                 "name": "OpenStreetMap",
