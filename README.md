@@ -75,6 +75,40 @@ Optional: install directly from a tagged GitHub source archive:
 pip install https://github.com/phlpr/netbox_geoview/archive/refs/tags/v0.9.0.tar.gz
 ```
 
+## Screenshots
+
+GeoView 0.9.0 on NetBox 4.7.3, using synthetic network data in Austria.
+Role colors and letter symbols are enabled in the demo configuration; see
+[marker appearance](#device-role-marker-appearance) for the settings.
+Click an image to view it at full size.
+
+**Map with device-role colors**
+
+[![GeoView map showing Austrian routers, switches, access switches and firewalls with role colors and symbols](https://raw.githubusercontent.com/phlpr/netbox_geoview/main/docs/screenshots/map-role-colors.jpg)](https://github.com/phlpr/netbox_geoview/blob/main/docs/screenshots/map-role-colors.jpg)
+
+<details>
+<summary>Saved filters, dashboard widgets and routing</summary>
+
+**Saved filters and device roles**
+
+Load a saved selection and refine it with location, hardware and device-role filters.
+
+[![GeoView filter tab with the saved Austria Switches filter and a selected device role](https://raw.githubusercontent.com/phlpr/netbox_geoview/main/docs/screenshots/saved-filters-and-roles.jpg)](https://github.com/phlpr/netbox_geoview/blob/main/docs/screenshots/saved-filters-and-roles.jpg)
+
+**Native NetBox dashboard widgets**
+
+Show different saved selections side by side, with independent maps and refresh controls.
+
+[![Two native GeoView dashboard widgets showing the complete Austrian demo network and its switches](https://raw.githubusercontent.com/phlpr/netbox_geoview/main/docs/screenshots/dashboard-widgets.jpg)](https://github.com/phlpr/netbox_geoview/blob/main/docs/screenshots/dashboard-widgets.jpg)
+
+**Routing in dark mode**
+
+Compare a calculated road route with the direct distance between two devices.
+
+[![GeoView in dark mode with a calculated Linz to Vienna route and direct-distance measurement](https://raw.githubusercontent.com/phlpr/netbox_geoview/main/docs/screenshots/routing-dark.jpg)](https://github.com/phlpr/netbox_geoview/blob/main/docs/screenshots/routing-dark.jpg)
+
+</details>
+
 ## Configuration
 
 Example plugin settings for `configuration.py`:
