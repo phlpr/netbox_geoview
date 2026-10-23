@@ -46,7 +46,11 @@ In PyPI project settings, add a Trusted Publisher with:
 1. Select a new, unpublished semantic version.
 2. Update `__version__`, `NETBOX_MIN_VERSION`, and `NETBOX_MAX_VERSION` in
    `netbox_geoview/version.py`.
-3. Update `README.md`, `COMPATIBILITY.md`, and `CHANGELOG.md`.
+3. Update `README.md`, `COMPATIBILITY.md`, and `CHANGELOG.md`. Collect changes
+   under `## Unreleased` while developing. Before tagging, move the release's
+   changes into exactly one `## X.Y.Z - YYYY-MM-DD` section matching the package
+   version. Use categories such as `Added`, `Changed`, `Fixed`, `Compatibility`,
+   `Security`, and `Upgrade notes`; omit empty categories.
 4. Run the unit tests and a smoke test with every newly supported NetBox line.
 5. Build both distributions and validate their metadata:
 
@@ -74,7 +78,23 @@ In PyPI project settings, add a Trusted Publisher with:
 2. Commit and push changes to default branch.
 3. Create and push a version tag in `vX.Y.Z` format.
 4. Workflow `Publish to PyPI` will run automatically for `v*` tags.
-5. Confirm the package on PyPI and the generated GitHub release.
+5. The workflow checks that the tag matches the package version and that the
+   changelog contains exactly one matching, dated section with release notes.
+   A missing, duplicate, undated, or empty entry stops the build before PyPI
+   publication.
+6. Confirm the package on PyPI and the generated GitHub release. Its description
+   uses the matching changelog section from the tagged commit, plus a comparison
+   link to the previous version listed in the changelog. Notes are available in
+   the build summary and the `release-notes` workflow artifact. Existing GitHub
+   releases are left unchanged when the release job is rerun.
+
+Preview the release notes locally before tagging (adjust the version):
+
+```bash
+python scripts/release_notes.py v0.9.0 \
+  --repository phlpr/netbox_geoview \
+  --output /tmp/geoview-release-notes.md
+```
 
 Example:
 

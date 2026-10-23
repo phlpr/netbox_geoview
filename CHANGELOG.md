@@ -3,6 +3,14 @@
 All notable changes to NetBox GeoView are documented in this file. The project
 uses semantic versioning for plugin releases.
 
+## Unreleased
+
+### Changed
+
+- Populate GitHub release notes from the matching dated changelog section and
+  include a link to the previous version. Validate release notes before publishing
+  to PyPI; missing, duplicate or empty entries stop the release workflow.
+
 ## 0.9.0 - 2026-10-22
 
 ### Added

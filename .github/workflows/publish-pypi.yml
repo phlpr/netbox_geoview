@@ -39,12 +39,15 @@ jobs:
           python-version: "3.12"
 
       - name: Validate tag matches package version
+        env:
+          TAG: ${{ github.ref_name }}
         run: |
           python - <<'PY'
+          import os
           import re
           from pathlib import Path
 
-          tag = "${{ github.ref_name }}"
+          tag = os.environ["TAG"]
           text = Path("netbox_geoview/version.py").read_text(encoding="utf-8")
           match = re.search(r'__version__\s*=\s*"([^"]+)"', text)
           if not match:
@@ -58,6 +61,15 @@ jobs:
           print(f"Release tag validated: {tag} matches __version__={version}")
           PY
 
+      - name: Validate changelog and prepare release notes
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          python scripts/release_notes.py "$TAG" \
+            --repository "$GITHUB_REPOSITORY" \
+            --output "$RUNNER_TEMP/release-notes.md"
+          cat "$RUNNER_TEMP/release-notes.md" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Build package
         run: |
           python -m pip install --upgrade pip build
@@ -68,6 +80,13 @@ jobs:
         with:
           name: dist
           path: dist/
+
+      - name: Upload release notes
+        uses: actions/upload-artifact@v6
+        with:
+          name: release-notes
+          path: ${{ runner.temp }}/release-notes.md
+          if-no-files-found: error
 
   publish:
     needs: build
@@ -102,6 +121,12 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
+      - name: Download validated release notes
+        uses: actions/download-artifact@v7
+        with:
+          name: release-notes
+          path: release-notes/
+
       - name: Create GitHub release for tag
         env:
           GH_TOKEN: ${{ github.token }}
@@ -111,4 +136,5 @@ jobs:
             echo "GitHub release for $TAG already exists. Skipping."
             exit 0
           fi
-          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes --title "$TAG"
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag \
+            --notes-file release-notes/release-notes.md --title "$TAG"

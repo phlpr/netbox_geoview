@@ -7,4 +7,5 @@ include TESTDATA.md
 include TESTING.md
 recursive-include docs *.md
 recursive-include tests *.py *.cjs
+include scripts/release_notes.py
 include configuration.example.py
