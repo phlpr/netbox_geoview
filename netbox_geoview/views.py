@@ -50,7 +50,7 @@ class GeoViewConfigMixin(GeoViewPermissionRequiredMixin, GeoViewMapService):
 
 
 class GeoViewDeviceChoicesView(GeoViewConfigMixin, DeviceViewSet):
-    """Keep NetBox's device selector aligned with GeoView role operators."""
+    """Keep NetBox's device selector aligned with GeoView filter operators."""
 
     def filter_queryset(self, queryset):
         queryset = super().filter_queryset(queryset)
@@ -59,6 +59,8 @@ class GeoViewDeviceChoicesView(GeoViewConfigMixin, DeviceViewSet):
                 {
                     "role": self.request.query_params.getlist("geoview_role"),
                     "role_op": self.request.query_params.get("geoview_role_op", "exact"),
+                    "status": self.request.query_params.getlist("geoview_status"),
+                    "status_op": self.request.query_params.get("geoview_status_op", "exact"),
                 },
                 strict=True,
             )
@@ -67,8 +69,11 @@ class GeoViewDeviceChoicesView(GeoViewConfigMixin, DeviceViewSet):
         form = GeoViewFilterForm(data=parameters, user=self.request.user)
         if not form.is_valid():
             raise APIValidationError(form.errors)
-        return self.apply_role_filter(
+        queryset = self.apply_role_filter(
             queryset, form.cleaned_data["role"], parameters["role_op"]
+        )
+        return self.apply_inclusion_filter(
+            queryset, "status", form.cleaned_data["status"], parameters["status_op"]
         )
 
 

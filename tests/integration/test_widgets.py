@@ -144,9 +144,12 @@ class SavedFilterWidgetTests(TestCase):
         )
 
     def test_save_form_and_create_saved_filter(self):
-        self.assertEqual(
-            self.client.get(self.save_url, {"q": "geoview"}).status_code, 200
-        )
+        page = self.client.get(self.save_url, {"q": "geoview"})
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, 'slug-source="name"')
+        self.assertContains(page, 'slug-field')
+        self.assertContains(page, 'reslug')
+        self.assertEqual(page.context["form"].fields["slug"].max_length, 100)
         response = self.post_filter({"q": "geoview"})
         self.assertEqual(response.status_code, 302)
         saved = SavedFilter.objects.get(slug="saved-via-geoview")

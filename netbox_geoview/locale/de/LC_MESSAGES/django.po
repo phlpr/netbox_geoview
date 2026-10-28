@@ -22,6 +22,9 @@ msgstr "Orte"
 msgid "Device roles"
 msgstr "Geraeterollen"
 
+msgid "Status"
+msgstr "Status"
+
 msgid "Devices"
 msgstr "Geraete"
 

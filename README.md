@@ -5,7 +5,7 @@ NetBox GeoView is a NetBox plugin for displaying infrastructure in a map-oriente
 It provides:
 
 - a Leaflet map with configurable raster tile layers
-- filters for sites, devices, tags, ownership, tenancy, and related objects
+- filters for sites, devices, device status, tags, ownership, tenancy, and related objects
 - reusable saved filters and native dashboard map widgets
 - device-role filters with inclusion/exclusion and descendant roles
 - optional device-role colors and per-role marker styles

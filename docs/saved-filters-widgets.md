@@ -8,8 +8,10 @@ there are no GeoView database models or migrations.
 
 1. Open GeoView and use the Filter tab to select sites or devices and operators.
 2. Apply the conditions. On the Map tab, choose **Save filter**.
-3. Enter a unique name and slug and, optionally, a description. Sharing is off by
-   default. Submit the form to return to the map using the new filter.
+3. Enter a unique name and, optionally, a description. NetBox fills an empty slug
+   when the name field loses focus; the refresh button regenerates it from the
+   current name. You can also edit it manually. Sharing is off by default.
+   Submit the form to return to the map using the new filter.
 4. To reuse it, select it in **Saved Filter** and press **Load filter**. Its
    conditions and operators populate the editable filter controls.
 5. After changing and applying conditions, use **Update saved filter** to replace
@@ -55,7 +57,7 @@ they do not cover its content or close button. Attribution remains visible.
 ## Conditions and matching
 
 Supported conditions are search, tags, region, site group, site, manufacturer,
-device type, platform, device role, tenant group, tenant, owner group, owner and device.
+device type, platform, device role, device status, tenant group, tenant, owner group, owner and device.
 List selections support inclusion (`exact`) and exclusion (`n`). Multiple values
 within a normal selection are alternatives; different conditions are combined.
 Tags retain GeoView's existing all-selected-tags behavior and untagged support.
@@ -63,6 +65,9 @@ Device roles include all descendant roles, matching NetBox's device filters.
 Excluding a role excludes its descendants as well. The device selector follows
 the selected roles and operator. Role choices require NetBox view access to
 those roles; device results remain limited by the user's device permissions.
+Device status uses NetBox's configured device status choices, including custom
+values. Multiple statuses are alternatives; exclusion removes all selected
+statuses. The device selector follows the selected statuses and operator.
 
 Site conditions select site markers. Device conditions select device markers.
 When both are present, device results are also constrained to the selected sites.
@@ -82,7 +87,7 @@ Saved filters use GeoView's parameter names, for example:
 
 Common NetBox ID aliases such as `site_id`, `region_id`, `manufacturer_id` and `role_id`
 are accepted. This is not a general NetBox filter engine: conditions such as
-`status`, arbitrary lookups and `cf_*` custom-field filters are unsupported.
+arbitrary lookups and `cf_*` custom-field filters are unsupported.
 An incompatible saved filter yields an explicit error and no marker data.
 Legacy saved `lat`, `lon` and `zoom` keys are ignored and omitted when saving.
 

@@ -136,8 +136,8 @@ suite; it does not run this local integration/browser environment automatically.
 create/update/copy round trips, saved operators, edited/cleared selections,
 mixed site/device constraints, unsupported and circular filters, CSRF, ownership,
 object permissions and the real NetBox dashboard configuration views. The full
-suite now discovers 94 tests, including the role-filter and marker cases below; the
-Unicode-only regression is skipped below 4.7.1.
+suite now discovers 100 tests, including the role-filter, marker and status cases
+below; the Unicode-only regression is skipped below 4.7.1.
 
 Run the nine widget browser scenarios against a server backed by a dedicated test
 database and a temporary authenticated test session:
@@ -185,3 +185,18 @@ child-role styles, malformed legacy colors, widget parity and preloaded queries.
 Run only these cases with `--pattern test_role_markers.py`. See the
 [role-marker validation report](docs/validation/device-role-markers.md) for
 compatibility and browser checks.
+
+## Device-status and saved-filter slug checks
+
+`tests/integration/test_status.py` adds six tests for status-only selections,
+multiple values, exclusion, combined conditions, device-selector dependencies,
+saved-filter and widget round trips, invalid values and device permissions.
+Run only these cases with `--pattern test_status.py`.
+The saved-filter tests also check NetBox's native slug field and refresh control.
+
+On 2026-10-28, the NetBox 4.7.0 integration run passed 99 tests with the expected
+Unicode skip; all 14 lightweight tests passed. Five Chromium scenarios against
+the isolated test database passed, covering a configured custom status, dynamic
+device choices, status exclusions, saving/reloading, widget data, automatic slug
+generation on blur, manual slug preservation, regeneration and mobile layout.
+There were no uncaught JavaScript errors. Screenshots were inspected locally.

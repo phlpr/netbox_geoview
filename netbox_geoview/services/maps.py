@@ -642,6 +642,9 @@ class GeoViewMapService:
             queryset, cleaned_data.get("role"), operators["role"]
         )
         queryset = self.apply_inclusion_filter(
+            queryset, "status", cleaned_data.get("status"), operators["status"]
+        )
+        queryset = self.apply_inclusion_filter(
             queryset,
             "tenant__group",
             cleaned_data.get("tenant_group"),
@@ -689,6 +692,16 @@ class GeoViewMapService:
                     "operator": operators["tag"],
                 }
             )
+        statuses = cleaned_data.get("status")
+        if statuses:
+            status_labels = dict(Device._meta.get_field("status").flatchoices)
+            groups.append(
+                {
+                    "label": _("Status"),
+                    "entries": [str(status_labels[value]) for value in statuses],
+                    "operator": operators["status"],
+                }
+            )
         field_specs = (
             ("region", _("Region")),
             ("site_group", _("Site group")),
@@ -734,6 +747,7 @@ class GeoViewMapService:
             "device_type",
             "platform",
             "role",
+            "status",
             "tenant_group",
             "tenant",
             "owner_group",

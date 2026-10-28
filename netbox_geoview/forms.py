@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from core.models import ObjectType
+from dcim.choices import DeviceStatusChoices
 from dcim.models import (
     Device,
     DeviceRole,
@@ -21,6 +22,7 @@ from users.models import Owner, OwnerGroup
 from utilities.forms.fields import (
     DynamicModelMultipleChoiceField,
     QueryField,
+    SlugField,
     TagFilterField,
 )
 
@@ -30,6 +32,7 @@ from .filters import get_usable_saved_filters, normalize_parameters
 
 
 class GeoViewSavedFilterForm(forms.ModelForm):
+    slug = SlugField(max_length=SavedFilter._meta.get_field("slug").max_length)
     parameters = forms.CharField(widget=forms.HiddenInput)
 
     class Meta:
@@ -97,6 +100,11 @@ class GeoViewFilterForm(forms.Form):
         required=False,
         queryset=DeviceRole.objects.all(),
     )
+    status = forms.MultipleChoiceField(
+        label=_("Status"),
+        required=False,
+        choices=DeviceStatusChoices,
+    )
     tenant_group = DynamicModelMultipleChoiceField(
         label=_("Tenant group"),
         required=False,
@@ -129,6 +137,8 @@ class GeoViewFilterForm(forms.Form):
             "platform_id": "$platform",
             "geoview_role": "$role",
             "geoview_role_op": "$role_op",
+            "geoview_status": "$status",
+            "geoview_status_op": "$status_op",
             "tenant_group_id": "$tenant_group",
             "tenant_id": "$tenant",
             "owner_group_id": "$owner_group",

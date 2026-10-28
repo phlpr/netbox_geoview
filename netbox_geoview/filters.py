@@ -17,6 +17,7 @@ DEVICE_FILTER_FIELDS = (
     "device_type",
     "platform",
     "role",
+    "status",
     "tenant_group",
     "tenant",
     "owner_group",
@@ -31,7 +32,11 @@ FILTER_FIELDS = set(SITE_FILTER_FIELDS + DEVICE_FILTER_FIELDS)
 FILTER_KEYS = FILTER_FIELDS | {f"{field}_op" for field in FIELD_OPERATOR_NAMES}
 REFERENCE_KEYS = {"filter", "filter_id"}
 LEGACY_DISPLAY_KEYS = {"lat", "lon", "zoom"}
-ALIASES = {f"{field}_id": field for field in FIELD_OPERATOR_NAMES if field != "tag"}
+ALIASES = {
+    f"{field}_id": field
+    for field in FIELD_OPERATOR_NAMES
+    if field not in {"tag", "status"}
+}
 ALIASES["group_id"] = "site_group"
 
 
