@@ -127,6 +127,9 @@ integration tests, the 49 release-era tests against published 0.8.2 code, nine
 targeted upstream tests and 32 browser checks. Only the maximum NetBox version
 was raised in disposable plugin copies. GeoView 0.9.0 includes that compatibility
 change; the unchanged 0.8.2 release remains limited to 4.7.2.
+The [NetBox 4.7.4 report](docs/validation/netbox-4.7.4.md) records the 0.10.0
+release checks against the official 4.7.4 source and dependencies, including an
+installed-wheel run, selectors, large tagged object IDs and browser rendering.
 GitHub CI currently runs the lightweight
 suite; it does not run this local integration/browser environment automatically.
 
@@ -136,8 +139,10 @@ suite; it does not run this local integration/browser environment automatically.
 create/update/copy round trips, saved operators, edited/cleared selections,
 mixed site/device constraints, unsupported and circular filters, CSRF, ownership,
 object permissions and the real NetBox dashboard configuration views. The full
-suite now discovers 104 tests, including the role-filter, marker, status and tile
+suite now discovers 105 tests, including the role-filter, marker, status and tile
 revalidation cases; the Unicode-only regression is skipped below 4.7.1.
+The large tagged-object ID regression is skipped below NetBox 4.7.4, which adds
+the required 64-bit tag relation migration.
 
 Run the nine widget browser scenarios against a server backed by a dedicated test
 database and a temporary authenticated test session:

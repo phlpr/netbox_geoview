@@ -17,7 +17,7 @@ NetBox compatibility is tracked separately through:
 
 Recommended release:
 
-- `0.9.0` for NetBox `4.5.4` through `4.7.3`
+- `0.10.0` for NetBox `4.5.4` through `4.7.4`
 
 Recommended branch model:
 
@@ -29,9 +29,9 @@ Recommended branch model:
 
 | Plugin Release | Minimum NetBox | Maximum NetBox |
 |---|---|---|
-| 0.9.0 | 4.5.4 | 4.7.3 |
+| 0.10.0 | 4.5.4 | 4.7.4 |
 
-The 0.9.0 maximum of 4.7.3 is deliberately exact: later NetBox patch
+The 0.10.0 maximum of 4.7.4 is deliberately exact: later NetBox patch
 releases still need validation.
 
 See [testing details](TESTING.md) for validation reports and test instructions.
@@ -49,3 +49,8 @@ passed 32 browser checks and nine targeted upstream regressions. See the
 [role-filter report](docs/validation/device-role-filter.md) and
 [role-marker report](docs/validation/device-role-markers.md).
 These checks do not newly validate every older patch within the supported range.
+
+GeoView 0.10.0 extends support to NetBox 4.7.4 and includes device-status filters,
+native slug generation, tile revalidation and smoother map initialization. See
+the [4.7.4 report](docs/validation/netbox-4.7.4.md) for the isolated environment,
+release-package validation, browser checks and upstream upgrade notes.

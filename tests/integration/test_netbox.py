@@ -245,6 +245,42 @@ class MapIntegrationTests(TestCase):
                 ids = [d["id"] for d in response.json()["results"]]
                 self.assertEqual(ids, [device.pk])
 
+    def test_large_tagged_device_ids_survive_map_widget_and_choices(self):
+        if Version(settings.VERSION) < Version("4.7.4"):
+            self.skipTest("64-bit tagged object IDs require NetBox 4.7.4 (#23425)")
+        site = Site.objects.create(
+            pk=2**31 + 17, name="Large ID site", slug="large-id-site",
+            latitude=48.2, longitude=16.3,
+        )
+        template = Device.objects.first()
+        device = Device.objects.create(
+            pk=2**31 + 18, name="Large ID device", site=site,
+            device_type=template.device_type, role=template.role,
+        )
+        tag = Tag.objects.create(pk=2**31 + 19, name="Large ID tag", slug="large-id-tag")
+        site.tags.add(tag)
+        device.tags.add(tag)
+        parameters = {"device": [device.pk], "tag": [tag.slug]}
+        response = self.get_map(parameters)
+        markers = response.context["map_config"]["site_markers"]
+        self.assertEqual([marker["name"] for marker in markers], [device.name])
+        self.assertTrue(markers[0]["netbox_url"].endswith(device.get_absolute_url()))
+        saved = SavedFilter.objects.create(
+            name="Large ID filter", slug="large-id-filter", user=self.admin,
+            parameters=parameters,
+        )
+        saved.object_types.add(ObjectType.objects.get_for_model(Device))
+        response = self.client.get(
+            reverse("plugins:netbox_geoview:map_data"), {"filter_id": saved.pk}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["config"]["site_markers"], markers)
+        response = self.client.get(
+            reverse("plugins:netbox_geoview:device_choices"), {"id": device.pk, "tag": tag.slug}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([row["id"] for row in response.json()["results"]], [device.pk])
+
     def test_hierarchical_filter_choices_after_move_and_rename(self):
         for model, form_field, site_field, endpoint, api_filter in (
             (Region, "region", "region", "regions", "region_id"),

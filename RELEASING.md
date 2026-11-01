@@ -91,7 +91,7 @@ In PyPI project settings, add a Trusted Publisher with:
 Preview the release notes locally before tagging (adjust the version):
 
 ```bash
-python scripts/release_notes.py v0.9.0 \
+python scripts/release_notes.py v0.10.0 \
   --repository phlpr/netbox_geoview \
   --output /tmp/geoview-release-notes.md
 ```

@@ -5,6 +5,13 @@ uses semantic versioning for plugin releases.
 
 ## Unreleased
 
+## 0.10.0 - 2026-11-01
+
+### Added
+
+- Filter devices by one or more NetBox statuses, including custom choices and
+  exclusion operators, across maps, dynamic device choices and saved widgets.
+
 ### Fixed
 
 - Keep dashboard maps, selected base layers and loaded tiles when refreshing
@@ -16,9 +23,17 @@ uses semantic versioning for plugin releases.
 
 ### Changed
 
+- Use NetBox's native slug field for saved filters, including automatic
+  generation and preservation of manually entered slugs.
 - Populate GitHub release notes from the matching dated changelog section and
   include a link to the previous version. Validate release notes before publishing
   to PyPI; missing, duplicate or empty entries stop the release workflow.
+
+### Compatibility
+
+- Support NetBox 4.5.4 through exactly 4.7.4. Validate the 4.7.4 dependency set,
+  selectors, REST device choices, saved filters, tags with 64-bit object IDs,
+  dashboard widgets and map rendering. No plugin migration is required.
 
 ## 0.9.0 - 2026-10-22
 
