@@ -51,43 +51,61 @@
             const refresh = root.querySelector("[data-geoview-refresh]");
             const state = {controller: null};
             instances.set(root, state);
+            const configId = "geoview-widget-config-" + root.dataset.geoviewWidget;
+
+            function clear() {
+                if (window.GeoView) window.GeoView.destroy(element);
+                delete element.dataset.geoviewMap;
+                delete element.dataset.configId;
+                element.replaceChildren();
+                const previousConfig = document.getElementById(configId);
+                if (previousConfig) previousConfig.remove();
+            }
 
             async function load() {
                 if (state.controller) state.controller.abort();
                 const controller = new AbortController();
                 state.controller = controller;
-                status.textContent = root.dataset.loading;
+                if (element.dataset.geoviewRendered !== "1") status.textContent = root.dataset.loading;
                 refresh.disabled = true;
-                open.classList.add("d-none");
-                if (window.GeoView) window.GeoView.destroy(element);
-                delete element.dataset.geoviewMap;
-                delete element.dataset.configId;
-                element.replaceChildren();
-                const configId = "geoview-widget-config-" + root.dataset.geoviewWidget;
-                const previousConfig = document.getElementById(configId);
-                if (previousConfig) previousConfig.remove();
+                root.setAttribute("aria-busy", "true");
                 try {
                     await loadAssets(root);
+                    if (controller.signal.aborted || !root.isConnected) return;
                     const response = await fetch(root.dataset.url, {credentials: "same-origin", cache: "no-store", signal: controller.signal});
                     if (!response.ok || response.redirected) throw new Error("Map unavailable");
                     const data = await response.json();
                     if (controller.signal.aborted || !root.isConnected) return;
-                    const config = document.createElement("script");
-                    config.type = "application/json";
-                    config.id = configId;
-                    config.textContent = JSON.stringify(data.config);
-                    root.appendChild(config);
-                    element.dataset.geoviewMap = "";
-                    element.dataset.configId = configId;
-                    window.GeoView.init(element);
-                    if (element.dataset.geoviewRendered !== "1") throw new Error("Map initialization failed");
+                    // Finalize the toolbar/status layout before Leaflet measures
+                    // the container and requests tiles for its initial view.
                     status.textContent = data.config.site_markers.length ? "" : root.dataset.empty;
                     open.href = data.map_url;
                     open.classList.remove("d-none");
+                    if (window.GeoView.update(element, data.config)) {
+                        document.getElementById(configId).textContent = JSON.stringify(data.config);
+                    } else {
+                        clear();
+                        const config = document.createElement("script");
+                        config.type = "application/json";
+                        config.id = configId;
+                        config.textContent = JSON.stringify(data.config);
+                        root.appendChild(config);
+                        element.dataset.geoviewMap = "";
+                        element.dataset.configId = configId;
+                        window.GeoView.init(element);
+                    }
+                    if (element.dataset.geoviewRendered !== "1") throw new Error("Map initialization failed");
                 } catch (error) {
-                    if (!controller.signal.aborted) status.textContent = root.dataset.error;
+                    if (!controller.signal.aborted) {
+                        clear();
+                        open.classList.add("d-none");
+                        status.textContent = root.dataset.error;
+                    }
                 } finally {
-                    if (state.controller === controller) refresh.disabled = false;
+                    if (state.controller === controller) {
+                        refresh.disabled = false;
+                        root.removeAttribute("aria-busy");
+                    }
                 }
             }
             refresh.addEventListener("click", load);

@@ -6,6 +6,22 @@
     background: var(--tblr-bg-surface-secondary, #d9e4ec);
 }
 
+.geoview-map[data-geoview-loading="1"] > .leaflet-map-pane,
+.geoview-map[data-geoview-loading="1"] > .leaflet-control-container {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.geoview-map[data-geoview-loading="1"]::after {
+    content: attr(data-loading-label);
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--tblr-secondary-color);
+    pointer-events: none;
+}
+
 .geoview-widget {
     display: flex;
     flex-direction: column;

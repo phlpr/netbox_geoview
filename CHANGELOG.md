@@ -5,6 +5,15 @@ uses semantic versioning for plugin releases.
 
 ## Unreleased
 
+### Fixed
+
+- Keep dashboard maps, selected base layers and loaded tiles when refreshing
+  widget markers. Reuse browser-cached tile images through ETag revalidation on
+  page reloads while checking permissions on each tile request.
+- Initialize the final map viewport before requesting tiles, disable tile fading
+  and reveal the initial map together after its tile load completes, with a
+  timeout fallback for stalled requests.
+
 ### Changed
 
 - Populate GitHub release notes from the matching dated changelog section and

@@ -454,6 +454,44 @@ class ProxyIntegrationTests(TestCase):
     def test_unknown_tile_layer(self):
         self.assertEqual(self.client.get(self.tile_url.replace("openstreetmap", "unknown")).status_code, 404)
 
+    def test_tile_browser_cache_revalidation(self):
+        with patch("netbox_geoview.views.requests.get") as get:
+            get.return_value = Mock(status_code=200, content=b"image", headers={"Content-Type": "image/png"})
+            initial = self.client.get(self.tile_url)
+            etag = initial["ETag"]
+            self.assertTrue(etag.startswith('"') and etag.endswith('"'))
+            for validator in (etag, f"W/{etag}", f'"other", {etag}', "*"):
+                with self.subTest(validator=validator):
+                    response = self.client.get(self.tile_url, HTTP_IF_NONE_MATCH=validator)
+                    self.assertEqual(response.status_code, 304)
+                    self.assertEqual(response.content, b"")
+                    self.assertEqual(response["ETag"], etag)
+                    self.assertEqual(response["Cache-Control"], "private, no-cache")
+                    self.assertIn("Cookie", response["Vary"])
+            get.assert_called_once()
+
+    def test_tile_revalidation_after_server_cache_expiry(self):
+        with patch("netbox_geoview.views.requests.get") as get:
+            get.return_value = Mock(status_code=200, content=b"image", headers={"Content-Type": "image/png"})
+            etag = self.client.get(self.tile_url)["ETag"]
+            cache.clear()
+            response = self.client.get(self.tile_url, HTTP_IF_NONE_MATCH=etag)
+            self.assertEqual(response.status_code, 304)
+            self.assertEqual(get.call_count, 2)
+            cache.clear()
+            get.return_value.content = b"updated image"
+            response = self.client.get(self.tile_url, HTTP_IF_NONE_MATCH=etag)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.content, b"updated image")
+            self.assertNotEqual(response["ETag"], etag)
+
+    def test_tile_revalidation_does_not_hide_upstream_errors(self):
+        with patch("netbox_geoview.views.requests.get") as get:
+            get.return_value = Mock(status_code=404)
+            self.assertEqual(self.client.get(self.tile_url, HTTP_IF_NONE_MATCH="*").status_code, 404)
+            get.return_value = Mock(status_code=200, content=b"error", headers={"Content-Type": "text/html"})
+            self.assertEqual(self.client.get(self.tile_url, HTTP_IF_NONE_MATCH="*").status_code, 502)
+
     def test_tile_upstream_failures(self):
         with patch("netbox_geoview.views.requests.get", side_effect=requests.exceptions.Timeout):
             self.assertEqual(self.client.get(self.tile_url).status_code, 502)

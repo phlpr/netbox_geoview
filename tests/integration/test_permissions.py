@@ -155,3 +155,15 @@ class GeoViewAccessTests(TestCase):
         self.assert_denied(403)
         self.client.logout()
         self.assert_denied(302)
+
+    def test_tile_validator_cannot_bypass_revoked_permissions(self):
+        self.client.force_login(self.users["group"])
+        with patch("netbox_geoview.views.requests.get") as get:
+            get.return_value = Mock(status_code=200, content=b"tile", headers={"Content-Type": "image/png"})
+            etag = self.client.get(self.urls["tile"])["ETag"]
+        self.users["group"].groups.clear()
+        with patch("netbox_geoview.views.requests.get") as get:
+            self.assertEqual(self.client.get(self.urls["tile"], HTTP_IF_NONE_MATCH=etag).status_code, 403)
+            self.client.logout()
+            self.assertEqual(self.client.get(self.urls["tile"], HTTP_IF_NONE_MATCH=etag).status_code, 302)
+            get.assert_not_called()

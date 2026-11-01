@@ -12,6 +12,7 @@ from core.models import ObjectType
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.cache import get_conditional_response, patch_vary_headers
 from django.utils.translation import gettext as _
 from django.views import View
 from django.views.generic import TemplateView
@@ -228,7 +229,7 @@ class GeoViewBaseView(GeoViewConfigMixin, TemplateView):
                 "update_filter_url": update_filter_url,
                 "source_filter_id": source_filter.pk if source_filter else "",
                 "filter_ops": operators,
-                "asset_version": f"{__version__}-role-markers-2",
+                "asset_version": f"{__version__}-map-first-frame-1",
                 "routing_profiles": [
                     {
                         "value": option,
@@ -464,6 +465,17 @@ class GeoViewTileView(GeoViewConfigMixin, View):
     def get_cache_key(self, upstream_url):
         return f"netbox_geoview.tile.{sha256(upstream_url.encode('utf-8')).hexdigest()}"
 
+    def tile_response(self, request, content, content_type):
+        response = HttpResponse(content, content_type=content_type)
+        response["ETag"] = f'"{sha256(content).hexdigest()}"'
+        # Revalidate after the permission check, including on cache hits.
+        # Browsers keep the image bytes and receive a bodyless 304 if unchanged.
+        response["Cache-Control"] = "private, no-cache"
+        patch_vary_headers(response, ("Cookie",))
+        return get_conditional_response(
+            request, etag=response["ETag"], response=response
+        )
+
     def get(self, request, layer_id, z, x, y):
         min_zoom, max_zoom = self.get_zoom_bounds()
         if z < min_zoom or z > max_zoom:
@@ -476,11 +488,9 @@ class GeoViewTileView(GeoViewConfigMixin, View):
         cache_key = self.get_cache_key(upstream_url)
         cached_tile = cache.get(cache_key)
         if cached_tile is not None:
-            response = HttpResponse(
-                cached_tile["content"], content_type=cached_tile["content_type"]
+            return self.tile_response(
+                request, cached_tile["content"], cached_tile["content_type"]
             )
-            response["Cache-Control"] = "private, no-cache"
-            return response
 
         request_headers = {
             "User-Agent": f"netbox-geoview/{__version__}",
@@ -512,9 +522,7 @@ class GeoViewTileView(GeoViewConfigMixin, View):
             {"content": content, "content_type": content_type},
             timeout=86400,
         )
-        response = HttpResponse(content, content_type=content_type)
-        response["Cache-Control"] = "private, no-cache"
-        return response
+        return self.tile_response(request, content, content_type)
 
 
 class GeoViewRouteView(GeoViewConfigMixin, View):

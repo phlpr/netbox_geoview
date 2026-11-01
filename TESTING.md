@@ -136,8 +136,8 @@ suite; it does not run this local integration/browser environment automatically.
 create/update/copy round trips, saved operators, edited/cleared selections,
 mixed site/device constraints, unsupported and circular filters, CSRF, ownership,
 object permissions and the real NetBox dashboard configuration views. The full
-suite now discovers 100 tests, including the role-filter, marker and status cases
-below; the Unicode-only regression is skipped below 4.7.1.
+suite now discovers 104 tests, including the role-filter, marker, status and tile
+revalidation cases; the Unicode-only regression is skipped below 4.7.1.
 
 Run the nine widget browser scenarios against a server backed by a dedicated test
 database and a temporary authenticated test session:
@@ -161,6 +161,24 @@ account when finished.
 
 For the 2026-10-15 matrix results and environment details, see
 [the saved-filter/widget validation report](docs/validation/saved-filters-widgets.md).
+
+Run the self-contained widget cache regression with Playwright and Chromium:
+
+```bash
+node tests/browser/widget-cache.cjs
+```
+
+It starts a temporary local HTTP server, serves this checkout's actual Leaflet
+and GeoView assets, and uses synthetic marker/tile responses without a NetBox
+database or login. It checks repeated marker refreshes without tile requests,
+selected layer and viewport preservation, updated popups and recenter bounds,
+empty results, denied refreshes and recovery, changed map settings, browser tile
+revalidation and HTMX cleanup. Delayed tile responses also verify that only the
+final viewport is requested and that tiles appear together without fading on
+initial load and full page reload. Failed/stalled tiles, the 12-second fallback,
+views outside a layer's zoom range and cleanup during initial tile loading are
+covered. The integration suite checks actual proxy ETags,
+server-cache expiry, changed image content and revoked permissions separately.
 
 ## Device-role filter checks
 

@@ -41,6 +41,28 @@
         });
     }
 
+    function waitForInitialTiles(element, layer) {
+        element.dataset.geoviewLoading = "1";
+        element.setAttribute("aria-busy", "true");
+        let timeout;
+
+        function cancel() {
+            window.clearTimeout(timeout);
+            layer.off("load", reveal);
+        }
+
+        function reveal() {
+            cancel();
+            element.dataset.geoviewLoading = "0";
+            element.removeAttribute("aria-busy");
+        }
+
+        layer.on("load", reveal);
+        // A failed or stalled tile must not leave the map hidden indefinitely.
+        timeout = window.setTimeout(reveal, 12000);
+        return {cancel: cancel, reveal: reveal};
+    }
+
     function createSiteMarkerIcon(markerStyle) {
         if (markerStyle.icon_url) {
             return window.L.icon({
@@ -176,7 +198,7 @@
         map.setView([config.lat, config.lon], config.zoom);
     }
 
-    function addRecenterControl(map, config, bounds) {
+    function addRecenterControl(map, recenter) {
         const RecenterControl = window.L.Control.extend({
             options: {
                 position: "topleft",
@@ -192,7 +214,7 @@
                 window.L.DomEvent.disableClickPropagation(container);
                 window.L.DomEvent.on(button, "click", function (event) {
                     window.L.DomEvent.preventDefault(event);
-                    fitMapToBounds(map, bounds, config);
+                    recenter();
                 });
 
                 return container;
@@ -250,7 +272,7 @@
         return `${remaining} min`;
     }
 
-    function addSiteMarkers(map, config, routeApi) {
+    function addSiteMarkers(markerLayer, config) {
         const markers = Array.isArray(config.site_markers) ? config.site_markers : [];
         const bounds = [];
 
@@ -266,10 +288,14 @@
                 offset: [0, -32],
                 className: "geoview-marker-label",
             });
-            leafletMarker.addTo(map);
+            leafletMarker.addTo(markerLayer);
             bounds.push(latLng);
         });
 
+        return bounds;
+    }
+
+    function bindMarkerPopups(map, routeApi) {
         map.on("popupopen", function (event) {
             const popupElement = event.popup.getElement();
             if (!popupElement) {
@@ -294,9 +320,6 @@
                 });
             });
         });
-
-        fitMapToBounds(map, bounds, config);
-        return bounds;
     }
 
     function renderMap(element) {
@@ -316,12 +339,11 @@
         }
 
         const map = window.L.map(element, {
-            center: [config.lat, config.lon],
-            zoom: config.zoom,
             minZoom: config.min_zoom,
             maxZoom: config.max_zoom,
             scrollWheelZoom: Boolean(config.scroll_wheel_zoom),
             zoomControl: true,
+            fadeAnimation: false,
         });
         let markerBounds = [];
         const observer = new ResizeObserver(function () {
@@ -337,7 +359,9 @@
             }
         });
         observer.observe(element);
-        instances.set(element, {map: map, observer: observer});
+        const instance = {map: map, observer: observer};
+        instances.set(element, instance);
+        const markerLayer = window.L.layerGroup().addTo(map);
 
         const baseLayers = {};
         let activeLayer = null;
@@ -352,10 +376,6 @@
 
         if (!activeLayer) {
             activeLayer = Object.values(baseLayers)[0];
-        }
-
-        if (activeLayer) {
-            activeLayer.addTo(map);
         }
 
         const routeContainer = element.closest("[data-geoview-route-panel]");
@@ -792,13 +812,29 @@
             position: "topright",
         }).addTo(map);
 
-        markerBounds = addSiteMarkers(map, config, { setPoint: setRoutePoint });
-        addRecenterControl(map, config, markerBounds);
+        markerBounds = addSiteMarkers(markerLayer, config);
+        bindMarkerPopups(map, { setPoint: setRoutePoint });
+        fitMapToBounds(map, markerBounds, config);
+        addRecenterControl(map, () => fitMapToBounds(map, markerBounds, config));
+        // Widgets can refresh their permission-filtered data without replacing
+        // the map, selected base layer, viewport or already loaded tiles.
+        instance.settings = JSON.stringify({...config, site_markers: null});
+        instance.updateMarkers = function (nextConfig) {
+            markerLayer.clearLayers();
+            config.site_markers = nextConfig.site_markers;
+            markerBounds = addSiteMarkers(markerLayer, nextConfig);
+        };
         setCostingOptions();
         setRouteSummary(null, defaultCosting);
         setMeasureSummary();
         updatePanelToggleButton();
         updateRoutePanel();
+        // Set the final view before attaching any tiles. This avoids requesting
+        // a preliminary viewport and lets the first frame appear as one map.
+        const initialTiles = waitForInitialTiles(element, activeLayer);
+        instance.cancelInitialLoad = initialTiles.cancel;
+        activeLayer.addTo(map);
+        if (!activeLayer.isLoading()) initialTiles.reveal();
         element.dataset.geoviewRenderReason = "";
         element.dataset.geoviewRendered = "1";
     }
@@ -806,11 +842,22 @@
     function destroy(element) {
         const instance = instances.get(element);
         if (instance) {
+            if (instance.cancelInitialLoad) instance.cancelInitialLoad();
             instance.observer.disconnect();
             instance.map.remove();
             instances.delete(element);
         }
+        delete element.dataset.geoviewLoading;
+        element.removeAttribute("aria-busy");
         element.dataset.geoviewRendered = "0";
+    }
+
+    function update(element, config) {
+        const instance = instances.get(element);
+        if (!instance || !element.hasAttribute("data-geoview-widget-map") ||
+            instance.settings !== JSON.stringify({...config, site_markers: null})) return false;
+        instance.updateMarkers(config);
+        return true;
     }
 
     function init(context) {
@@ -829,7 +876,7 @@
             }
         });
     }
-    window.GeoView = {init: init, destroy: destroy};
+    window.GeoView = {init: init, destroy: destroy, update: update};
     document.addEventListener("htmx:load", event => init(event.detail.elt));
     document.addEventListener("htmx:beforeCleanupElement", function (event) {
         const root = event.detail.elt;

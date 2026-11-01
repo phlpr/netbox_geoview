@@ -109,6 +109,17 @@ Creating or copying requires `extras.add_savedfilter`. Updating requires
 superusers may update another user's filter. POST requests require CSRF protection.
 NetBox's standard Saved Filters screens remain available for managing records.
 
+Widget refresh updates markers in the existing map, keeping loaded tiles, the
+selected base layer and the current view. Changes to map settings rebuild the
+map; failed refreshes clear previous data. Tile images are cached on the server
+for 24 hours. Browsers revalidate their private tile cache with ETags on page
+reloads, so unchanged images return a bodyless `304` after the access check.
+On a full page reload, Leaflet still creates a new map. Its final viewport is
+selected before tiles are requested, and the initial map appears together without
+tile fading once the tiles finish loading (including tile errors). A 12-second
+fallback reveals the map if a request stalls. Later zooming and panning remain
+interactive and do not hide the map again.
+
 The JSON endpoint checks current permissions on every request and is not cached
 across users. Removing sharing, disabling/deleting a filter or losing access shows
 an unavailable message on refresh; it does not substitute all objects. Valid

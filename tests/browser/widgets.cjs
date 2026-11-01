@@ -78,9 +78,14 @@ const {chromium} = require('playwright');
         await widget.locator('.leaflet-popup').waitFor();
         assert.equal(await widget.locator('[data-route-point]').count(), 0);
         assert((await widget.locator('[data-geoview-open]').getAttribute('href')).includes('filter_id=' + filterId));
+        await widget.locator('.leaflet-tile-loaded').first().waitFor();
+        await widget.evaluate(root => { root._tilesBeforeRefresh = Array.from(root.querySelectorAll('.leaflet-tile')); });
         await widget.locator('[data-geoview-refresh]').click();
+        await page.waitForFunction(() => !document.querySelector('[data-geoview-widget] [data-geoview-refresh]').disabled);
         await widget.locator('[data-geoview-widget-map][data-geoview-rendered="1"]').waitFor();
         assert.equal(await widget.locator('.leaflet-marker-icon').count(), 2);
+        assert(await widget.evaluate(root => root._tilesBeforeRefresh.every(tile => tile.isConnected)),
+            'Refresh replaced previously loaded tiles');
     });
     await check('Unavailable filter clears previous marker data without fallback', async () => {
         const widget = page.locator('[data-geoview-widget]').first();
