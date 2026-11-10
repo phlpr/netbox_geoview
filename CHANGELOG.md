@@ -5,6 +5,25 @@ uses semantic versioning for plugin releases.
 
 ## Unreleased
 
+## 0.10.1 - 2026-11-10
+
+### Compatibility
+
+- Support NetBox 4.5.4 through exactly 4.7.5 by raising only the maximum NetBox
+  version. No functional plugin changes, new dependencies or plugin migrations
+  are required. GeoView 0.10.0 remains limited to NetBox 4.7.4.
+- Validate the installed release wheel against NetBox 4.7.5 and its pinned
+  dependencies, including Django 6.1.3 and django-taggit 7.0.0. Add regressions
+  for filtered/ordered device choices with narrow REST responses and live tag
+  replacement across maps, device choices and saved widgets.
+
+### Documentation
+
+- Record integration, upstream and browser checks, the isolated 4.7.4 upgrade
+  comparison, and relevant migration/SSO upgrade notes in the 4.7.5 report.
+- Extend the browser save workflow with invalid-input recovery and synchronize
+  manual slug entry with NetBox's blur-driven automatic generation.
+
 ## 0.10.0 - 2026-11-01
 
 ### Added

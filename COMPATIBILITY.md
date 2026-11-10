@@ -17,7 +17,7 @@ NetBox compatibility is tracked separately through:
 
 Recommended release:
 
-- `0.10.0` for NetBox `4.5.4` through `4.7.4`
+- `0.10.1` for NetBox `4.5.4` through `4.7.5`
 
 Recommended branch model:
 
@@ -29,9 +29,9 @@ Recommended branch model:
 
 | Plugin Release | Minimum NetBox | Maximum NetBox |
 |---|---|---|
-| 0.10.0 | 4.5.4 | 4.7.4 |
+| 0.10.1 | 4.5.4 | 4.7.5 |
 
-The 0.10.0 maximum of 4.7.4 is deliberately exact: later NetBox patch
+The 0.10.1 maximum of 4.7.5 is deliberately exact: later NetBox patch
 releases still need validation.
 
 See [testing details](TESTING.md) for validation reports and test instructions.
@@ -54,3 +54,9 @@ GeoView 0.10.0 extends support to NetBox 4.7.4 and includes device-status filter
 native slug generation, tile revalidation and smoother map initialization. See
 the [4.7.4 report](docs/validation/netbox-4.7.4.md) for the isolated environment,
 release-package validation, browser checks and upstream upgrade notes.
+
+GeoView 0.10.1 extends the tested maximum to NetBox 4.7.5 without a functional
+plugin change. Its installed-wheel integration suite, focused upstream tests,
+browser suites and isolated 4.7.4 database upgrade are recorded in the
+[4.7.5 validation report](docs/validation/netbox-4.7.5.md). Older supported
+patches were not newly revalidated by this compatibility-only release.

@@ -130,6 +130,10 @@ change; the unchanged 0.8.2 release remains limited to 4.7.2.
 The [NetBox 4.7.4 report](docs/validation/netbox-4.7.4.md) records the 0.10.0
 release checks against the official 4.7.4 source and dependencies, including an
 installed-wheel run, selectors, large tagged object IDs and browser rendering.
+The [NetBox 4.7.5 report](docs/validation/netbox-4.7.5.md) records the 0.10.1
+installed-wheel checks, focused upstream regressions and browser results. It
+also verifies unchanged fixture data while migrating an isolated 4.7.4 database
+copy and exercises the upstream legacy-constraint repair on temporary tables.
 GitHub CI currently runs the lightweight
 suite; it does not run this local integration/browser environment automatically.
 
@@ -139,10 +143,14 @@ suite; it does not run this local integration/browser environment automatically.
 create/update/copy round trips, saved operators, edited/cleared selections,
 mixed site/device constraints, unsupported and circular filters, CSRF, ownership,
 object permissions and the real NetBox dashboard configuration views. The full
-suite now discovers 105 tests, including the role-filter, marker, status and tile
+suite now discovers 107 tests, including the role-filter, marker, status and tile
 revalidation cases; the Unicode-only regression is skipped below 4.7.1.
 The large tagged-object ID regression is skipped below NetBox 4.7.4, which adds
 the required 64-bit tag relation migration.
+The 4.7.5 compatibility release adds two regressions for ordered/narrow REST
+device choices and live tag replacements. The widget browser workflow also
+corrects an invalid filter submission and resubmits it successfully. It finishes
+NetBox's blur-driven slug generation before entering a manual slug.
 
 Run the nine widget browser scenarios against a server backed by a dedicated test
 database and a temporary authenticated test session:
