@@ -67,6 +67,34 @@ class MapIntegrationTests(TestCase):
                 self.assertEqual(response.status_code, 200)
                 self.assertIn("results", response.json())
 
+    def test_device_choices_narrow_responses_preserve_filters_and_order(self):
+        devices = list(Device.objects.order_by("name")[:3])
+        Device.objects.filter(pk__in=[device.pk for device in devices]).update(
+            role=devices[0].role, status="active"
+        )
+        Device.objects.filter(pk=devices[0].pk).update(status="offline")
+        expected = [device.pk for device in reversed(devices[1:])]
+        for selection in ({}, {"brief": "1"}, {"fields": "id,name"}):
+            with self.subTest(selection=selection):
+                response = self.client.get(
+                    reverse("plugins:netbox_geoview:device_choices"),
+                    {
+                        "id": [device.pk for device in devices],
+                        "geoview_role": devices[0].role_id,
+                        "geoview_status": "active",
+                        "ordering": "-name",
+                        **selection,
+                    },
+                    HTTP_ACCEPT="application/json",
+                )
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.json()["count"], 2)
+                self.assertEqual(
+                    [row["id"] for row in response.json()["results"]], expected
+                )
+                if selection:
+                    self.assertNotIn("config_context", response.json()["results"][0])
+
     def test_site_filters_and_popups(self):
         sites = Site.objects.filter(slug__startswith="geoview-")
         response = self.get_map({"site": list(sites.values_list("pk", flat=True))})
@@ -125,6 +153,49 @@ class MapIntegrationTests(TestCase):
             with self.subTest(params=params):
                 response = self.get_map(params)
                 self.assertEqual(response.context["selection_counts"]["devices"], expected)
+
+    def test_tag_replacement_updates_map_choices_and_saved_widget(self):
+        device, remaining = list(Device.objects.order_by("pk")[:2])
+        initial = Tag.objects.create(name="Initial live tag", slug="initial-live-tag")
+        replacement = Tag.objects.create(name="Replacement live tag", slug="replacement-live-tag")
+        device.tags.set([initial])
+        # NetBox only offers tags still used by this model in TagFilterField.
+        remaining.tags.add(initial)
+        saved = SavedFilter.objects.create(
+            name="Live tag selection", slug="live-tag-selection", user=self.admin,
+            parameters={"tag": [initial.slug]},
+        )
+        saved.object_types.add(ObjectType.objects.get_for_model(Device))
+        data_url = reverse("plugins:netbox_geoview:map_data")
+        self.assertEqual(
+            len(self.client.get(data_url, {"filter_id": saved.pk}).json()["config"]["site_markers"]),
+            2,
+        )
+
+        device.tags.set([replacement])
+        for tag, expected in ((initial, 1), (replacement, 1)):
+            with self.subTest(tag=tag.slug):
+                page = self.get_map({"tag": tag.slug})
+                self.assertEqual(page.context["selection_counts"]["devices"], expected)
+                choices = self.client.get(
+                    reverse("plugins:netbox_geoview:device_choices"), {"tag": tag.slug}
+                )
+                self.assertEqual(choices.status_code, 200)
+                self.assertEqual(choices.json()["count"], expected)
+        unchanged_filter = self.client.get(data_url, {"filter_id": saved.pk})
+        self.assertEqual(unchanged_filter.status_code, 200)
+        self.assertEqual(
+            [marker["name"] for marker in unchanged_filter.json()["config"]["site_markers"]],
+            [remaining.name],
+        )
+        saved.parameters = {"tag": [replacement.slug]}
+        saved.save()
+        refreshed = self.client.get(data_url, {"filter_id": saved.pk})
+        self.assertEqual(refreshed.status_code, 200)
+        self.assertEqual(
+            [marker["name"] for marker in refreshed.json()["config"]["site_markers"]],
+            [device.name],
+        )
 
     def test_saved_filter_by_id_and_slug(self):
         saved = SavedFilter.objects.create(name="GeoView test", slug="geoview-test", parameters={"q": "geoview"})

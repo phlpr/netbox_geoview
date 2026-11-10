@@ -32,7 +32,19 @@ const {chromium} = require('playwright');
         assert.equal(await page.locator('.leaflet-marker-icon').count(), 2);
         await page.locator('a[href*="/plugins/geoview/saved-filters/add/"]').click();
         await page.locator('#id_name').fill('Widget browser ' + suffix);
+        // Finish NetBox's blur-driven slug generation before replacing its value.
+        await page.locator('#id_name').press('Tab');
         await page.locator('#id_slug').fill(slug);
+        assert.equal(await page.locator('#id_slug').inputValue(), slug, 'Manual slug before submission');
+        const parameters = await page.locator('#id_parameters').inputValue();
+        await page.locator('#id_parameters').evaluate(element => { element.value = '{invalid'; });
+        const rejected = page.waitForResponse(response => response.request().method() === 'POST' &&
+            new URL(response.url()).pathname === '/plugins/geoview/saved-filters/add/');
+        await page.getByRole('button', {name: 'Save', exact: true}).click();
+        assert.equal((await rejected).status(), 200);
+        await page.locator('.alert-danger').waitFor();
+        assert.equal(await page.locator('#id_slug').inputValue(), slug);
+        await page.locator('#id_parameters').evaluate((element, value) => { element.value = value; }, parameters);
         await page.getByRole('button', {name: 'Save', exact: true}).click();
         await page.waitForURL('**/plugins/geoview/?filter_id=*');
         filterId = new URL(page.url()).searchParams.get('filter_id');
@@ -47,6 +59,7 @@ const {chromium} = require('playwright');
         await page.goto(`${base}/plugins/geoview/?q=gv-vie-core-01`);
         await page.locator('a[href*="/plugins/geoview/saved-filters/add/"]').click();
         await page.locator('#id_name').fill('Widget device ' + suffix);
+        await page.locator('#id_name').press('Tab');
         await page.locator('#id_slug').fill(slug + '-device');
         await page.getByRole('button', {name: 'Save', exact: true}).click();
         await page.waitForURL('**/plugins/geoview/?filter_id=*');
