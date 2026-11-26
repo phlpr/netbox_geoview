@@ -17,7 +17,7 @@ NetBox compatibility is tracked separately through:
 
 Recommended release:
 
-- `0.10.1` for NetBox `4.5.4` through `4.7.5`
+- `0.10.2` for NetBox `4.5.4` through `4.7.6`
 
 Recommended branch model:
 
@@ -29,9 +29,9 @@ Recommended branch model:
 
 | Plugin Release | Minimum NetBox | Maximum NetBox |
 |---|---|---|
-| 0.10.1 | 4.5.4 | 4.7.5 |
+| 0.10.2 | 4.5.4 | 4.7.6 |
 
-The 0.10.1 maximum of 4.7.5 is deliberately exact: later NetBox patch
+The 0.10.2 maximum of 4.7.6 is deliberately exact: later NetBox patch
 releases still need validation.
 
 See [testing details](TESTING.md) for validation reports and test instructions.
@@ -59,4 +59,11 @@ GeoView 0.10.1 extends the tested maximum to NetBox 4.7.5 without a functional
 plugin change. Its installed-wheel integration suite, focused upstream tests,
 browser suites and isolated 4.7.4 database upgrade are recorded in the
 [4.7.5 validation report](docs/validation/netbox-4.7.5.md). Older supported
+patches were not newly revalidated by this compatibility-only release.
+
+GeoView 0.10.2 extends the tested maximum to NetBox 4.7.6. No functional plugin
+adaptation or migration is required. Its installed-wheel checks include real
+read-only database sessions in maintenance mode, invalid dynamic selections,
+native dashboard workflows and an isolated 4.7.5 upgrade comparison. See the
+[4.7.6 validation report](docs/validation/netbox-4.7.6.md). Older supported
 patches were not newly revalidated by this compatibility-only release.

@@ -33,7 +33,7 @@ Most of the code was generated with Codex as a coding co-pilot, but maintenance 
 
 | Plugin Release | NetBox |
 |---|---|
-| `0.10.1` | `4.5.4` to `4.7.5` |
+| `0.10.2` | `4.5.4` to `4.7.6` |
 
 Later NetBox versions are not included automatically. See
 [testing details](TESTING.md) for validation reports and test instructions.
@@ -61,8 +61,10 @@ and optional role-based marker styles. GeoView 0.10.0 adds device-status filters
 native saved-filter slugs, tile revalidation and smoother map reloads. See the
 [NetBox 4.7.4 validation report](docs/validation/netbox-4.7.4.md) for compatibility
 checks and upstream upgrade notes.
-GeoView 0.10.1 adds the tested NetBox 4.7.5 compatibility limit without changing
-runtime behavior; see the [4.7.5 validation report](docs/validation/netbox-4.7.5.md).
+GeoView 0.10.2 adds the tested NetBox 4.7.6 compatibility limit without changing
+runtime behavior. Validation includes NetBox's stricter maintenance mode, invalid
+dynamic selections and native dashboard widgets; see the
+[4.7.6 validation report](docs/validation/netbox-4.7.6.md).
 
 ## Installation
 
@@ -70,13 +72,13 @@ Install [netbox-geoview from PyPI](https://pypi.org/project/netbox-geoview/)
 inside the NetBox virtual environment:
 
 ```bash
-python -m pip install --upgrade netbox-geoview==0.10.1
+python -m pip install --upgrade netbox-geoview==0.10.2
 ```
 
 Optional: install directly from a tagged GitHub source archive:
 
 ```bash
-pip install https://github.com/phlpr/netbox_geoview/archive/refs/tags/v0.10.1.tar.gz
+pip install https://github.com/phlpr/netbox_geoview/archive/refs/tags/v0.10.2.tar.gz
 ```
 
 ## Screenshots
@@ -292,7 +294,7 @@ Recommendation:
 
 ## Requirements
 
-- GeoView `0.10.1`: NetBox `4.5.4` through `4.7.5`.
+- GeoView `0.10.2`: NetBox `4.5.4` through `4.7.6`.
 - Python `>=3.12`
 - No additional Python runtime dependencies are required beyond NetBox's own environment
 - Installation in the NetBox virtual environment (see [Installation](#installation))

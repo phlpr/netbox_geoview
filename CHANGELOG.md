@@ -5,6 +5,30 @@ uses semantic versioning for plugin releases.
 
 ## Unreleased
 
+## 0.10.2 - 2026-11-26
+
+### Compatibility
+
+- Support NetBox 4.5.4 through exactly 4.7.6. Only the package version and
+  maximum NetBox version change in runtime code; no functional adaptation,
+  additional dependency or plugin migration is required. GeoView 0.10.1
+  remains limited to NetBox 4.7.5.
+
+### Tests
+
+- Verify real read-only database sessions in NetBox 4.7.6: maps, choices and
+  dashboards remain readable, saved-filter and widget writes are refused,
+  writes resume after maintenance, and a default dashboard is not persisted.
+- Check that invalid dynamic device selections render errors without exposing
+  other map data and can be corrected successfully. These regressions are
+  skipped on older NetBox versions without the corresponding upstream fixes.
+
+### Documentation
+
+- Update installation examples and the compatibility matrix. Record the
+  installed-wheel, upstream and browser checks, isolated 4.7.5 database
+  comparison and relevant upgrade notes in the 4.7.6 validation report.
+
 ## 0.10.1 - 2026-11-10
 
 ### Compatibility
