@@ -57,6 +57,23 @@ class MapIntegrationTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["active_tab"], "filter")
 
+    def test_invalid_device_selections_render_errors_and_can_be_corrected(self):
+        if Version(settings.VERSION) < Version("4.7.6"):
+            self.skipTest("Invalid dynamic initial values require NetBox 4.7.6")
+        for value in ("not-an-id", "999999999999999999999999999999999999"):
+            with self.subTest(value=value):
+                page = self.client.get(self.map_url, {"device": value})
+                self.assertEqual(page.status_code, 200)
+                self.assertIn("device", page.context["filter_form"].errors)
+                self.assertEqual(page.context["map_config"]["site_markers"], [])
+                data = self.client.get(
+                    reverse("plugins:netbox_geoview:map_data"), {"device": value}
+                )
+                self.assertEqual(data.status_code, 400)
+        device = Device.objects.first()
+        corrected = self.get_map({"device": device.pk})
+        self.assertEqual(corrected.context["selection_counts"]["devices"], 1)
+
     def test_dynamic_choice_api_endpoints(self):
         # Exercise the real NetBox REST serializers used by the dropdown widgets.
         for endpoint in ("dcim/regions", "dcim/site-groups", "dcim/sites", "dcim/manufacturers",
